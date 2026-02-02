@@ -177,6 +177,6 @@ This is particularly useful to store a default `jarl.toml` in a config folder so
 **Less rules activated by default** as some were considered too noisy relative to their benefit (such as `assignment` and `fixed_regex`).
 Those rules still exist but need to be selected in `jarl.toml` or with command line arguments.
 
-And a few bug fixes, because what would be programming without bugs.
+And a few bug fixes, because what would programming be without bugs.
 
 I hope you enjoy this release!
