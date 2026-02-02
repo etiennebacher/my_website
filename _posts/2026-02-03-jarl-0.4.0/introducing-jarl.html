@@ -2425,7 +2425,7 @@ Code might not be reachable for a few reasons:</p>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">&quot;end of function&quot;</span>)</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<p>The <code>print()</code> statement will never be executed because all branches of the <code>if</code> condition return early or error.
+<p>The <code>print()</code> statement will never be executed because all branches of the <code>if</code> statement return early or error.
 And indeed, Jarl indicates:</p>
 <pre><code>warning: unreachable_code
  --&gt; _posts/2026-02-03-jarl-0.4.0/test.R:9:3
@@ -2505,7 +2505,7 @@ This is why you have to specify the rule name in the comment.
 It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.</p>
 <p>To help you writing valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).</p>
 <h2 id="other-goodies">Other goodies</h2>
-<p>This release also comes with more features!</p>
+<p>This release brings more features!</p>
 <p><strong>A new command-line argument <code>--statistics</code></strong> to show a count of diagnostics instead of being flooded in details in the console:</p>
 <pre><code>&gt; jarl check . --statistics
 

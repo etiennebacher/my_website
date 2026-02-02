@@ -45,7 +45,7 @@ f <- function(x) {
 }
 ```
 
-The `print()` statement will never be executed because all branches of the `if` condition return early or error.
+The `print()` statement will never be executed because all branches of the `if` statement return early or error.
 And indeed, Jarl indicates:
 
 ```
@@ -156,7 +156,7 @@ To help you writing valid suppression comments, Jarl will report comments that a
 
 ## Other goodies
 
-This release also comes with more features!
+This release brings more features!
 
 **A new command-line argument `--statistics`** to show a count of diagnostics instead of being flooded in details in the console:
 
