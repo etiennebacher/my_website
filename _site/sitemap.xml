@@ -2,23 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" version="1.0">
   <url>
     <loc>https://www.etiennebacher.com/blog.html</loc>
-    <lastmod>2026-01-19T18:54:33+00:00</lastmod>
+    <lastmod>2024-09-28T22:48:09+02:00</lastmod>
   </url>
   <url>
     <loc>https://www.etiennebacher.com/gallery.html</loc>
-    <lastmod>2026-01-19T18:54:33+00:00</lastmod>
+    <lastmod>2024-09-28T22:48:09+02:00</lastmod>
   </url>
   <url>
     <loc>https://www.etiennebacher.com/</loc>
-    <lastmod>2026-01-19T18:54:33+00:00</lastmod>
+    <lastmod>2026-02-03T00:22:42+01:00</lastmod>
   </url>
   <url>
     <loc>https://www.etiennebacher.com/research.html</loc>
-    <lastmod>2026-01-19T18:54:33+00:00</lastmod>
+    <lastmod>2024-09-28T22:48:09+02:00</lastmod>
   </url>
   <url>
     <loc>https://www.etiennebacher.com/software.html</loc>
-    <lastmod>2026-01-19T18:54:33+00:00</lastmod>
+    <lastmod>2026-02-02T23:15:39+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://www.etiennebacher.com/posts/2026-02-03-jarl-0.4.0/</loc>
+    <lastmod>2026-02-03T00:43:28+01:00</lastmod>
   </url>
   <url>
     <loc>https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/</loc>

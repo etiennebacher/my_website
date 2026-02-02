@@ -7,7 +7,16 @@
     <description>Etienne Bacher
 </description>
     <generator>Distill</generator>
-    <lastBuildDate>Thu, 20 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 02 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Jarl 0.4.0</title>
+      <dc:creator>Etienne Bacher</dc:creator>
+      <link>https://www.etiennebacher.com/posts/2026-02-03-jarl-0.4.0</link>
+      <description>Find unreachable code, ignore diagnostics, show summary statistics of diagnostics,
+and more.</description>
+      <guid>https://www.etiennebacher.com/posts/2026-02-03-jarl-0.4.0</guid>
+      <pubDate>Mon, 02 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
     <item>
       <title>Jarl: just another R linter</title>
       <dc:creator>Etienne Bacher</dc:creator>
