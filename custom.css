@@ -122,6 +122,11 @@ d-article details {
 	background: #edf3f8;
 }
 
+d-article > details > summary > p {
+	display: inline-block;
+  margin: 0 0 0 0 !important;
+}
+
 /* Cards in "Projects" */
 .grid-container {
   display: grid;
@@ -142,7 +147,7 @@ d-article details {
   border-radius: 2%;
   position: relative;
 }
-    
+
 .card .card-text {
   padding: .75rem 1rem;
   font-size: 15px;
