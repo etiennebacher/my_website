@@ -2414,6 +2414,7 @@ Code might not be reachable for a few reasons:</p>
 <li>it comes after a <code>return()</code> statement in a function;</li>
 <li>it is part of a branch that can never be executed (for instance after <code>if (FALSE)</code>).</li>
 </ul>
+<p>Usually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.</p>
 <p>For example, take this simple function:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (x <span class="sc">&gt;</span> <span class="dv">5</span>) {</span>
@@ -2457,7 +2458,8 @@ This also allows you to safely use Jarl and <code>lintr</code> in the same proje
 The new suppression comments are extensively covered in the section <a href="https://jarl.etiennebacher.com/using-jarl#ignoring-diagnostics">“Ignoring diagnostics”</a> on the documentation website, but I present a summary below.</p>
 <p>There are three types of suppression comments:</p>
 <ul>
-<li><p><strong>standard comments</strong> apply to the next block of code:</p>
+<li><p><strong>standard comments</strong> apply to the next block of code, or <em>node</em>.
+A node correspond to an R expression as well as all expressions that belong to it (aka <em>children nodes</em>).</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The comment below only applies to `any(is.na(x1))`.</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># jarl-ignore any_is_na: &lt;reason&gt;</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">is.na</span>(x1))</span>
@@ -2469,7 +2471,11 @@ The new suppression comments are extensively covered in the section <a href="htt
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x1, x2) {</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">any</span>(<span class="fu">is.na</span>(x1))</span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">any</span>(<span class="fu">is.na</span>(x2))</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div></li>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>In the example above, <code>any(is.na(x1))</code> and <code>any(is.na(x2))</code> are two separate nodes.
+The assignment operation (<code>&lt;-</code>) is also a node that has two children: the left-hand side of the assignment (<code>f</code>) and the right-hand side of the assignment (the function definition).
+Therefore, the two <code>any(is.na(...))</code> in the function body are two separate nodes, but they belong to the same parent node.
+The parent node has Jarl’s special comment, hence none of the two <code>any(is.na(...))</code> is reported.</p></li>
 <li><p><strong>range comments</strong> applies to all the code between <code>start</code> and <code>end</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The comment below applies until `jarl-ignore-end` is found (and at the</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># same nesting level).</span></span>

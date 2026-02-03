@@ -29,6 +29,8 @@ Code might not be reachable for a few reasons:
 - it comes after a `return()` statement in a function;
 - it is part of a branch that can never be executed (for instance after `if (FALSE)`).
 
+Usually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.
+
 For example, take this simple function:
 
 ```r
@@ -90,7 +92,8 @@ The new suppression comments are extensively covered in the section ["Ignoring d
 
 There are three types of suppression comments:
 
-* **standard comments** apply to the next block of code:
+* **standard comments** apply to the next block of code, or *node*.
+  A node correspond to an R expression as well as all expressions that belong to it (aka *children nodes*).
 
   ```r
   # The comment below only applies to `any(is.na(x1))`.
@@ -106,6 +109,11 @@ There are three types of suppression comments:
     any(is.na(x2))
   }
   ```
+
+  In the example above, `any(is.na(x1))` and `any(is.na(x2))` are two separate nodes.
+  The assignment operation (`<-`) is also a node that has two children: the left-hand side of the assignment (`f`) and the right-hand side of the assignment (the function definition).
+  Therefore, the two `any(is.na(...))` in the function body are two separate nodes, but they belong to the same parent node.
+  The parent node has Jarl's special comment, hence none of the two `any(is.na(...))` is reported.
 
 * **range comments** applies to all the code between `start` and `end`:
 
