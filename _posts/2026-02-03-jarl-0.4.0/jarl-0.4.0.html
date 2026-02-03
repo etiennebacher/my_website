@@ -356,16 +356,6 @@ display: none;
 </div>
 
 
-<pre class="css"><code>d-article &gt; details &gt; summary &gt; p {
-    display: inline-block !important;
-  margin: 0 0 0 0 !important;
-}</code></pre>
-<style type="text/css">
-d-article > details > summary > p {
-display: inline-block !important;
-margin: 0 0 0 0 !important;
-}
-</style>
 <p>I’m very happy to announce the release of <a href="https://jarl.etiennebacher.com/">Jarl</a> 0.4.0. Jarl is a very
 fast R linter, written in Rust. It finds inefficient, hard-to-read, and
 suspicious patterns of R code across dozens of files and thousands of
@@ -469,7 +459,9 @@ suppression comments</a>, then you should already be familiar about the
 locations of Jarl’s comments since they follow the same rules.</p>
 <details>
 <summary>
+<p style="display: inline">
 <p>Click to see more details on how node detection works.</p>
+</p>
 </summary>
 <p>Jarl is entirely based on parsing the abstract syntax tree (AST) of
 the code. In the example above, the <code>f &lt;- function...</code>
