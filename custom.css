@@ -122,11 +122,6 @@ d-article details {
 	background: #edf3f8;
 }
 
-d-article > details > summary > p {
-	display: inline-block;
-  margin: 0 0 0 0 !important;
-}
-
 /* Cards in "Projects" */
 .grid-container {
   display: grid;

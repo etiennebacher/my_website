@@ -12,6 +12,13 @@ output:
     toc: true
 ---
 
+```{css, echo=TRUE}
+d-article > details > summary > p {
+	display: inline-block !important;
+  margin: 0 0 0 0 !important;
+}
+```
+
 I'm very happy to announce the release of [Jarl](https://jarl.etiennebacher.com/) 0.4.0.
 Jarl is a very fast R linter, written in Rust.
 It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds.
