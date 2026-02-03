@@ -563,23 +563,40 @@ Rules with `[*]` have an automatic fix.</code></pre>
 hierarchical search for <code>jarl.toml</code></strong></a> to look for
 configuration files in parent folders if the working directory doesn’t
 have one.</p>
+<p>This is particularly useful to store a default <code>jarl.toml</code>
+in a config folder so that any projects that doesn’t have its own
+<code>jarl.toml</code> will fallback to this one. The location of this
+config folder varies by OS:</p>
+<ul>
+<li>on Linux/macOS, you can store the default config at
+<code>~/.config/jarl/jarl.toml</code>;</li>
+<li>on Windows, you can store the default config at
+<code>~/AppData/Roaming/jarl/jarl.toml</code>.</li>
+</ul>
 <p>For instance, suppose I have <code>test.R</code> in my working
 directory, and this working directory doesn’t have a
 <code>jarl.toml</code>. Before 0.4.0, Jarl wouldn’t look for other
-configuration files. As of 0.4.0, Jarl looks in parent folders and would
-find <code>jarl.toml</code> one level above.</p>
-<pre><code>Desktop
-|
-├── test   # ---&gt; this is my working directory
-│   ├── data
-│   ├── scripts
-│   ├── ...
-│   └── test.R
+configuration files. As of 0.4.0, Jarl looks in parent folders and in
+the config folder as a fallback.</p>
+<pre><code>/home/etienne
     |
-└── jarl.toml  # ---&gt; this is in the parent directory (relative to the wd)</code></pre>
-<p>This is particularly useful to store a default <code>jarl.toml</code>
-in a config folder so that any projects that doesn’t have its own
-<code>jarl.toml</code> will fallback to this one.</p>
+    ├── Desktop
+    |     ├── test    # ---&gt; this is my working directory
+    |     |   ├── data
+    |     |   ├── scripts
+    |     |   ├── ...
+    |     |   └── test.R
+    |     |
+    |     └── jarl.toml    # ---&gt; config file belongs to &quot;Desktop&quot; (parent
+    |                      #      directory of my working directory) so it
+    |                      #      will be used first
+    |
+    └── .config
+        └── jarl
+            └── jarl.toml  # ---&gt; this is the fallback config file that would
+                           #      be used if there weren&#39;t any jarl.toml found
+                           #      in parent directories of my working
+                           #      directory.</code></pre>
 <p><strong>Less rules activated by default</strong> as some were
 considered too noisy relative to their benefit (such as
 <code>assignment</code> and <code>fixed_regex</code>). Those rules still
