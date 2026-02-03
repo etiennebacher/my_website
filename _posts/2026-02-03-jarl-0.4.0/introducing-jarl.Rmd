@@ -160,6 +160,8 @@ If this is the case, it is important that only the rule that gives the false pos
 This is why you have to specify the rule name in the comment.
 It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.
 
+Note that if you don't want any diagnostics of a specific rule, you can always ignore the rule in `jarl.toml` or with command-line arguments.
+
 To help you writing valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).
 
 ## Other goodies

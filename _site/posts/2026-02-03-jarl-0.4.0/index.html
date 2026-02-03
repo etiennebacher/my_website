@@ -3582,6 +3582,7 @@ You may have a valid reason to ignore a diagnostic, for instance because Jarl re
 If this is the case, it is important that only the rule that gives the false positive is ignored and not rules that have nothing to do with the false positive.
 This is why you have to specify the rule name in the comment.
 It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.</p>
+<p>Note that if you don’t want any diagnostics of a specific rule, you can always ignore the rule in <code>jarl.toml</code> or with command-line arguments.</p>
 <p>To help you writing valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).</p>
 <h2 id="other-goodies">Other goodies</h2>
 <p>This release brings more features!</p>
