@@ -114,7 +114,7 @@ There are three types of suppression comments:
   If you have ever used [Air's suppression comments](https://posit-dev.github.io/air/formatter.html#disabling-formatting), then you should already be familiar about the locations of Jarl's comments since they follow the same rules.
 
   <details>
-  <summary><p style="display: inline">Click to see more details on how node detection works.</p></summary>
+  <summary><p style="display: inline !important">Click to see more details on how node detection works.</p></summary>
 
   Jarl is entirely based on parsing the abstract syntax tree (AST) of the code.
   In the example above, the `f <- function...` call is represented as follows:
