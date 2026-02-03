@@ -190,3 +190,4 @@ Those rules still exist but need to be selected in `jarl.toml` or with command l
 And a few bug fixes, because what would programming be without bugs.
 
 I hope you enjoy this release!
+If you find any issues or want to contribute, please check out the [Github repository](https://github.com/etiennebacher/jarl).
