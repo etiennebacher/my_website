@@ -3317,7 +3317,7 @@ d-article details {
   border-radius: 2%;
   position: relative;
 }
-    
+
 .card .card-text {
   padding: .75rem 1rem;
   font-size: 15px;
@@ -3399,6 +3399,7 @@ d-article div.sourceCode pre {
 #distill-search {
 	font-size: 0.8rem;
 }
+
 /*! Hint.css - v2.7.0 - 2021-10-01
 * https://kushagra.dev/lab/hint/
 * Copyright (c) 2021 Kushagra Gour */
@@ -3548,7 +3549,9 @@ Importantly, the detection of which node is affected by a comment doesn’t depe
 <p>If you have ever used <a href="https://posit-dev.github.io/air/formatter.html#disabling-formatting">Air’s suppression comments</a>, then you should already be familiar about the locations of Jarl’s comments since they follow the same rules.</p>
 <details>
 <summary>
+<p style="display: inline">
 <p>Click to see more details on how node detection works.</p>
+</p>
 </summary>
 <p>Jarl is entirely based on parsing the abstract syntax tree (AST) of the code.
 In the example above, the <code>f &lt;- function...</code> call is represented as follows:</p>
@@ -3611,7 +3614,7 @@ If this is the case, it is important that only the rule that gives the false pos
 This is why you have to specify the rule name in the comment.
 It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.</p>
 <p>Note that if you don’t want any diagnostics of a specific rule, you can always ignore the rule in <code>jarl.toml</code> or with command-line arguments.</p>
-<p>To help you writing valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).</p>
+<p>To help you write valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).</p>
 <h2 id="other-goodies">Other goodies</h2>
 <p>This release brings more features!</p>
 <p><strong>A new command-line argument <code>--statistics</code></strong> to show a count of diagnostics instead of being flooded in details in the console:</p>
@@ -3624,19 +3627,34 @@ It is also important that you explain why this case must be ignored, so that fut
 
 Rules with `[*]` have an automatic fix.</code></pre>
 <p><a href="https://jarl.etiennebacher.com/config#config-file-detection"><strong>A hierarchical search for <code>jarl.toml</code></strong></a> to look for configuration files in parent folders if the working directory doesn’t have one.</p>
+<p>This is particularly useful to store a default <code>jarl.toml</code> in a config folder so that any projects that doesn’t have its own <code>jarl.toml</code> will fallback to this one.
+The location of this config folder varies by OS:</p>
+<ul>
+<li>on Linux/macOS, you can store the default config at <code>~/.config/jarl/jarl.toml</code>;</li>
+<li>on Windows, you can store the default config at <code>~/AppData/Roaming/jarl/jarl.toml</code>.</li>
+</ul>
 <p>For instance, suppose I have <code>test.R</code> in my working directory, and this working directory doesn’t have a <code>jarl.toml</code>.
 Before 0.4.0, Jarl wouldn’t look for other configuration files.
-As of 0.4.0, Jarl looks in parent folders and would find <code>jarl.toml</code> one level above.</p>
-<pre><code>Desktop
-|
-├── test   # ---&gt; this is my working directory
-│   ├── data
-│   ├── scripts
-│   ├── ...
-│   └── test.R
+As of 0.4.0, Jarl looks in parent folders and in the config folder as a fallback.</p>
+<pre><code>/home/etienne
     |
-└── jarl.toml  # ---&gt; this is in the parent directory (relative to the wd)</code></pre>
-<p>This is particularly useful to store a default <code>jarl.toml</code> in a config folder so that any projects that doesn’t have its own <code>jarl.toml</code> will fallback to this one.</p>
+    ├── Desktop
+    |     ├── test    # ---&gt; this is my working directory
+    |     |   ├── data
+    |     |   ├── scripts
+    |     |   ├── ...
+    |     |   └── test.R
+    |     |
+    |     └── jarl.toml    # ---&gt; config file belongs to &quot;Desktop&quot; (parent
+    |                      #      directory of my working directory) so it
+    |                      #      will be used first
+    |
+    └── .config
+        └── jarl
+            └── jarl.toml  # ---&gt; this is the fallback config file that would
+                           #      be used if there weren&#39;t any jarl.toml found
+                           #      in parent directories of my working
+                           #      directory.</code></pre>
 <p><strong>Less rules activated by default</strong> as some were considered too noisy relative to their benefit (such as <code>assignment</code> and <code>fixed_regex</code>).
 Those rules still exist but need to be selected in <code>jarl.toml</code> or with command line arguments.</p>
 <p>And a few bug fixes, because what would programming be without bugs.</p>
