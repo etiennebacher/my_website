@@ -3595,14 +3595,26 @@ It is also important that you explain why this case must be ignored, so that fut
     1 [*] string_boundary
 
 Rules with `[*]` have an automatic fix.</code></pre>
-<p><a href="https://jarl.etiennebacher.com/config#config-file-detection"><strong>A hierarchical search for <code>jarl.toml</code></strong></a> to look for configuration files in parent folders if the working directory doesn’t have one.
-This is particularly useful to store a default <code>jarl.toml</code> in a config folder so that any projects that doesn’t have its own <code>jarl.toml</code> will fallback to this one.</p>
+<p><a href="https://jarl.etiennebacher.com/config#config-file-detection"><strong>A hierarchical search for <code>jarl.toml</code></strong></a> to look for configuration files in parent folders if the working directory doesn’t have one.</p>
+<p>For instance, suppose I have <code>test.R</code> in my working directory, and this working directory doesn’t have a <code>jarl.toml</code>.
+Before 0.4.0, Jarl wouldn’t look for other configuration files.
+As of 0.4.0, Jarl looks in parent folders and would find <code>jarl.toml</code> one level above.</p>
+<pre><code>Desktop
+|
+├── test   # ---&gt; this is my working directory
+│   ├── data
+│   ├── scripts
+│   ├── ...
+│   └── test.R
+|
+└── jarl.toml  # ---&gt; this is in the parent directory (relative to the wd)</code></pre>
+<p>This is particularly useful to store a default <code>jarl.toml</code> in a config folder so that any projects that doesn’t have its own <code>jarl.toml</code> will fallback to this one.</p>
 <p><strong>Less rules activated by default</strong> as some were considered too noisy relative to their benefit (such as <code>assignment</code> and <code>fixed_regex</code>).
 Those rules still exist but need to be selected in <code>jarl.toml</code> or with command line arguments.</p>
 <p>And a few bug fixes, because what would programming be without bugs.</p>
 <p>I hope you enjoy this release!
 If you find any issues or want to contribute, please check out the <a href="https://github.com/etiennebacher/jarl">Github repository</a>.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

@@ -182,6 +182,23 @@ Rules with `[*]` have an automatic fix.
 ```
 
 [**A hierarchical search for `jarl.toml`**](https://jarl.etiennebacher.com/config#config-file-detection) to look for configuration files in parent folders if the working directory doesn't have one.
+
+For instance, suppose I have `test.R` in my working directory, and this working directory doesn't have a `jarl.toml`.
+Before 0.4.0, Jarl wouldn't look for other configuration files.
+As of 0.4.0, Jarl looks in parent folders and would find `jarl.toml` one level above.
+
+```
+Desktop
+|
+├── test   # ---> this is my working directory
+│   ├── data
+│   ├── scripts
+│   ├── ...
+│   └── test.R
+|
+└── jarl.toml  # ---> this is in the parent directory (relative to the wd)
+```
+
 This is particularly useful to store a default `jarl.toml` in a config folder so that any projects that doesn't have its own `jarl.toml` will fallback to this one.
 
 **Less rules activated by default** as some were considered too noisy relative to their benefit (such as `assignment` and `fixed_regex`).
