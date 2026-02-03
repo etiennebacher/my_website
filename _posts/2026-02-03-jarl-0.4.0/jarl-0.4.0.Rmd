@@ -94,6 +94,7 @@ There are three types of suppression comments:
 
 * **standard comments** apply to the next block of code, or *node*.
   A node correspond to an R expression as well as all expressions that belong to it (aka *children nodes*).
+  Importantly, the detection of which node is affected by a comment doesn't depend on the layout of the code (line breaks, whitespaces, etc.).
 
   ```r
   # The comment below only applies to `any(is.na(x1))`.
@@ -110,10 +111,43 @@ There are three types of suppression comments:
   }
   ```
 
-  In the example above, `any(is.na(x1))` and `any(is.na(x2))` are two separate nodes.
-  The assignment operation (`<-`) is also a node that has two children: the left-hand side of the assignment (`f`) and the right-hand side of the assignment (the function definition).
-  Therefore, the two `any(is.na(...))` in the function body are two separate nodes, but they belong to the same parent node.
-  The parent node has Jarl's special comment, hence none of the two `any(is.na(...))` is reported.
+  If you have ever used [Air's suppression comments](https://posit-dev.github.io/air/formatter.html#disabling-formatting), then you should already be familiar about the locations of Jarl's comments since they follow the same rules.
+
+  <details>
+  <summary>Click to see more details on how node detection works.</summary>
+
+  Jarl is entirely based on parsing the abstract syntax tree (AST) of the code.
+  In the example above, the `f <- function...` call is represented as follows:
+
+  ``` r
+  lobstr::ast(
+    f <- function() {
+      any(is.na(x1))
+      any(is.na(x2))
+    }
+  )
+  #> █─`<-`
+  #> ├─f
+  #> └─█─`function`
+  #>   ├─NULL
+  #>   ├─█─`{`
+  #>   │ ├─█─any
+  #>   │ │ └─█─is.na
+  #>   │ │   └─x1
+  #>   │ └─█─any
+  #>   │   └─█─is.na
+  #>   │     └─x2
+  #>   └─NULL
+  ```
+
+  The top node is the assignment `<-`.
+  Then come the left-hand side and right-hand side of the assignment.
+  The LHS simply is the identifier `f`, but the RHS has itself multiple children, including the function body (`{`).
+  Finally, inside the function body, we see the two calls to `any(is.na(...))`.
+
+  When we put a comment above `f <- function...`, we attach the node to `<-` *and to all its children*, which explains why code inside the function also uses this comment to ignore diagnostics.
+
+  </details>
 
 * **range comments** applies to all the code between `start` and `end`:
 
@@ -195,7 +229,7 @@ Desktop
 │   ├── scripts
 │   ├── ...
 │   └── test.R
-|
+    |
 └── jarl.toml  # ---> this is in the parent directory (relative to the wd)
 ```
 
