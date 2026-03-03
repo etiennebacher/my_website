@@ -1,0 +1,646 @@
+/*******************************************************************************
+CSS VARIABLES
+*******************************************************************************/
+
+:root {
+    --highlight-weak: rgba(128, 128, 128, 0.2);
+    --highlight-strong: rgba(128, 128, 128, 0.4);
+    --radius-sm: 0.2rem;
+}
+
+
+/*******************************************************************************
+BASE STYLES
+*******************************************************************************/
+
+html {
+    font-size: 10.5pt;
+    height: 100%;
+}
+
+/* Sticky footer layout */
+body {
+    margin: 0 auto;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main content fills remaining space */
+body>article {
+    flex: 1 0 auto;
+    padding: 4.5rem 0 1.5rem;
+}
+
+/* Footer stays at bottom */
+body>footer {
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+img,
+svg {
+    max-width: 100%;
+    max-height: 80vh;
+    height: auto;
+    width: auto;
+}
+
+/* 
+   CONTENT ALIGNMENT & CENTERING 
+   Shared logic for images, SVGs
+*/
+
+/* 1. Content centered in the main text column (55% width) */
+section>img,
+section>svg {
+    max-width: 55%;
+    position: relative;
+    left: 27.5%;
+    transform: translateX(-50%);
+}
+
+section>img,
+section>svg {
+    display: block;
+}
+
+/* 2. Content centered in figures (100% of figure width) */
+section>figure:not(.fullwidth)>img,
+section>figure:not(.fullwidth)>svg {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+section>figure:not(.fullwidth)>img,
+section>figure:not(.fullwidth)>svg {
+    display: block;
+}
+
+/* Fullwidth content */
+.fullwidth {
+    max-width: 90%;
+    clear: both;
+}
+
+.fullwidth img,
+.fullwidth svg {
+    max-width: 100%;
+}
+
+
+/*******************************************************************************
+TYPOGRAPHY
+*******************************************************************************/
+
+/* Paragraph alignment and spacing */
+p {
+    text-align: justify;
+    text-justify: inter-ideograph;
+    line-height: 2.2rem;
+}
+
+/* List spacing */
+ul,
+ol,
+dl {
+    line-height: 2.2rem;
+}
+
+/* Heading styles */
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-style: normal;
+    font-weight: bold;
+    color: #111;
+}
+
+h2 {
+    font-size: 2.3rem;
+    line-height: 1.2;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+}
+
+h4 {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    margin-top: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+h5 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* English/numeric text in headings */
+.heading-en {
+    font-style: italic;
+}
+
+
+/*******************************************************************************
+CODE BLOCKS AND INLINE CODE
+*******************************************************************************/
+
+/* Code block container */
+pre {
+    position: relative;
+    background-color: #f7f7f7;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 1em;
+    padding-bottom: 0.5em;
+    overflow-x: auto;
+    margin-bottom: 1.5em;
+    width: 55%;
+    margin-left: 0;
+    margin-right: 0;
+    float: none;
+    clear: none;
+    box-sizing: border-box;
+    left: 0;
+}
+
+/* Code within pre */
+pre>code {
+    width: 95%;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin-left: 0%;
+    background-color: transparent;
+    padding: 0;
+    padding-bottom: 0.7em;
+    border: none;
+}
+
+/* Code blocks with line numbers */
+pre.has-line-numbers {
+    display: flex;
+    align-items: flex-start;
+}
+
+.line-numbers-rows {
+    display: flex;
+    flex-direction: column;
+    padding-right: 0.4em;
+    margin-right: 0.4em;
+    border-right: 1px solid #ddd;
+    color: #aaa;
+    user-select: none;
+    text-align: right;
+    min-width: 1.2em;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    font-family: monospace;
+}
+
+/* Inline code */
+code {
+    font-size: 1.2rem;
+    background-color: #f7f7f7;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    border: 1px solid #e7e7e7;
+}
+
+/* Code blocks in lists */
+li pre,
+ul pre,
+ol pre,
+dl pre {
+    width: 100%;
+}
+
+/* Code blocks in figures */
+figure pre {
+    width: 100%;
+}
+
+/* Copy button */
+.copy-button {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    padding: 0.3em 0.6em;
+    font-size: 0.8rem;
+    color: #666;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+pre:hover .copy-button {
+    opacity: 1;
+}
+
+.copy-button:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.copy-button.copied {
+    background-color: #e6fffa;
+    color: #008000;
+    border-color: #008000;
+}
+
+
+/*******************************************************************************
+QUOTE BLOCKS
+*******************************************************************************/
+
+/* Quote blocks with left border */
+div[style*="border-inline-start"] {
+    width: 55% !important;
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    clear: none;
+    margin: 1.5em 0;
+    padding-right: 0;
+    box-sizing: border-box;
+}
+
+/* Nested quote blocks should take full width of parent */
+div[style*="border-inline-start"] div[style*="border-inline-start"] {
+    width: 100% !important;
+    margin: 0.5em 0;
+}
+
+div[style*="border-inline-start"] p {
+    font-size: 1.4rem;
+    margin: 0.5em 0;
+    width: 100%;
+}
+
+div[style*="border-inline-start"] .footnote-ref,
+div[style*="border-inline-start"] .marginnote,
+div[style*="border-inline-start"] .footnote-ref a {
+    color: #111 !important;
+}
+
+
+/*******************************************************************************
+TABLES
+*******************************************************************************/
+
+table {
+    width: auto;
+    margin: 1.5em auto;
+    border-collapse: collapse;
+    font-size: 1.4rem;
+    line-height: 1.2;
+}
+
+/* Naked tables behave like the main text column */
+section>table {
+    width: auto;
+    position: relative;
+    left: 27.5%;
+    transform: translateX(-50%);
+    margin-left: 0;
+    margin-right: 0;
+}
+
+table th,
+table td {
+    padding: 0.5em 0.7em;
+    border: 1px solid #ccc;
+    text-align: left;
+    vertical-align: top;
+}
+
+table th,
+table thead td {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    text-align: center;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+table tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+@media (max-width: 760px) {
+    table {
+        font-size: 1.2rem;
+    }
+
+    /* Reset naked table positioning on mobile */
+    section>table {
+        left: 0;
+        transform: none;
+        margin: 1.5em auto;
+    }
+
+    figure {
+        margin: 1.5em auto;
+    }
+
+    table th,
+    table td {
+        padding: 0.4em 0.6em;
+    }
+}
+
+
+/*******************************************************************************
+MATH NOTATION
+*******************************************************************************/
+
+/* Block math equations - display as block, centered */
+figure[role="math"] {
+    display: block;
+    width: 55%;
+    text-align: center;
+    margin: 1em 0;
+    padding: 0.5em 0;
+    font-size: 1.4em;
+    line-height: 1.2;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Math content wrapper - prevent shrinking */
+figure[role="math"]>* {
+    display: inline-block;
+    min-width: max-content;
+    text-align: center;
+}
+
+figure>figure[role="math"] {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto;
+    padding: 0.5em 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Math content wrapper for nested figures */
+figure>figure[role="math"]>* {
+    display: inline-block;
+    min-width: max-content;
+    text-align: center;
+}
+
+/* Inline math - smaller size, aligned with text baseline */
+span[role="math"] {
+    display: inline-block;
+    vertical-align: baseline;
+    margin: 0 0.1em;
+    text-indent: 0;
+}
+
+
+/*******************************************************************************
+RESPONSIVE LAYOUT
+*******************************************************************************/
+
+@media (max-width: 760px) {
+
+    /* Margin notes render inline on narrow screens */
+    .marginnote {
+        display: block;
+        float: none;
+        position: static;
+        padding: 0.85rem 1rem;
+        width: 100%;
+        margin: 0.5rem 0 1.25rem;
+        background: var(--theme-pre-bg);
+        border: 1px solid var(--theme-pre-border);
+        border-radius: var(--radius-sm);
+        box-sizing: border-box;
+    }
+
+    .marginnote.is-expanded {
+        display: block;
+    }
+
+    /* Footnote margin notes collapse by default */
+    .footnote-ref+.marginnote {
+        display: none;
+    }
+
+    .footnote-ref+.marginnote.is-expanded {
+        display: block;
+    }
+
+    /* Limit image size inside expanded margin notes */
+    .marginnote img,
+    .marginnote svg {
+        max-width: 100%;
+        max-height: 50vh;
+        margin: 0.4rem auto;
+        display: block;
+    }
+
+    sup.footnote-ref {
+        line-height: 1;
+        top: -0.2em;
+    }
+
+    sup.footnote-ref>a.footnote-ref-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        line-height: 1;
+        min-width: 1.6em;
+        height: 1.6em;
+        padding: 0 0.4em;
+        margin: 0 0.15em;
+        border-radius: 999px;
+        border: 1px solid var(--theme-pre-border);
+        background: var(--theme-pre-bg);
+        color: var(--theme-text);
+        appearance: none;
+        cursor: pointer;
+    }
+
+    sup.footnote-ref>a.footnote-ref-link.is-expanded {
+        background: var(--highlight-weak);
+    }
+
+    /* Enable hyphenation on narrow screens */
+    p {
+        hyphens: auto !important;
+    }
+
+    /* Full-width quote blocks on mobile */
+    div[style*="border-inline-start"] {
+        width: 100% !important;
+    }
+
+    /* Full-width code blocks on mobile */
+    pre {
+        width: 100%;
+    }
+
+    /* Full-width tables and images on mobile */
+    section>img,
+    section>svg {
+        max-width: 100%;
+        left: 0;
+        transform: none;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Math equations take full width on mobile */
+    figure[role="math"] {
+        width: 100%;
+    }
+}
+
+
+/*******************************************************************************
+NAVBAR AND HEADER/FOOTER
+*******************************************************************************/
+
+/* Site header and footer should have consistent styling */
+header.site-header,
+footer {
+    font-size: 1.1rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+header.site-header {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    margin-left: 0.35em;
+}
+
+footer {
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
+header nav {
+    display: flex;
+    gap: 1em;
+}
+
+header nav a,
+header nav a:link,
+header nav a:visited {
+    color: inherit;
+    text-decoration: none !important;
+    background-image: none !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none;
+    font-size: 1.5rem;
+    padding: 0.2em 0.4em;
+    margin-top: 1em;
+    border-radius: var(--radius-sm);
+    transition: background-color 120ms ease;
+}
+
+header nav a:hover,
+header nav a:focus-visible {
+    background: var(--highlight-weak);
+    outline: none;
+}
+
+
+/*******************************************************************************
+FOOTNOTES AND MARGIN NOTES
+*******************************************************************************/
+
+/* Fix footnote line-height inconsistency */
+sup.footnote-ref {
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+    top: -0.5em;
+}
+
+.footnote-ref,
+.footnote-ref+.marginnote {
+    --highlight: transparent;
+    background-color: var(--highlight);
+    box-shadow: 0 0 0 5px var(--highlight);
+    border-radius: var(--radius-sm);
+    transition: background-color 0.3s ease 1s, box-shadow 0.3s ease 1s;
+}
+
+/* Highlight margin note when footnote reference is hovered */
+.footnote-ref:hover+.marginnote {
+    --highlight: var(--highlight-weak);
+    transition-delay: 0s;
+}
+
+/* Highlight footnote reference when margin note is hovered */
+.footnote-ref:has(+ .marginnote:hover) {
+    --highlight: var(--highlight-strong);
+    transition-delay: 0s;
+}
+
+a.footnote-ref-link {
+    background-image: none;
+    text-shadow: none !important;
+}
+
+@media (min-width: 761px) {
+    sup.marginnote-ref {
+        display: none;
+    }
+}
+
+/* Fix code size in margin notes (including inside links) */
+.marginnote code {
+    font-size: inherit;
+}
+
+/*******************************************************************************
+POST TILES
+*******************************************************************************/
+
+.post-tile {
+    margin: 0 0 1rem;
+}
+
+.post-tile a {
+    display: inline-block;
+    padding: 0.1em 0.2em;
+    background-image: none !important;
+}
+
+.post-tile a:hover,
+.post-tile a:focus-visible {
+    background: var(--highlight-weak);
+    outline: none;
+}
+
+.post-tile h3 {
+    margin: 0;
+}
+
+.post-tile p {
+    margin: 0.25rem 0 0;
+}

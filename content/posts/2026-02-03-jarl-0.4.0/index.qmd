@@ -1,0 +1,268 @@
+---
+format:
+  typst:
+    keep-typ: true
+    syntax-highlighting: idiomatic
+    include-before-body:
+      - text: |
+          #import "../index.typ": template, tufted
+          #import "@preview/lilaq:0.5.0" as lq
+          // 如需生成 RSS feed，必须填写 title、description 和 date 元数据
+          #show: template.with(
+            title: "Jarl 0.4.0",
+            description: "Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.",
+            date: datetime(year: 2026, month: 02, day: 03),
+            lang: "en",
+          )
+---
+
+# Jarl 0.4.0
+
+I'm very happy to announce the release of [Jarl](https://jarl.etiennebacher.com/) 0.4.0.
+Jarl is a very fast R linter, written in Rust.
+It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds.
+Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.
+
+After a few rapid iterations following the [initial 0.1.0 announcement](https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/), I took a bit more time to add more features and fix more bugs.
+
+## Unreachable code
+
+Jarl is now able to find unreachable code in R files.
+Code might not be reachable for a few reasons:
+
+- it comes after a function that stops the execution (`stop()`, `rlang::abort()`, etc.);
+- it comes after a keyword that breaks a loop (`break`) or goes to the next iteration (`next`);
+- it comes after a `return()` statement in a function;
+- it is part of a branch that can never be executed (for instance after `if (FALSE)`).
+
+Usually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.
+
+For example, take this simple function:
+
+```r
+f <- function(x) {
+  if (x > 5) {
+    return("greater than five")
+  } else if (x < 5) {
+    return("lower than five")
+  } else {
+    stop("x must be greater or lower than five")
+  }
+  print("end of function")
+}
+```
+
+The `print()` statement will never be executed because all branches of the `if` statement return early or error.
+And indeed, Jarl indicates:
+
+```
+warning: unreachable_code
+ --> _posts/2026-02-03-jarl-0.4.0/test.R:9:3
+  |
+9 |   print("end of function")
+  |   ------------------------ This code is unreachable because the preceding if/else
+  terminates in all branches.
+  |
+
+Found 1 error.
+```
+
+Note that if we were to remove the `else` statement:
+
+```r
+f <- function(x) {
+  if (x > 5) {
+    return("greater than five")
+  } else if (x < 5) {
+    return("lower than five")
+  }
+  print("end of function")
+}
+```
+
+then Jarl wouldn't report anything because the `print()` statement would run if `x == 5`.
+
+This unreachable code detection also works outside of functions, which can be helpful for example if you have introduced a `stop()` for debugging somewhere in a script and forgot to remove it when running the entire script again later.
+
+
+## Suppression comments
+
+Suppression comments are special comments that are used to ignore diagnostics reported by the linter.
+If you have already used `lintr`, you might be familiar with the `# nolint` comments.
+In the first iterations of Jarl, these `# nolint` comments were partially supported.
+However, the way they were implemented in Jarl was brittle and prone to errors, especially when automatically inserting them.
+
+As of Jarl 0.4.0, suppression comments have been entirely rewritten and now follow a different syntax.
+This also allows you to safely use Jarl and `lintr` in the same project, knowing that there won't be conflicts between their comments.
+The new suppression comments are extensively covered in the section ["Ignoring diagnostics"](https://jarl.etiennebacher.com/using-jarl#ignoring-diagnostics) on the documentation website, but I present a summary below.
+
+There are three types of suppression comments:
+
+* **standard comments** apply to the next block of code, or *node*.
+  A node correspond to an R expression as well as all expressions that belong to it (aka *children nodes*).
+  Importantly, the detection of which node is affected by a comment doesn't depend on the layout of the code (line breaks, whitespaces, etc.).
+
+  ```r
+  # The comment below only applies to `any(is.na(x1))`.
+  # jarl-ignore any_is_na: <reason>
+  any(is.na(x1))
+  any(is.na(x2))
+
+  # The comment below applies to the entire function definition, including the
+  # two `any(is.na(...))` calls.
+  # jarl-ignore any_is_na: <reason>
+  f <- function(x1, x2) {
+    any(is.na(x1))
+    any(is.na(x2))
+  }
+  ```
+
+  If you have ever used [Air's suppression comments](https://posit-dev.github.io/air/formatter.html#disabling-formatting), then you should already be familiar about the locations of Jarl's comments since they follow the same rules.
+
+  ````{=typst}
+  #html.elem("details")[
+    #html.elem("summary")[
+      Click to see more details on how node detection works.
+    ]
+
+  Jarl is entirely based on parsing the abstract syntax tree (AST) of the code.
+  In the example above, the `f <- function...` call is represented as follows:
+
+  ```r
+  lobstr::ast(
+    f <- function() {
+      any(is.na(x1))
+      any(is.na(x2))
+    }
+  )
+  #> █─`<-`
+  #> ├─f
+  #> └─█─`function`
+  #>   ├─NULL
+  #>   ├─█─`{`
+  #>   │ ├─█─any
+  #>   │ │ └─█─is.na
+  #>   │ │   └─x1
+  #>   │ └─█─any
+  #>   │   └─█─is.na
+  #>   │     └─x2
+  #>   └─NULL
+  ```
+
+  The top node is the assignment `<-`.
+  Then come the left-hand side and right-hand side of the assignment.
+  The LHS simply is the identifier `f`, but the RHS has itself multiple children, including the function body (`{`).
+  Finally, inside the function body, we see the two calls to `any(is.na(...))`.
+
+  When we put a comment above `f <- function...`, we attach the node to `<-` *and to all its children*, which explains why code inside the function also uses this comment to ignore diagnostics.
+
+  ]
+  ````
+
+* **range comments** applies to all the code between `start` and `end`:
+
+  ```r
+  # The comment below applies until `jarl-ignore-end` is found (and at the
+  # same nesting level).
+  # jarl-ignore-start any_is_na: <reason>
+  any(is.na(x1))
+  any(is.na(x2))
+
+  f <- function(x1, x2) {
+    any(is.na(x1))
+    any(is.na(x2))
+  }
+  # jarl-ignore-end any_is_na
+  ```
+
+* **file comments** applies to all code in the file:
+
+  ```r
+  # The comment below applies to the entire file.
+  # jarl-ignore-file any_is_na: <reason>
+  any(is.na(x1))
+  any(is.na(x2))
+
+  f <- function(x1, x2) {
+    any(is.na(x1))
+    any(is.na(x2))
+  }
+  ```
+
+There are two important things to notice in the syntax of the suppression comments.
+
+First, **they must state the precise rule to ignore**.
+This means that if you wish to ignore multiple rules for the same code block, you must have one comment per rule to ignore (the reason for this is the next point).
+This also means that comments such as `# jarl-ignore` (aka *blanket suppressions*) are ignored and even reported by Jarl.
+
+Second, **they must state a reason why these diagnostics are ignored**.
+This is the `<reason>` placeholder in the examples above, and it can be any text after the colon.
+
+If you are used to `lintr`'s suppression comment system, this may feel quite constraining but there is a good justification for having these two rules.
+You may have a valid reason to ignore a diagnostic, for instance because Jarl returns a false positive.
+If this is the case, it is important that only the rule that gives the false positive is ignored and not rules that have nothing to do with the false positive.
+This is why you have to specify the rule name in the comment.
+It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.
+
+Note that if you don't want any diagnostics of a specific rule, you can always ignore the rule in `jarl.toml` or with command-line arguments.
+
+To help you write valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).
+
+## Other goodies
+
+This release brings more features!
+
+**A new command-line argument `--statistics`** to show a count of diagnostics instead of being flooded in details in the console:
+
+```
+> jarl check . --statistics
+
+   88 [*] numeric_leading_zero
+    3 [*] redundant_equals
+    1 [ ] vector_logic
+    1 [*] string_boundary
+
+Rules with `[*]` have an automatic fix.
+```
+
+[**A hierarchical search for `jarl.toml`**](https://jarl.etiennebacher.com/config#config-file-detection) to look for configuration files in parent folders if the working directory doesn't have one.
+
+This is particularly useful to store a default `jarl.toml` in a config folder so that any projects that doesn't have its own `jarl.toml` will fallback to this one.
+The location of this config folder varies by OS:
+
+- on Linux/macOS, you can store the default config at `~/.config/jarl/jarl.toml`;
+- on Windows, you can store the default config at `~/AppData/Roaming/jarl/jarl.toml`.
+
+For instance, suppose I have `test.R` in my working directory, and this working directory doesn't have a `jarl.toml`.
+Before 0.4.0, Jarl wouldn't look for other configuration files.
+As of 0.4.0, Jarl looks in parent folders and in the config folder as a fallback.
+
+```
+/home/etienne
+    |
+    ├── Desktop
+    |     ├── test    # ---> this is my working directory
+    |     |   ├── data
+    |     |   ├── scripts
+    |     |   ├── ...
+    |     |   └── test.R
+    |     |
+    |     └── jarl.toml    # ---> config file belongs to "Desktop" (parent
+    |                      #      directory of my working directory) so it
+    |                      #      will be used first
+    |
+    └── .config
+        └── jarl
+            └── jarl.toml  # ---> this is the fallback config file that would
+                           #      be used if there weren't any jarl.toml found
+                           #      in parent directories of my working
+                           #      directory.
+```
+
+**Less rules activated by default** as some were considered too noisy relative to their benefit (such as `assignment` and `fixed_regex`).
+Those rules still exist but need to be selected in `jarl.toml` or with command line arguments.
+
+And a few bug fixes, because what would programming be without bugs.
+
+I hope you enjoy this release!
+If you find any issues or want to contribute, please check out the [Github repository](https://github.com/etiennebacher/jarl). And thanks Maëlle for the suggestions!

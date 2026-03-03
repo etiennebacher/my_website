@@ -1,0 +1,513 @@
+---
+format:
+  typst:
+    keep-typ: true
+    syntax-highlighting: idiomatic
+    include-before-body:
+      - text: |
+          #import "../index.typ": template, tufted
+          #import "@preview/lilaq:0.5.0" as lq
+          // 如需生成 RSS feed，必须填写 title、description 和 date 元数据
+          #show: template.with(
+            title: "First contact with the data on R",
+            description: "A blog post describing the first steps of data cleaning and analysis using R.",
+            date: datetime(year: 2020, month: 01, day: 22),
+            lang: "en",
+          )
+---
+
+# First contact with the data on R
+
+<p style="color:rgb(127, 165, 179)"> <b> Note: </b>  </p> <p style="color:rgb(127, 165, 179)">In this and future articles, you will see some arrows below R code. If you click on it, it will display the Stata code equivalent to the R code displayed. However, since those are two different softwares, they are not completely equivalent and some of the Stata code may not fully correspond to the R code. Consider it more like a reference point not to be lost rather than like an exact equivalent. </p>
+
+<br>
+
+In this post, you will see how to import and treat data, make descriptive statistics and a few plots. I will also show you a personal method to organize one's work. 
+
+
+## Files used and organization of the project
+
+First of all, you need to create a project. In RStudio, you can do "File", "New Project" and then choose the location of the project and its name. In the folder that contains the project, I have several sub-folders: Figures, Bases_Used, Bases_Created. To be able to save or use files in these particular sub-folders, I use the package **`here`**. The command **`here()`** shows the path to your project and you just need to complete the path to access to your datasets or other files.
+
+```{r message = FALSE}
+# if you've never installed this package before, do:
+# install.packages("here")
+library(here)
+```
+
+Why is this package important? Your code must be reproducible, either for your current collaborators to work efficiently with you or for other people to check your code and to use it in the future. Using paths that work only for your computer (like "/home/Mr X/somefolder/somesubfolder/Project") makes it longer and more annoying to use your code since it requires to manually change paths in order to import data or other files. The package **`here`** makes it much easier to reproduce your code since it automatically detects the path to access to your data. You only need to keep the same structure between R files and datasets. You will see in the next part how to use it.
+
+## Import data
+
+We will use data contained in Excel (**`.xlsx`**) and text (**`.txt`**) files. You can find these files (and the full R script corresponding to this post) [here](https://github.com/etiennebacher/personal_website/tree/master/_posts/2020-01-22-first-contact/). To import Excel data, we will need the **`readxl`** package. 
+
+```{r}
+library(readxl)
+```
+
+We use the **`read_excel`** function of this package to import excel files and the function **`read.table`** (in base R) to import the data: 
+
+<!-- La partie qui suit doit être visible pour correspondre à ce que je dis mais ne doit pas être exécutée car pas les bons chemins d'accès -->
+```{r eval = FALSE}
+base1 <- read_excel(here("Bases_Used/Base_Excel.xlsx"), sheet = "Base1")
+base2 <- read_excel(here("Bases_Used/Base_Excel.xlsx"), sheet = "Base2")
+base3 <- read_excel(here("Bases_Used/Base_Excel.xlsx"), sheet = "Base3")
+base4 <- read.table(here("Bases_Used/Base_Text.txt"), header = TRUE)
+```
+<!-- La partie qui suit ne doit pas être visible mais doit être exécutée -->
+```{r include = FALSE}
+base1 <- read_excel(here("_posts/2020-01-22-first-contact/Base_Excel.xlsx"), sheet = "Base1")
+base2 <- read_excel(here("_posts/2020-01-22-first-contact/Base_Excel.xlsx"), sheet = "Base2")
+base3 <- read_excel(here("_posts/2020-01-22-first-contact/Base_Excel.xlsx"), sheet = "Base3")
+base4 <- read.table(here("_posts/2020-01-22-first-contact/Base_Text.txt"), header = TRUE)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  cd "/path/to/Bases_Used"
+  import excel using Base_Excel, sheet("Base1") firstrow
+  ```
+]
+````
+
+As you can see, if your project is in a folder and if you stored you datasets in the Bases_Used subfolder, this code will work automatically since **`here`** detects the path. Now, we have stored the four datasets in four objects called **`data.frames`**. To me, this simple thing is an advantage on Stata where storing multiple datasets in the same time is not intuitive at all.
+
+
+## Merge dataframes
+
+We want to have a unique dataset to make descriptive statistics and econometrics (we will just do descriptive statistics in this post). Therefore, we will merge these datasets together, first by using the **`dplyr`** package. This package is one of the references for data manipulation. It is extremely useful and much more easy to use than base R. You may find a cheatsheet (i.e. a recap of the functions) for this package [here](https://rstudio.com/resources/cheatsheets/), along with cheatsheets of many other great packages.
+
+First, we want to regroup **`base1`** and **`base2`**. To do so, we just need to put one under the other and to "stick" them together with **`bind_rows`** and we observe the result:
+
+```{r message = FALSE}
+library(dplyr)
+base_created <- bind_rows(base1, base2)
+base_created
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  preserve
+
+  *** Open base #2 and bind the rows
+  clear all
+  import excel using Base_Excel, sheet("Base2") firstrow
+  tempfile base2
+  save  `base2'
+  restore
+  append using `base2'
+  ```
+]
+````
+
+As you can see, we obtain a dataframe with 6 columns (like each table separately) and 23 rows: 18 in the first table, 5 in the second table. Now, we merge this dataframe with **`base3`**. **`base_created`** and **`base3`** only have one column in common (**`hhid`**) so we will need to specify that we want to merge these two bases by this column:
+
+```{r message = FALSE}
+base_created <- left_join(base_created, base3, by = "hhid")
+base_created
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  preserve
+
+  *** Open base #3 and merge
+  clear all
+  cd ..\Bases_Used
+  import excel using Base_Excel, sheet("Base3") firstrow
+  tempfile base3
+  save `base3'
+  restore
+  merge m:1 hhid using `base3'
+  drop _merge
+  ```
+]
+````
+
+**`left_join`** is a **`dplyr`** function saying that the first dataframe mentioned (here **`base_created`**) is the "most important" and that we will stick the second one (here **`base3`**) to it. If there are more rows in the first one than in the second one, then there will be some missing values but the number of rows will stay the same. If we knew that **`base3`** had more rows than **`base_created`**, we would have used **`right_join`**.
+
+We now want to merge **`base_created`** with **`base4`**. The problem is that there are no common columns so we will need to create one in each. Moreover, **`base_created`** contains data for the year 2019 and **`base4`** for the year 2020. We will need to create columns to specify that too:
+
+```{r}
+# rename the second column of base_created and of base4
+colnames(base_created)[2] <- "indid"
+colnames(base4)[2] <- "indid"
+
+# create the column "year", that will take the value 2019 
+# for base_created and 2020 for base4
+base_created$year <- 2019
+base4$year <- 2020
+```
+
+From this point, we can merge these two dataframes:
+
+```{r}
+base_created2 <- bind_rows(base_created, base4)
+base_created2
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  rename indidy1 indid
+  gen year=2019
+  preserve
+
+  * Open base #4 and merge
+  clear all
+  import delimited Base_Text.txt
+  rename indidy2 indid
+  gen year=2020
+  tempfile base4
+  save `base4'
+  restore
+
+  merge 1:1 hhid indid year using `base4'
+  drop _merge
+  ```
+]
+````
+
+But we have many missing values for the new rows because **`base4`** only contained three columns. We want to have a data frame arranged by household then by individual and finally by year. Using only **`dplyr`** functions, we can do:
+
+```{r}
+base_created2 <- base_created2 %>% 
+  group_by(hhid, indid) %>% 
+  arrange(hhid, indid, year) %>%
+  ungroup()
+base_created2
+```
+
+Notice that there are some **`%>%`** between the lines: it is a pipe and its function is to connect lines of code between them so that we don't have to write **`base_created2`** every time. Now that our dataframe is arranged, we need to fill the missing values. Fortunately, these missing values do not change for an individual since they concern the gender, the location, the name and the surname. So basically, we can just take the value of the cell above (corresponding to year 2019) and replicate it in each cell (corresponding to year 2020):
+
+```{r}
+library(tidyr)
+base_created2 <- base_created2 %>%
+  fill(select_if(., ~ any(is.na(.))) %>% 
+         names(),
+       .direction = 'down')
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  foreach x of varlist surname name gender location {
+    bysort hhid indid: replace `x'=`x'[_n-1] if year==2020
+  }
+  ```
+]
+````
+
+Let me explain the code above:
+
+* **`fill`** aims to fill cells
+* **`select_if`** selects columns according to the condition defined
+* **`any(is.na(.))`** is a logical question asking if there are missing values (NA)
+* **`.`** indicates that we want to apply the function to the whole dataframe
+* **`names`** tells us what the names of the columns selected are
+* **`.direction`** tells the direction in which the filling goes
+
+So **`fill(select_if(., ~ any(is.na(.))) %>% names(), .direction = 'down')`** means that for the dataframe, we select each column which has some NA in it and we obtain their names. In these columns, the empty cells are filled by the value of the cell above (since the direction is "down").
+
+Finally, we want the first three columns to be **`hhid`**, **`indid`** and **`year`**, and we create a ID column named **`hhind`** which is just the union of **`hhid`** and **`indid`**.
+
+```{r}
+base_created2 <- base_created2 %>%
+  select(hhid, indid, year, everything()) %>%
+  unite(hhind, c(hhid, indid), sep = "", remove = FALSE) 
+base_created2
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  egen hhind=group(hhid indid)
+  order hhind hhid indid year *
+  sort hhid indid year
+  ```
+]
+````
+
+That's it, we now have the complete dataframe. 
+
+
+## Clean the data
+
+There are still some things to do. First, we remark that there are some errors in the column **`location`** (**`England_error`** and **`Spain_error`**) so we correct it:
+
+```{r}
+# display the unique values of the column "location"
+unique(base_created2$location)
+# correct the errors
+base_created2[base_created2 == "England_error"] <- "England"
+base_created2[base_created2 == "Spain_error"] <- "Spain"
+unique(base_created2$location)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  replace localisation="England" if localisation=="England_error"
+  replace localisation="Spain" if localisation=="Spain_error"
+  ```
+]
+````
+
+Basically, what we've done here is that we have selected every cell in the whole dataframe that had the value **`England_error`** (respectively **`Spain_error`**) and we replaced these cells by **`England`** (**`Spain`**). We also need to recode the column **`gender`** because binary variables have to take values of 0 or 1, not 1 or 2.
+
+```{r results = 'hide'}
+base_created2$gender <- recode(base_created2$gender, `2` = 0)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  label define genderlab 1 "M" 2 "F"
+  label values gender genderlab
+  recode gender (2=0 "Female") (1=1 "Male"), gen(gender2)
+  drop gender
+  rename gender2 gender
+  ```
+]
+````
+
+To have more details on the dataframe, we need to create some labels. To do so, we need the **`upData`** function in the **`Hmisc`** package.
+
+```{r message = FALSE, results = 'hide'}
+library(Hmisc)
+var.labels <- c(hhind = "individual's ID",
+                hhid = "household's ID",
+                indid = "individual's ID in the household",
+                year = "year",
+                surname = "surname",
+                name = "name",
+                gender = "1 if male, 0 if female",
+                wage = "wage",
+                location = "household's location")
+base_created2 <- upData(base_created2, labels = var.labels)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  label variable hhind "individual's ID"
+  label variable indid "household's ID"
+  label variable year "year"
+  label variable hhid "individual's ID in the household"
+  label variable surname "Surname"
+  label variable name "Name"
+  label variable gender "1 if male, 0 if female"
+  label variable wage "wage"
+  label variable location "household's location"
+  ```
+]
+````
+
+We can see the result with: 
+
+```{r}
+contents(base_created2)
+```
+
+Now that our dataframe is clean and detailed, we can compute some descriptive statistics. But before doing it, we might want to save it:
+
+```{r eval = FALSE}
+write.xlsx(base_created2, file = here("Bases_Created/modified_base.xlsx")
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  cd ..\Bases_Created
+  export excel using "modified_base.xls", replace
+  ```
+]
+````
+
+
+## Descriptive Statistics
+
+First of all, if we want to check the number of people per location or gender and per year, we use the **`table`** function:
+
+```{r}
+table(base_created2$gender, base_created2$year)
+table(base_created2$location, base_created2$year)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  tab gender if year==2019
+  tab location if year==2019
+  ```
+]
+````
+
+To have more detailed statistics, you can use many functions. Here, we use the function **`describe`** from the **`Hmisc`** package
+
+```{r}
+describe(base_created2)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  sum *, detail
+  ```
+]
+````
+
+but you can also try the function **`summary`** (automatically available in base R), **`stat.desc`** in **`pastecs`**, **`skim`** in **`skimr`** or even **`makeDataReport`** in **`dataMaid`** to have a complete PDF report summarizing your data. To summarize data under certain conditions (e.g. to have the average wage for each location), you can use **`dplyr`**:
+
+```{r warning = FALSE}
+# you can change the argument in group_by() by gender for example
+base_created2 %>%
+  group_by(location) %>%
+  summarize_at(.vars = "wage", .funs = "mean")
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  tabstat wage if year==2019, stats(N mean sd min max p25 p50 p75) by(location)
+  tabstat wage if year==2020, stats(N mean sd min max p25 p50 p75) by(location)
+  ```
+]
+````
+
+## Plots
+
+Finally, we want to plot some data to include in our report or article (or anything else). **`ggplot2`** is THE reference to make plots with R. The **`ggplot`** function does not create a graph but tells what is the data you are going to use and the aesthetics (**`aes`**). Here, we want to display the wages in a histogram and to distinguish them per year. Therefore, we want to fill the bars according to the year. To precise the type of graph we want, we add **`+ geom_histogram()`** after **`ggplot`**. You may change the number of **`bins`** to have a more precise histogram. 
+
+```{r message = FALSE}
+library(ggplot2)
+hist1 <- ggplot(data = base_created2, 
+                mapping = aes(wage, fill = factor(year))) +
+  geom_histogram(bins = 10)
+hist1
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  histogram wage if year==2019, saving(Hist1, replace) bin(10) freq title("Year 2019") ytitle("Frequency")
+  histogram wage if year==2020, saving(Hist2, replace) bin(10) freq title("Year 2020") ytitle("Frequency")
+  ```
+]
+````
+
+If you prefer one histogram per year, you can use the **`facet_wrap()`** argument, as below.
+
+```{r message = FALSE}
+hist2 <- ggplot(data = base_created2, 
+                mapping = aes(wage, fill = factor(year))) +
+  geom_histogram(bins = 10) +
+  facet_wrap(vars(year))
+hist2
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  graph combine Hist1.gph Hist2.gph, col(2) xsize(10) ysize(5) iscale(1.5) title("{bf:Wage distribution per year}")
+  ```
+]
+````
+
+Finally, you may want to export these graphs. To do so, we use **`ggsave`** (you can replace .pdf by .eps or .png if you want): 
+
+```{r eval = FALSE}
+ggsave(here("Figures/plot1.pdf"), plot = hist1)
+```
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Stata
+  ]
+
+  ```stata
+  graph export Histogram1.pdf,  replace
+  ```
+]
+````
+
+That's it! In this first post, you have seen how to import, clean and tidy datasets, and how to make some descriptive statistics and some plots. I hope this was helpful to you!
+
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Session Info
+  ]
+
+  This is my session info, so that you can see the versions of packages used. This is useful if the results in my post are no longer reproducible because packages changed. The packages with a star are those explicitely called in the script.
+
+  ```{r, echo = FALSE}
+  sessioninfo::session_info()
+  ```
+]
+````
