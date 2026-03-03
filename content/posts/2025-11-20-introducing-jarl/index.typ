@@ -390,6 +390,10 @@ I'm very excited to introduce #link("https://jarl.etiennebacher.com/")[Jarl]#foo
 
 Jarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on #link("https://github.com/wch/r-source/")[r-source] (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:
 
+#html.elem("video", attrs: (width: "60%", height: "60%", alt: "Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it.", controls: ""))[
+  #html.elem("source", attrs: (src: "demos/lint-r-source.webm", type: "video/mp4"))
+]
+
 On top of that, Jarl can apply automatic fixes#footnote[This is not always possible, it depends on the rule.]. Suppose that we have the following file `foo.R`:
 
 ```r
@@ -439,7 +443,15 @@ There are two ways to use Jarl:
 
 The Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.
 
+#html.elem("video", attrs: (width: "60%", height: "60%", alt: "This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic.", controls: ""))[
+  #html.elem("source", attrs: (src: "demos/hover.webm", type: "video/mp4"))
+]
+
 The latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.
+
+#html.elem("video", attrs: (width: "60%", height: "60%", alt: "This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked.", controls: ""))[
+  #html.elem("source", attrs: (src: "demos/quick-fixes.webm", type: "video/mp4"))
+]
 
 In the future, those extensions could have a "Fix on save" feature similar to the "Format on save" functionality provided by Air.
 
