@@ -193,23 +193,23 @@
 // 2023-10-09: #fa-icon("fa-info") is not working, so we'll eval "#fa-info()" instead
 #let callout(body: [], title: "Callout", background_color: rgb("#dddddd"), icon: none, icon_color: black, body_background_color: white) = {
   block(
-    breakable: false, 
-    fill: background_color, 
-    stroke: (paint: icon_color, thickness: 0.5pt, cap: "round"), 
-    width: 100%, 
+    breakable: false,
+    fill: background_color,
+    stroke: (paint: icon_color, thickness: 0.5pt, cap: "round"),
+    width: 100%,
     radius: 2pt,
     block(
       inset: 1pt,
-      width: 100%, 
-      below: 0pt, 
+      width: 100%,
+      below: 0pt,
       block(
         fill: background_color,
         width: 100%,
         inset: 8pt)[#if icon != none [#text(icon_color, weight: 900)[#icon] ]#title]) +
       if(body != []){
         block(
-          inset: 1pt, 
-          width: 100%, 
+          inset: 1pt,
+          width: 100%,
           block(fill: body_background_color, width: 100%, inset: 8pt, body))
       }
     )
@@ -397,7 +397,7 @@ First of all, let's construct the gallery with HTML, CSS, and Javascript. We wil
 ```html
 <head>
 
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css" /> 
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js"></script>
 
 <!-- lightgallery plugins -->
@@ -429,7 +429,7 @@ Then, we add the Javascript code to run lightgallery.js:
 #block[
 ```html
 <script type="text/javascript">
-  lightGallery(document.getElementById('lightgallery')); 
+  lightGallery(document.getElementById('lightgallery'));
 </script>
 ```
 
@@ -504,11 +504,11 @@ library(magick)
 library(here)
 
 resize_image <- function(image) {
-  
+
   imFile <- image_read(here::here(paste0("_gallery/img/", image)))
   imFile_resized <- magick::image_resize(imFile, "6%")
   magick::image_write(imFile_resized, here::here(paste0("_gallery/img/thumb-", image)))
-  
+
 }
 
 list_png <- list.files("_gallery/img")
@@ -546,21 +546,21 @@ We can now create a function to apply this structure to all the images we have:
 #block[
 ```r
 make_gallery_layout <- function() {
-  
+
   # Get the names of all images
   images <- list.files("_gallery/img")
-  
+
   # Get the names of all full-size images
   images_full_size <- grep("thumb", images, value = TRUE, invert = TRUE)
-  
+
   # Get the names of all thumbnails
   images_thumb <- grep("thumb", images, value = TRUE)
-  
+
   # Create a dataframe where each row is one image (useful for
   # the apply() function)
   images <- data.frame(images_thumb = images_thumb,
                        images_full_size = images_full_size)
-  
+
   # Create the HTML structure for each image
   tagList(apply(images, 1, function(x) {
       tags$a(
@@ -568,7 +568,7 @@ make_gallery_layout <- function() {
         tags$img(src = paste0("_gallery/img/", x[["images_thumb"]]))
       )
   }))
-  
+
 }
 ```
 
@@ -605,7 +605,7 @@ We now have all the HTML code we need. We now have to add the CSS and the JavaSc
 
 
   ::: {.cell}
-  
+
   :::
 
 
@@ -622,7 +622,7 @@ We now have all the HTML code we need. We now have to add the CSS and the JavaSc
 
 
   ::: {.cell}
-  
+
   ```{.css .cell-code}
   #lightgallery > a > img:hover {
      transform: scale(1.15, 1.15);
@@ -633,11 +633,11 @@ We now have all the HTML code we need. We now have to add the CSS and the JavaSc
   :::
 
 
-  
+
 
 
   ::: {.cell}
-  
+
   ```{.r .cell-code}
   # Create layout
   withTags(
@@ -662,7 +662,7 @@ We now have all the HTML code we need. We now have to add the CSS and the JavaSc
 <update-github-actions>
 We need to add `fs::dir_copy("_gallery/img", "_site/_gallery/img")` in GitHub Actions so that the images are found when the gallery is built. We also have to add `magick` and `httr` in the list of packages to install.
 
-If you haven't set up GitHub Actions yet, you can check #link("https://www.etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/")[my previous post], or check my #link("https://github.com/etiennebacher/personal_website_distill/blob/master/.github/workflows/main.yml")[current GitHub Actions] for this site.
+If you haven't set up GitHub Actions yet, you can check #link("https://www.etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/")[my previous post], or check my #link("https://github.com/etiennebacher/my_website/blob/master/.github/workflows/main.yml")[current GitHub Actions] for this site.
 
 == Bonus: make a gallery for \#tidytuesday
 <bonus-make-a-gallery-for-tidytuesday>
@@ -675,11 +675,11 @@ The purpose of the function below is to download a plot for a specific week in a
 library(httr)
 
 get_tt_image <- function(year, week) {
-  
+
   if (is.numeric(year)) year <- as.character(year)
   if (is.numeric(week)) week <- as.character(week)
   if (nchar(week) == 1) week <- paste0("0", week)
-  
+
   ### Get the link to download the image I want
   req <- GET("https://api.github.com/repos/etiennebacher/tidytuesday/git/trees/master?recursive=1")
   stop_for_status(req)
@@ -691,16 +691,16 @@ get_tt_image <- function(year, week) {
   if (any(grepl("accidental_art", png_wanted))) {
     png_wanted <- png_wanted[-which(grepl("accidental_art", png_wanted))]
   }
-  
+
   ### Link of the image I want to download
   origin <- paste0(
     "https://raw.githubusercontent.com/etiennebacher/tidytuesday/master/",
-    png_wanted 
+    png_wanted
   )
-  
+
   ### Destination of this image
   destination <- paste0("_gallery/img/", year, "-", week, "-", trimws(basename(origin)))
-  
+
   ### Download only if not already there
   if (!file.exists(destination)) {
     if (!file.exists("_gallery/img")) {
@@ -708,14 +708,14 @@ get_tt_image <- function(year, week) {
     }
     download.file(origin, destination)
   }
-  
+
   ### Create the thumbnail if not already there
-  thumb_destination <- paste0("_gallery/img/thumb-", year, "-", week, "-", 
+  thumb_destination <- paste0("_gallery/img/thumb-", year, "-", week, "-",
                         trimws(basename(origin)))
   if (!file.exists(thumb_destination)) {
     resize_image(paste0(year, "-", week, "-", trimws(basename(origin))))
   }
- 
+
 }
 ```
 
@@ -738,7 +738,7 @@ Note that for some reason, this function sometimes fails on GitHub Actions becau
 
 
   ::: {.cell}
-  
+
   :::
 
 
@@ -755,7 +755,7 @@ Note that for some reason, this function sometimes fails on GitHub Actions becau
 
 
   ::: {.cell}
-  
+
   ```{.css .cell-code}
   #lightgallery > a > img:hover {
      transform: scale(1.15, 1.15);
@@ -766,11 +766,11 @@ Note that for some reason, this function sometimes fails on GitHub Actions becau
   :::
 
 
-  
+
 
 
   ::: {.cell}
-  
+
   ```{.r .cell-code}
   # Create layout
   withTags(
@@ -793,6 +793,6 @@ Note that for some reason, this function sometimes fails on GitHub Actions becau
 ]
 == Conclusion
 <conclusion>
-In this post, I tried to explain how to build a gallery with a simple example. However, you can also check the #link("https://github.com/etiennebacher/personal_website_distill")[repo of my website] to have a clearer view of how to do so. I also added some CSS styling that is not described here, to limit the code to what is really necessary.
+In this post, I tried to explain how to build a gallery with a simple example. However, you can also check the #link("https://github.com/etiennebacher/my_website")[repo of my website] to have a clearer view of how to do so. I also added some CSS styling that is not described here, to limit the code to what is really necessary.
 
 Check the #link("https://www.etiennebacher.com/gallery.html")[gallery] to see the result.

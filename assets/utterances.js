@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var script = document.createElement("script");
   script.src = "https://utteranc.es/client.js";
-  script.setAttribute("repo", "etiennebacher/personal_website_distill");
+  script.setAttribute("repo", "etiennebacher/my_website");
   script.setAttribute("issue-term", "og:title");
   script.setAttribute("crossorigin", "anonymous");
   script.setAttribute("label", "comment_thread");
