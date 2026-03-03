@@ -4,21 +4,13 @@ CUSTOM STYLES
 Add your custom CSS styles here to override or extend the default styles.
 *******************************************************************************/
 
-/* 刘建毛草字体 */
-@font-face {
-    font-family: 'LiuJianMaoCao';
-    src: url('LiuJianMaoCao-Regular.ttf') format('truetype');
-}
-
-/* 应用字体到特定文字 */
-.liujian-font {
-    font-family: 'LiuJianMaoCao', serif;
-    font-size: 2.5em;
-    text-align: center;
-    display: block;
-}
-
 /* Smaller inline code in margin notes */
 .marginnote code {
     font-size: 0.8em;
+}
+
+/* Show when hovering section title */
+.site-nav > a:hover {
+	color: #c5bcbc !important;
+    transition: 0.4s;
 }
