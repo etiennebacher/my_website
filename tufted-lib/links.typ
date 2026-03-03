@@ -5,8 +5,9 @@
       // 1. Determine whether it is an external link (starting with http)
       let is-external = it.dest.starts-with("http")
 
-      // 2. Determine whether it is a "non-web page resource"
-      let is-resource = it.dest.contains(".") and not it.dest.ends-with(".html")
+      // 2. Determine whether it is a "non-web page resource" (e.g. .pdf, .zip)
+      //    A link ending with "/" is a directory (i.e. a page), not a resource.
+      let is-resource = not it.dest.ends-with("/") and it.dest.contains(".") and not it.dest.ends-with(".html")
 
       if is-external or is-resource {
         html.a(
