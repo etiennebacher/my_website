@@ -84,6 +84,7 @@
           "/assets/marginnote-toggle.js",
           "/assets/toc.js",
           "/assets/gallery.js",
+          "/assets/utterances.js",
         )
         for (js-src) in (base-js + js-scripts).dedup() {
           html.script(src: js-src)

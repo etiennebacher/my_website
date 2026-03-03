@@ -34,6 +34,8 @@
     </script>
     <script src="/assets/gallery.js">
     </script>
+    <script src="/assets/utterances.js">
+    </script>
   </head>
   <body>
     <header class="site-header"></header>
@@ -45,6 +47,7 @@
         <h2>Jarl: just another R linter</h2>
         <p>I’m very excited to introduce <a href="https://jarl.etiennebacher.com/" target="_blank" rel="noopener noreferrer">Jarl</a><sup class="footnote-ref"><a class="footnote-ref-link" href="#fn-1" id="fnref-1">1</a></sup><span class="marginnote" id="fn-1"><sup><a class="footnote-ref-link" href="#fnref-1">1</a></sup> Jarl stands for “Just Another R Linter”.</span>, a new R linter. A linter is a tool that statically parses code (meaning that it doesn’t run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.</p>
         <p>Jarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on <a href="https://github.com/wch/r-source/" target="_blank" rel="noopener noreferrer">r-source</a> (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:</p>
+        <video width="60%" height="60%" alt="Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it." controls><source src="demos/lint-r-source.webm" type="video/mp4"></video>
         <p>On top of that, Jarl can apply automatic fixes<sup class="footnote-ref"><a class="footnote-ref-link" href="#fn-2" id="fnref-2">2</a></sup><span class="marginnote" id="fn-2"><sup><a class="footnote-ref-link" href="#fnref-2">2</a></sup> This is not always possible, it depends on the rule.</span>. Suppose that we have the following file <code>foo.R</code>:</p>
         <pre><code data-lang="r">x <span style="color: #d73948">&lt;-</span> <span style="color: #4b69c6">any</span>(<span style="color: #4b69c6">is.na</span>(mtcars))<br><br><span style="color: #4b69c6">f</span> <span style="color: #d73948">&lt;-</span> <span style="color: #d73948">function</span>(x) {<br>  <span style="color: #4b69c6">apply</span>(x, <span style="color: #b60157">1</span>, mean)<br>}</code></pre>
         <p>There are two rule violations in this file:</p>
@@ -70,7 +73,9 @@
           <li>using the integration in your coding editor (at the time of writing, a Jarl extension is available in VS Code, Positron, and Zed).</li>
         </ol>
         <p>The Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.</p>
+        <video width="60%" height="60%" alt="This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic." controls><source src="demos/hover.webm" type="video/mp4"></video>
         <p>The latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.</p>
+        <video width="60%" height="60%" alt="This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked." controls><source src="demos/quick-fixes.webm" type="video/mp4"></video>
         <p>In the future, those extensions could have a “Fix on save” feature similar to the “Format on save” functionality provided by Air.</p>
         <h3>Configuring Jarl</h3>
         <p>By default, Jarl will report violations for almost of its rules. It is possible to configure its behavior using a configuration file named <code>jarl.toml</code>. In particular, in this file, you can specify:</p>
