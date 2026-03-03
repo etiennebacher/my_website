@@ -1,0 +1,45 @@
+.toc-sidebar {
+    position: fixed;
+    left: 1rem;
+    max-width: 15%;
+    overflow-y: auto;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    z-index: 10;
+}
+
+.toc-sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.toc-sidebar li {
+    margin-bottom: 0.3em;
+}
+
+.toc-sidebar li.toc-h3 {
+    padding-left: 1em;
+}
+
+.toc-sidebar a {
+    color: var(--theme-text);
+    opacity: 0.45;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.toc-sidebar a:hover {
+    opacity: 0.8;
+}
+
+.toc-sidebar a.active {
+    opacity: 1;
+    font-weight: 600;
+}
+
+@media (max-width: 760px) {
+    .toc-sidebar {
+        display: none;
+    }
+}
