@@ -84,6 +84,7 @@
           "/assets/marginnote-toggle.js",
           "/assets/toc.js",
           "/assets/gallery.js",
+          "/assets/nav-toggle.js",
           "/assets/utterances.js",
         )
         for (js-src) in (base-js + js-scripts).dedup() {
@@ -110,6 +111,14 @@
         html.header(
           class: "site-header",
           if header-links != none and header-links.len() > 0 {
+            html.elem(
+              "button",
+              attrs: (
+                class: "nav-toggle",
+                aria-label: "Toggle navigation",
+              ),
+              html.elem("span", attrs: (class: "nav-toggle-icon",), ""),
+            )
             html.nav(
               class: "site-nav",
               for (href, title) in header-links {

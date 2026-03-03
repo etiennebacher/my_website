@@ -545,6 +545,60 @@ header nav {
     gap: 1em;
 }
 
+/* Hamburger menu button — hidden on desktop */
+.nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5em;
+    margin-left: 0.35em;
+}
+
+.nav-toggle-icon,
+.nav-toggle-icon::before,
+.nav-toggle-icon::after {
+    display: block;
+    width: 1.5em;
+    height: 2px;
+    background: var(--theme-text, #333);
+    position: relative;
+    transition: transform 200ms ease;
+}
+
+.nav-toggle-icon::before,
+.nav-toggle-icon::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+
+.nav-toggle-icon::before {
+    top: -0.45em;
+}
+
+.nav-toggle-icon::after {
+    top: 0.45em;
+}
+
+@media (max-width: 760px) {
+    .nav-toggle {
+        display: block;
+    }
+
+    header nav.site-nav {
+        display: none;
+        flex-direction: column;
+        gap: 0;
+        margin-left: 0.35em;
+    }
+
+    header nav.site-nav.is-open {
+        display: flex;
+    }
+}
+
 header nav a,
 header nav a:link,
 header nav a:visited {
