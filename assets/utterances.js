@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  if (!/\/posts\//.test(location.pathname)) {
+  if (!/\/posts\/.+/.test(location.pathname)) {
     return;
   }
 
