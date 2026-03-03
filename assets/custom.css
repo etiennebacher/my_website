@@ -17,3 +17,8 @@ Add your custom CSS styles here to override or extend the default styles.
     text-align: center;
     display: block;
 }
+
+/* Smaller inline code in margin notes */
+.marginnote code {
+    font-size: 0.8em;
+}
