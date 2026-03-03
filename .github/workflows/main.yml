@@ -1,7 +1,9 @@
 on:
   repository_dispatch:
   push:
-    branches: master
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 name: Render & Deploy Site
 
