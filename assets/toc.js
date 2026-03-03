@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Only show TOC on blog posts (and not on the "Blog" page)
-    if (!window.location.pathname.startsWith('/Blog/') || window.location.pathname.endsWith('/Blog/')) return;
+    if (!window.location.pathname.startsWith('/posts/') || window.location.pathname.endsWith('/posts/')) return;
 
     const headings = document.querySelectorAll('article > section h2, article > section h3');
 
