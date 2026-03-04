@@ -48,7 +48,7 @@
         if (storedTheme) {
             return storedTheme;
         }
-        return getSystemTheme();
+        return "light";
     }
 
     // 应用主题到文档
@@ -98,9 +98,12 @@
 
     // 初始化
     function init() {
-        // 在 DOM 加载完成前先应用主题以防止闪烁
-        const theme = getCurrentTheme();
-        document.documentElement.setAttribute("data-theme", theme);
+        // Only set data-theme if user has an explicit session preference;
+        // otherwise let CSS handle the default (light) and system overrides.
+        const storedTheme = getStoredTheme();
+        if (storedTheme) {
+            document.documentElement.setAttribute("data-theme", storedTheme);
+        }
 
         // DOM 加载完成后添加按钮
         if (document.readyState === "loading") {
@@ -125,15 +128,6 @@
         // 更新按钮状态
         updateToggleButton(getCurrentTheme());
 
-        // 监听系统主题变化
-        window
-            .matchMedia("(prefers-color-scheme: dark)")
-            .addEventListener("change", function (e) {
-                // 只有在用户没有手动设置偏好时才跟随系统
-                if (!getStoredTheme()) {
-                    applyTheme(e.matches ? "dark" : "light");
-                }
-            });
     }
 
     // 立即执行初始化

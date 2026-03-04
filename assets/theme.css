@@ -38,8 +38,7 @@ CSS CUSTOM PROPERTIES (Theme Variables)
 }
 
 /* Dark mode variables */
-html[data-theme="dark"],
-html:not([data-theme]) {
+html[data-theme="dark"] {
     --theme-bg: #151515;
     --theme-text: #ddd;
     --theme-heading: #eee;
@@ -66,35 +65,7 @@ html:not([data-theme]) {
     --theme-icon-filter: invert(1);
 }
 
-/* System preference: only apply dark variables when no explicit theme is set */
-@media (prefers-color-scheme: light) {
-    html:not([data-theme]) {
-        --theme-bg: #fffff8;
-        --theme-text: #111;
-        --theme-heading: #111;
-        --theme-code-bg: #f7f7f7;
-        --theme-code-text: inherit;
-        --theme-code-border: #e7e7e7;
-        --theme-pre-bg: #f7f7f7;
-        --theme-pre-border: #e0e0e0;
-        --theme-line-numbers-border: #ddd;
-        --theme-line-numbers-text: #aaa;
-        --theme-copy-btn-bg: #fff;
-        --theme-copy-btn-text: #666;
-        --theme-copy-btn-border: #ccc;
-        --theme-copy-btn-hover-bg: #f0f0f0;
-        --theme-copy-btn-hover-text: #333;
-        --theme-copy-btn-copied-bg: #e6fffa;
-        --theme-copy-btn-copied-text: #008000;
-        --theme-copy-btn-copied-border: #008000;
-        --theme-table-border: #ccc;
-        --theme-table-header-bg: #f5f5f5;
-        --theme-table-row-even: #fafafa;
-        --theme-table-row-hover: #f0f0f0;
-        --theme-math-filter: none;
-        --theme-icon-filter: none;
-    }
-}
+/* Light is always the default; user can toggle to dark via the button. */
 
 
 /*******************************************************************************
