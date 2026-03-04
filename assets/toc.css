@@ -1,7 +1,7 @@
 .toc-sidebar {
     position: fixed;
     left: 1rem;
-    max-width: 15%;
+    max-width: min(20%, 20rem);
     overflow-y: auto;
     font-size: 0.75rem;
     line-height: 1.4;

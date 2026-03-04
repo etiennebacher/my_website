@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const article = document.querySelector('article');
     if (article) {
         article.parentNode.insertBefore(nav, article);
+        // Only add padding if the ToC actually overlaps the article
+        var navRight = nav.getBoundingClientRect().right;
+        var articleLeft = article.getBoundingClientRect().left;
+        var overlap = navRight - articleLeft;
+        if (overlap > 0) {
+            article.style.paddingLeft = (overlap + 16) + 'px';
+        }
     } else {
         document.body.prepend(nav);
     }

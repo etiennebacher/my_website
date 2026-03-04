@@ -29,7 +29,7 @@ body {
 /* Main content fills remaining space */
 body>article {
     flex: 1 0 auto;
-    padding: 4.5rem 0 1.5rem 5rem;
+    padding: 4.5rem 0 1.5rem 0;
 }
 
 /* Footer stays at bottom */
