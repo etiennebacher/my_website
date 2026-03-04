@@ -29,7 +29,7 @@ body {
 /* Main content fills remaining space */
 body>article {
     flex: 1 0 auto;
-    padding: 4.5rem 0 1.5rem;
+    padding: 4.5rem 0 1.5rem 5rem;
 }
 
 /* Footer stays at bottom */
@@ -46,8 +46,8 @@ svg {
     width: auto;
 }
 
-/* 
-   CONTENT ALIGNMENT & CENTERING 
+/*
+   CONTENT ALIGNMENT & CENTERING
    Shared logic for images, SVGs
 */
 
@@ -493,6 +493,11 @@ RESPONSIVE LAYOUT
     /* Full-width quote blocks on mobile */
     div[style*="border-inline-start"] {
         width: 100% !important;
+    }
+
+    /* Remove extra left padding on mobile */
+    body > article {
+        padding-left: 0;
     }
 
     /* Full-width code blocks on mobile */
