@@ -14,3 +14,47 @@ Add your custom CSS styles here to override or extend the default styles.
 	color: var(--theme-copy-btn-hover-text) !important;
     transition: 0.4s;
 }
+
+/* Blog entry cards */
+.blog-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5em;
+    padding: 1em 0;
+    border-bottom: 1px solid var(--theme-table-border, #ccc);
+    width: 75%
+}
+
+.blog-entry-content {
+    flex: 1;
+}
+
+.blog-entry-content a {
+    font-size: 1.5em;
+    border-bottom: none !important;
+}
+
+.blog-entry-content a:hover {
+    color: var(--theme-copy-btn-hover-text) !important;
+}
+
+.blog-entry-date {
+    flex-shrink: 0;
+    color: var(--theme-line-numbers-text, #aaa);
+    font-size: 1.2em;
+    white-space: nowrap;
+}
+
+.blog-entry-preview {
+    flex-shrink: 0;
+    width: 30%;
+    order: 2;
+}
+
+.blog-entry-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
