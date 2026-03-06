@@ -1,0 +1,154 @@
+---
+title: Compare two languages in R Markdown documents
+author: Etienne Bacher
+date: '2020-12-03'
+description: 'A few months ago, I tried to compare two languages in an article. Here are several ways to do it.'
+output:
+  distill::distill_article:
+    toc: true
+    toc_float: true
+    highlight: pygments
+    highlight_downlit: true
+---
+
+In one of [my first posts](https://www.etiennebacher.com/post/first-contact/first-contact/), I wanted to compare two languages (namely and R and Stata) by putting two chunks side-by-side. I asked how to do this [on StackOverflow](https://stackoverflow.com/questions/59511268/display-several-code-chunks-in-a-concise-way) and continued to dig this question occasionally. I have now a few more or less convincing solutions/alternatives, that I summarize here.
+
+
+## Two code chunks side-by-side
+
+It is possible to produce two columns in an HTML document (this is also possible for LaTeX files but the code is different). The following code...
+
+````
+:::: {style="display: grid; grid-template-columns: 70% 70%; grid-column-gap: 30px;"}
+
+::: {}
+```{r}`r ''`
+head(mtcars)
+```
+:::
+
+::: {}
+```{r}`r ''`
+head(anscombe)
+```
+:::
+
+::::
+````
+
+... produces this output:
+
+:::: {style="display: grid; grid-template-columns: 70% 70%; grid-column-gap: 30px;"}
+::: {}
+```{r}
+head(mtcars)
+```
+:::
+::: {}
+```{r}
+head(anscombe)
+```
+:::
+::::
+
+
+All of this is more detailed in [this section](https://bookdown.org/yihui/rmarkdown-cookbook/multi-column.html) of the R Markdown Cookbook.
+
+
+
+## Create tabs with `{xaringanExtra}`
+
+An alternative to side-by-side chunks is to create tabs. We lose the ability to compare directly two chunks, but we can put much more tabs than code chunks. To do so, we use [`{xaringanExtra}`](https://pkg.garrickadenbuie.com/xaringanExtra/), made by Garrick Aden-Buie. It is a great package that adds a lot of functionalities to R Markdown or `{xaringan}`.
+
+To create tabs, we run `xaringanExtra::use_panelset()` first, and then we create the sections. Let's init the panelset:
+
+```{r}
+library(xaringanExtra)
+# enable panelset
+use_panelset()
+```
+
+Next, we can create several panels with `::::: {.panelset}` and `::: {.panel}`. Here's an example:
+
+````
+::::: {.panelset}
+
+::: {.panel}
+[mtcars]{.panel-name}
+```{r}`r ''`
+head(mtcars)
+```
+:::
+
+::: {.panel}
+[anscombe]{.panel-name}
+```{r}`r ''`
+head(anscombe)
+```
+:::
+
+::::
+````
+
+::::: {.panelset}
+::: {.panel}
+[mtcars]{.panel-name}
+```{r}
+head(mtcars)
+```
+:::
+::: {.panel}
+[anscombe]{.panel-name}
+```{r}
+head(anscombe)
+```
+:::
+:::: 
+
+
+
+## Use `<details>`
+
+Finally, it is also possible to create chunks that are hidden by default but can be expanded by the user. This is particularly useful if you want to provide the user a reference. For instance, if you're trying to teach a new language, it might be helpful to provide code that the user already knows,  without displaying it by default.
+
+
+Here's an example. We create the "expanding zone" below with:
+
+````
+<details>
+<summary> Stata </summary>
+Here, I put some Stata code hidden so that the user can compare if necessary:
+```stata `r ''`
+regress y x
+```
+</details>
+````
+
+
+```{r, eval=FALSE}
+# Here I'm teaching R
+lm(mpg ~ drat, data = mtcars)
+```
+
+<details>
+<summary> Stata </summary>
+Here, I put some Stata code hidden so that the user can compare if necessary:
+```stata
+regress y x
+```
+</details>
+
+
+<br>
+
+That's all! To summarize:
+
+* code chunks side-by-side
+* tabs
+* hidden chunks with `<details>`
+
+
+
+
+
+

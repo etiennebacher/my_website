@@ -1,0 +1,233 @@
+---
+format:
+  typst:
+    keep-typ: true
+    syntax-highlighting: idiomatic
+    include-before-body:
+      - text: |
+          #import "../index.typ": template, tufted
+          #import "@preview/lilaq:0.5.0" as lq
+          // 如需生成 RSS feed，必须填写 title、description 和 date 元数据
+          #show: template.with(
+            title: "Writing a Master's thesis with R Markdown and Bookdown",
+            description: "I wrote my Master's thesis with bookdown. This post contains some tips to modify the layout and other stuff.",
+            date: datetime(year: 2020, month: 07, day: 16),
+            lang: "en",
+          )
+---
+
+# Writing a Master's thesis with R Markdown and Bookdown
+
+I finished my Master's thesis very recently, and I wrote it with R Markdown, and more precisely with the `bookdown` package. It was really comfortable to do absolutely everything with R: data treatment, use of econometric methods, redaction with chunk of codes, and even the slides for the presentation! However, I have also spent a non-negligible part of my time trying to have a correct layout, essentially for the first pages. I found that some things were not as easy to do as they should be. This post contains some solutions to these problems.
+
+## Why `bookdown`? 
+
+A small preamble before starting to list these problems and solutions: why did I use `bookdown` and not `rmarkdown`? `bookdown` has a few advantages that are very important when writing a Master's thesis (or an academic paper in general), such as cross-references between sections, figures, tables, etc. See [the `bookdown` book](https://bookdown.org/yihui/bookdown/) for all the details. 
+
+While it is possible to create a `bookdown` project with RStudio, I "manually" made my own, because I have the impression there are a lot of files created automatically by RStudio that would just confuse myself. Therefore, I had a file containing the YAML and the chunks necessary to load all the packages needed and to run the child documents. Child documents are `.Rmd` files that contain only some Markdown text and code chunks (no YAML). They make it much easier to write a thesis since it is possible to divide it in several pieces (introduction, literature review, method, etc.).
+
+In addition to `Global.Rmd` (which contains YAML and setup chunks), I used two `.tex` files: `preamble.tex` is where I put all the LaTeX commands and packages I used, and `titlepage.tex` to make my custom titlepage, acknowledgments and abstract before the table of contents. 
+
+
+## LaTeX packages and commands
+
+In `preamble.tex`, I put all the LaTeX commands, many of them being `\usepackage`. For example, the R package `kableExtra` provides a list of LaTeX packages required to be able to customize the tables (see [here](https://haozhu233.github.io/kableExtra/awesome_table_in_pdf.pdf)). 
+
+Here's a small list of the commands I used for my thesis.
+
+* `\renewcommand{\baselinestretch}{1.3}` to change the space between lines;
+
+* `\pagenumbering{gobble}` to remove page numbering for the first pages, that contain the title, the table of content (TOC), the lists of figures and tables (LOF and LOT) and some blank pages. I used `\pagenumbering{arabic}` after the YAML to start the page numbering at the right place.
+
+* `\usepackage{caption}`; `\captionsetup[table]{name=Tableau}`; `\captionsetup[figure]{name=Figure}`. These three commands (to put on three separate lines) are here to change the name of tables and figures. If you're writing in English, you probably won't need them, but they were necessary to write in French.
+
+* the following lines create a new command to create a blank page after the titlepage. Strangely, `\pagebreak` or `\newpage` didn't work inside the titlepage and I had to find an alternative:
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    Command to create a blank page
+  ]
+
+  ```
+  \usepackage{afterpage}
+  \newcommand\blankpage{%
+      \null
+      \thispagestyle{empty}%
+      \addtocounter{page}{-1}%
+      \newpage}
+  ```
+]
+````
+
+
+
+## Titlepage, acknowledgements and abstract
+
+Concerning these three components, I put them in another file named `titlepage.tex`. This is the layout I wanted:
+
+* a titlepage with some logos and some information on my thesis and my university;
+
+* a blank page;
+
+* acknowledgements on a new page;
+
+* abstract on a new page;
+
+* TOC, LOF and LOT on a new page.
+
+To do so, I started the titlepage with `\begin{titlepage}` and customized it as I wanted. But before putting `\end{titlepage}`, I placed `\afterpage{\blankpage}`, which is the command we define in `preamble.tex`. With this, I had a titlepage and a blank page. 
+
+The next step was to create two pages containing the acknowledgements and the abstract This was easily done in LaTeX, and this time I could use `\pagebreak` at the end of the acknowledgements to create a new page for the abstract. I also put another `\pagebreak` to finish `titlepage.tex`, so that TOC, LOF and LOT (created in the YAML) could start on a new page.
+
+
+## Include LaTeX files in YAML
+
+As explained, I had two `.tex` files to run when compiling the R Markdown file:
+
+* `preamble.tex` is a list of commands that should be placed before `\begin{document}` when this `.Rmd` file will be converted to `.tex`. Therefore, I used `in_header` in the YAML to compile it.
+
+* `titlepage.tex` contains some elements that should be in the final PDF document. Since this should appear first (before the rest of the `.Rmd` document), I used `before_body` in the YAML.  
+
+
+
+## Summary
+
+Here are examples of the three files: `Global.Rmd`, `preamble.tex` and `titlepage.tex`.
+
+`````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    **Global.Rmd**
+  ]
+
+  ````
+  ---
+  output:
+    bookdown::pdf_book:
+      includes:
+        in_header: preamble.tex
+        before_body: titlepage.tex
+      keep_tex: true
+      toc: yes
+      toc_depth: 3
+  indent: true
+  link-citations: yes
+  lot: true
+  lof: true
+  ---
+
+  <!-- Start the redaction on a new page -->
+  \newpage
+
+  <!-- Start page numbering where the redaction starts -->
+  \pagenumbering{arabic}
+
+  `r ''````{r globaloptions, include=FALSE}
+  # Include here chunk options
+  ```
+
+  `r ''````{r packages}
+  # Load here the packages
+  ```
+
+  <!-- Call the child documents -->
+  `r ''````{r body, child = c('01-Intro.Rmd', '02-Literature.Rmd', '03-Data-and-method.Rmd', '04-Results.Rmd', '05-Discussion.Rmd', '06-Conclusion.Rmd')}
+  ```
+
+  <!-- Placement of bibliography -->
+  # References {-}
+
+  <div id="refs"></div>
+
+
+  <!-- Place the appendix after the bibliography -->
+  `r ''````{r appendix, child = c('07--Appendix.Rmd')}
+  ```
+  ````
+]
+`````
+
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    **preamble.tex**
+  ]
+
+  ```
+  % Line spacing
+  \renewcommand{\baselinestretch}{1.3}
+
+  % Page number and chapter at the top of the page
+  \pagestyle{headings}
+
+  % Important packages
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage[dvipsnames]{xcolor}
+  \usepackage{hyperref}
+  \usepackage{dcolumn}
+  \usepackage{booktabs}
+  \usepackage{longtable}
+
+  % Figure and table names
+  \usepackage{caption}
+  \captionsetup[table]{name=Tableau}
+  \captionsetup[figure]{name=Figure}
+
+  % Packages for kableExtra
+  \usepackage{array}
+  \usepackage{multirow}
+  \usepackage{wrapfig}
+  \usepackage{colortbl}
+  \usepackage{pdflscape}
+  \usepackage{float}
+  \usepackage{tabu}
+  \usepackage{threeparttable}
+  \usepackage{threeparttablex}
+  \usepackage[normalem]{ulem}
+  \usepackage{makecell}
+
+  % Remove page numbering before start of redaction
+  \pagenumbering{gobble}
+
+  % Command to make a blank page
+  \usepackage{afterpage}
+  \newcommand\blankpage{%
+      \null
+      \thispagestyle{empty}%
+      \addtocounter{page}{-1}%
+      \newpage}
+  ```
+]
+````
+
+
+````{=typst}
+#html.elem("details")[
+  #html.elem("summary")[
+    **titlepage.tex**
+  ]
+
+  ```
+  \begin{titlepage}
+  \centering
+  Title of my thesis
+  \afterpage{\blankpage}
+  \end{titlepage}
+
+  \section*{Acknowledgements}
+  Thanks everyone
+  \pagebreak
+
+  \begin{center}
+  \textbf{Abstract}
+  \end{center}
+  Bla bla bla...
+  \pagebreak
+  ```
+]
+````
+
+Hope this helps!

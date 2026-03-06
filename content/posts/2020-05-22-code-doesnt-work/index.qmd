@@ -1,0 +1,92 @@
+---
+format:
+  typst:
+    keep-typ: true
+    syntax-highlighting: idiomatic
+    include-before-body:
+      - text: |
+          #import "../index.typ": template, tufted
+          #import "@preview/lilaq:0.5.0" as lq
+          // 如需生成 RSS feed，必须填写 title、description 和 date 元数据
+          #show: template.with(
+            title: "What to do when your code doesn't work?",
+            description: "This is the list of actions I make when I have an error in R.",
+            date: datetime(year: 2020, month: 05, day: 22),
+            lang: "en",
+          )
+---
+
+# What to do when your code doesn't work?
+ 
+As [Jenny Bryan said](https://rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/), one of the first things people do when there is a problem with the code is run it a second time. But in 95% of the cases (in my small programming experience), this does not solve the problem, and I realized I developed a small pattern of reactions when I am in this situation. 
+
+
+### Read the error message
+
+This may seem obvious since this is the first thing we see when there is an error. However, some messages (like those in the `tidyverse` packages) are really helpful and are enough to solve the problem.
+
+As you spend time programming, some error messages become quite familiar over time. You don't necessarily need to fully understand the message, just remember how you solved the error when you saw this. But this does not help if this is the first time you see the message.
+
+
+### Search on StackOverflow and RStudio Community
+
+If the error message was not helpful, I quickly go to step 2: search online (which is almost always equivalent to "search on StackOverflow and RStudio Community"). Those are the two places where you have the most odds of finding an answer to your problem. If your problem concerns mainstream packages (once again, such as the `tidyverse` ones), then there will always be at least one person who had a similar problem for which a solution was given.
+
+
+### Search on Github
+
+If no answer was available on these two websites, I usually go a step further and search about it on GitHub, especially if the problem comes from an unknown and/or new package. Indeed, the source code of a lot of R packages is available on GitHub, as well as the brand-new versions (not on CRAN yet). It is also the place where people make feedback on some issues or help develop the package.
+
+It happens that somebody reported a similar issue and that the package maintainer answered. If not, well, it is always useful to see the situations in which people use the package, or to learn new functions of this package.
+
+
+### Post my question online - Part 1
+
+I have an error, I don't understand the error message and there are no answers online. What can I do now?
+
+You can post your question on one of the websites I mentioned. My order of preference is:
+
++ StackOverflow: in general, more people see your message and therefore more people might answer your question.
+
++ RStudio Community: more "specialized" and some mainstream packages maintainers are there. Also useful when the question is about RStudio IDE (not to be confused with the R language) since they developed it.
+
++ GitHub: clearly the problem comes from an error specific to the package and I couldn't find an answer online. Most of the time, there is no need to create new issues.
+
+**However:** posting a question online implies that you need to create a reproducible example. What is a reproducible example?
+
+Suppose that you are working on your data and have a problem. You may want to copy and paste your code online. It's quick and easy. But try to imagine you're someone on StackOverflow that sees your code for the first time. This person needs to run it to understand what your code does and what the problem is. But that's impossible, because you load CSV data that is only available for you, or because you forgot to mention the packages you're using. Therefore, no one can run your code and the odds of someone solving your problem plummet.
+
+If you post online, your post MUST contain:
+
++ A description of what you're trying to do and of your problem in plain text.
+
++ Some code that contains:
+
+  + the `library()` calls needed to run every function you use (but no need to put packages that you never use in your example)
+  
+  + a code that can be copied and pasted in a new R session and that ends up in the same situation as you're in. That means that the data you use must be reproducible.
+  
+  + the expected output, if possible. If you can easily show the output you want, do it. It will be easier to help you if you show what you want. In some cases (*e.g* Shiny apps), it is not always possible or easy to provide this, so it is not a 100% necessary.
+
+
+Making a reproducible example takes time but is incredibly helpful. Open a new tab in RStudio, try to simplify your situation as much as possible and to make it reproducible by using data available for everyone. For example, some datasets are automatically in R, such as `mtcars` or `iris`. Don't forget to mention the packages you use in `library()`. Once you think you have finished (you show what packages you use, you keep your example as small as possible and you show the expected output), restart the session (ctrl + shift + F10) and see if it runs and if it reproduces the same error. If it doesn't, it means your example is not reproducible and that you have to improve it.
+
+I would say that I solve the problem myself by making a reproducible example in 70% of the cases, so taking the time to make one is worth it!
+
+
+### Post my question online - Part 2
+
+However, if you didn't solve your problem with this (and if your example is reproducible), you can post it on StackOverflow or RStudio Community. Don't forget to explain your situation and your code, don't paste it without any details!
+
+Hopefully, you'll have an answer.
+
+
+
+### Additional resources
+
+Here are two pages with details about making a reproducible example:
+
++ https://stackoverflow.com/help/minimal-reproducible-example
+
++ https://stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example
+

@@ -1,38 +1,23 @@
 on:
   repository_dispatch:
   push:
-    branches: master
+    branches: [main, master]
 
 name: Render & Deploy Site
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
-  cancel-in-progress: true
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: r-lib/actions/setup-r@v2
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - name: Install dependencies, save github token for gh(), render site
+      - uses: actions/checkout@v6
+      - name: Download CV and commit
         run: |
-          github_token <- "${{ secrets.GITHUB_TOKEN }}"
-          install.packages(c("distill", "postcards", "devtools", "httr",
-          "fs", "htmltools", "here", "magick", "gh", "jsonlite", "echarts4r.assets"))
-          rmarkdown::render_site(encoding = "UTF-8")
-        shell: Rscript {0}
-        
-      - name: Copy redirects and gallery images
-        run: Rscript -e 'fs::file_copy("_redirects", "_site/_redirects"); fs::dir_copy("_gallery/img", "_site/_gallery/img")'
-      - name: Get CV
-        run: Rscript -e 'devtools::source_url("https://github.com/etiennebacher/personal_website_distill/blob/master/R/get_cv.R?raw=TRUE")'
-      - name: Commit results
-        run: |
-          git add -A
-          git commit -m 'Rebuild site' || echo "No changes to commit"
-          git push origin || echo "No changes to commit"
+          curl -L -o cv.pdf https://raw.githubusercontent.com/etiennebacher/CV_perso/master/cv.pdf
+          git add cv.pdf
+          git commit -m 'Update CV' || echo "No changes to commit"
+          git push

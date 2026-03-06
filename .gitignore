@@ -1,5 +1,34 @@
-.Rproj.user
-.Rhistory
-.Rdata
-.httr-oauth
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# uv
+.venv/
+uv.lock
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# build outputs
+_site/
+target/
+
+# temp files
+*.tmp
+*.bak
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# todo
+TODO.md
