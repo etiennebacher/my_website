@@ -589,13 +589,21 @@ header nav {
 
     header nav.site-nav {
         display: none;
-        flex-direction: column;
-        gap: 0;
-        margin-left: 0.35em;
     }
 
     header nav.site-nav.is-open {
+        display: block;
+        margin-left: 0.35em;
+    }
+
+    header nav.site-nav.is-open p {
         display: flex;
+        flex-direction: column;
+        gap: 0.3em;
+    }
+
+    .theme-toggle-btn {
+        margin-left: 2.5em !important;
     }
 }
 
