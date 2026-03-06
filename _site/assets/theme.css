@@ -11,56 +11,56 @@ CSS CUSTOM PROPERTIES (Theme Variables)
 
 :root {
     /* Light mode colors (default) */
-    --theme-bg: #fffff8;
+    --theme-bg: #e1e9f6;
     --theme-text: #111;
     --theme-heading: #111;
-    --theme-code-bg: #f7f7f7;
+    --theme-code-bg: #d3e1f4;
     --theme-code-text: inherit;
-    --theme-code-border: #e7e7e7;
-    --theme-pre-bg: #f7f7f7;
-    --theme-pre-border: #e0e0e0;
-    --theme-line-numbers-border: #ddd;
-    --theme-line-numbers-text: #aaa;
-    --theme-copy-btn-bg: #fff;
-    --theme-copy-btn-text: #666;
-    --theme-copy-btn-border: #ccc;
-    --theme-copy-btn-hover-bg: #f0f0f0;
-    --theme-copy-btn-hover-text: #333;
+    --theme-code-border: #c9d7ea;
+    --theme-pre-bg: #d3e1f4;
+    --theme-pre-border: #c9d7ea;
+    --theme-line-numbers-border: #b8c9e0;
+    --theme-line-numbers-text: #8a9bb5;
+    --theme-copy-btn-bg: #eaf0f9;
+    --theme-copy-btn-text: #4a6080;
+    --theme-copy-btn-border: #b8c9e0;
+    --theme-copy-btn-hover-bg: #dce6f3;
+    --theme-copy-btn-hover-text: #2a4060;
     --theme-copy-btn-copied-bg: #e6fffa;
     --theme-copy-btn-copied-text: #008000;
     --theme-copy-btn-copied-border: #008000;
-    --theme-table-border: #ccc;
-    --theme-table-header-bg: #f5f5f5;
-    --theme-table-row-even: #fafafa;
-    --theme-table-row-hover: #f0f0f0;
+    --theme-table-border: #b8c9e0;
+    --theme-table-header-bg: #dce6f3;
+    --theme-table-row-even: #e8eff8;
+    --theme-table-row-hover: #dce6f3;
     --theme-math-filter: none;
     --theme-icon-filter: none;
 }
 
 /* Dark mode variables */
 html[data-theme="dark"] {
-    --theme-bg: #151515;
+    --theme-bg: #0f1a2e;
     --theme-text: #ddd;
     --theme-heading: #eee;
-    --theme-code-bg: #2d2d2d;
+    --theme-code-bg: #162040;
     --theme-code-text: #e8e8e8;
-    --theme-code-border: #3d3d3d;
-    --theme-pre-bg: #2d2d2d;
-    --theme-pre-border: #3d3d3d;
-    --theme-line-numbers-border: #555;
-    --theme-line-numbers-text: #666;
-    --theme-copy-btn-bg: #333;
-    --theme-copy-btn-text: #ccc;
-    --theme-copy-btn-border: #555;
-    --theme-copy-btn-hover-bg: #444;
-    --theme-copy-btn-hover-text: #eee;
+    --theme-code-border: #1e2d50;
+    --theme-pre-bg: #162040;
+    --theme-pre-border: #1e2d50;
+    --theme-line-numbers-border: #2a3a5c;
+    --theme-line-numbers-text: #4a6080;
+    --theme-copy-btn-bg: #1a2844;
+    --theme-copy-btn-text: #a0b4cc;
+    --theme-copy-btn-border: #2a3a5c;
+    --theme-copy-btn-hover-bg: #223050;
+    --theme-copy-btn-hover-text: #d0dcea;
     --theme-copy-btn-copied-bg: #1a4d3a;
     --theme-copy-btn-copied-text: #5fda9d;
     --theme-copy-btn-copied-border: #5fda9d;
-    --theme-table-border: #444;
-    --theme-table-header-bg: #333;
-    --theme-table-row-even: #2a2a2a;
-    --theme-table-row-hover: #383838;
+    --theme-table-border: #2a3a5c;
+    --theme-table-header-bg: #1a2844;
+    --theme-table-row-even: #131e35;
+    --theme-table-row-hover: #1e2d50;
     --theme-math-filter: invert(1) hue-rotate(180deg);
     --theme-icon-filter: invert(1);
 }
@@ -97,7 +97,11 @@ a:visited {
     background-color: transparent !important;
     text-shadow: none !important;
     background-image: none !important;
-    border-bottom: dotted 1px !important;
+    border-bottom: dashed 1px !important;
+}
+
+a:hover {
+    color: var(--theme-copy-btn-hover-text) !important;
 }
 
 code {

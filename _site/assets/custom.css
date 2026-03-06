@@ -11,6 +11,6 @@ Add your custom CSS styles here to override or extend the default styles.
 
 /* Show when hovering section title */
 .site-nav > a:hover {
-	color: #c5bcbc !important;
+	color: var(--theme-copy-btn-hover-text) !important;
     transition: 0.4s;
 }
