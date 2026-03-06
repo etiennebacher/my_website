@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
+
 /*******************************************************************************
 CSS VARIABLES
 *******************************************************************************/
@@ -14,12 +16,13 @@ BASE STYLES
 *******************************************************************************/
 
 html {
-    font-size: 10.5pt;
+    font-size: 11pt;
     height: 100%;
 }
 
 /* Sticky footer layout */
 body {
+    font-family: "EB Garamond", serif;
     margin: 0 auto;
     min-height: 100%;
     display: flex;
