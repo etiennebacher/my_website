@@ -58,3 +58,9 @@ Add your custom CSS styles here to override or extend the default styles.
     object-fit: cover;
     border-radius: 4px;
 }
+
+/* Align utterances comment box with content */
+.utterances {
+    max-width: 55% !important;
+    margin-left: 0 !important;
+}
