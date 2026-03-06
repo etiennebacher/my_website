@@ -611,6 +611,7 @@ header nav a:visited {
     font-size: 1.5rem;
     padding: 0.2em 0.4em;
     margin-top: 1em;
+    margin-left: 2em;
     border-radius: var(--radius-sm);
     transition: background-color 120ms ease;
 }

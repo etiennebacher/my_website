@@ -179,23 +179,19 @@ THEME TOGGLE BUTTON (DeepWiki Style)
 *******************************************************************************/
 
 .theme-toggle-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 4rem;
     padding: 0;
     background: transparent;
     border: none;
     border-radius: 0.375rem;
     cursor: pointer;
-    position: fixed;
-    top: 1.6em;
-    right: 3em;
-    z-index: 1000;
+    vertical-align: middle;
     transition: background-color 0.15s ease;
     color: #374151;
-    /* 浅色模式下月亮图标颜色 */
+    margin-left: 1em;
 }
 
 .theme-toggle-btn:hover {
@@ -208,8 +204,8 @@ THEME TOGGLE BUTTON (DeepWiki Style)
 }
 
 .theme-toggle-btn svg {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.4rem;
+    height: 1.4rem;
 }
 
 /* 深色模式下太阳图标颜色 */

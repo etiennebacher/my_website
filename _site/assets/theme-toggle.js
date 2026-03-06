@@ -48,7 +48,7 @@
         if (storedTheme) {
             return storedTheme;
         }
-        return "light";
+        return getSystemTheme();
     }
 
     // 应用主题到文档
@@ -76,36 +76,19 @@
 
     // 切换主题
     function toggleTheme() {
-        const currentTheme =
-            document.documentElement.getAttribute("data-theme") || getSystemTheme();
+        const currentTheme = getCurrentTheme();
         const newTheme = currentTheme === "dark" ? "light" : "dark";
         setStoredTheme(newTheme);
         applyTheme(newTheme);
     }
 
-    // 创建切换按钮 (DeepWiki 风格 - 单图标按钮)
-    function createToggleButton() {
-        const button = document.createElement("button");
-        button.id = "theme-toggle";
-        button.className = "theme-toggle-btn";
-        button.type = "button";
-        button.setAttribute("aria-label", "切换主题");
-
-        button.addEventListener("click", toggleTheme);
-
-        return button;
-    }
-
     // 初始化
     function init() {
-        // Only set data-theme if user has an explicit session preference;
-        // otherwise let CSS handle the default (light) and system overrides.
-        const storedTheme = getStoredTheme();
-        if (storedTheme) {
-            document.documentElement.setAttribute("data-theme", storedTheme);
-        }
+        // Always set data-theme so CSS picks up the correct theme immediately
+        const initialTheme = getCurrentTheme();
+        document.documentElement.setAttribute("data-theme", initialTheme);
 
-        // DOM 加载完成后添加按钮
+        // DOM 加载完成后绑定按钮
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", onDOMReady);
         } else {
@@ -114,20 +97,13 @@
     }
 
     function onDOMReady() {
-        const button = createToggleButton();
-
-        // 查找 header nav 元素，将按钮添加到导航栏中
-        const nav = document.querySelector("header nav");
-        if (nav) {
-            nav.appendChild(button);
-        } else {
-            // 如果没有 nav，则添加到 body
-            document.body.appendChild(button);
+        const button = document.getElementById("theme-toggle");
+        if (button) {
+            button.addEventListener("click", toggleTheme);
         }
 
         // 更新按钮状态
         updateToggleButton(getCurrentTheme());
-
     }
 
     // 立即执行初始化

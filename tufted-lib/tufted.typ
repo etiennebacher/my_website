@@ -121,12 +121,24 @@
             )
             html.nav(
               class: "site-nav",
-              for (href, title) in header-links {
-                if href.ends-with(".pdf") {
-                  html.a(href: href, target: "_blank", title)
-                } else {
-                  html.a(href: href, title)
+              {
+                for (href, title) in header-links {
+                  if href.ends-with(".pdf") {
+                    html.a(href: href, target: "_blank", title)
+                  } else {
+                    html.a(href: href, title)
+                  }
                 }
+                html.elem(
+                  "button",
+                  attrs: (
+                    id: "theme-toggle",
+                    class: "theme-toggle-btn",
+                    type: "button",
+                    aria-label: "Toggle theme",
+                  ),
+                  "",
+                )
               },
             )
           }
