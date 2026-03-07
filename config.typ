@@ -17,6 +17,6 @@
   feed-dir: ("/Blog/",),
   footer-elements: (
     "© 2026 Etienne Bacher",
-    [Powered by #link("https://github.com/Yousa-Mirage/Tufted-Blog-Template")[Tufted-Blog-Template]],
+    [#link("https://github.com/etiennebacher/my_website")[Website source] \u{00B7} Powered by #link("https://github.com/Yousa-Mirage/Tufted-Blog-Template")[Tufted-Blog-Template]],
   ),
 )
