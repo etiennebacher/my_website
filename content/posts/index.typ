@@ -35,7 +35,7 @@
 
 = Blog
 
-#blog-entry("2026-03-20", "2026-03-20-jarl-0.5.0", "Jarl 0.5.0")
+#blog-entry("2026-03-23", "2026-03-23-jarl-0.5.0", "Jarl 0.5.0")
 #blog-entry("2026-02-03", "2026-02-03-jarl-0.4.0", "Jarl 0.4.0")
 #blog-entry("2025-11-20", "2025-11-20-introducing-jarl", "Jarl: just another R linter")
 #blog-entry("2025-05-23", "2025-05-23-refactoring-code-with-flir", "Refactoring code with flir")
