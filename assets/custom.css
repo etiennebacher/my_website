@@ -10,8 +10,8 @@ Add your custom CSS styles here to override or extend the default styles.
 }
 
 /* Show when hovering section title */
-.site-nav > a:hover {
-	color: var(--theme-copy-btn-hover-text) !important;
+.site-nav>a:hover {
+    color: var(--theme-copy-btn-hover-text) !important;
     transition: 0.4s;
 }
 
@@ -63,4 +63,8 @@ Add your custom CSS styles here to override or extend the default styles.
 .utterances {
     max-width: 55% !important;
     margin-left: 0 !important;
+}
+
+pre {
+    font-size: 0.8rem;
 }
