@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Typst">
     <title>Jarl 0.5.0</title>
-    <meta name="date" content="2026-03-20">
+    <meta name="date" content="2026-03-23">
     <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Etienne Bacher RSS Feed">
     <link rel="canonical" href="https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/">
     <meta property="og:title" content="Jarl 0.5.0">
@@ -51,10 +51,10 @@
     <article>
       <section>
         <h2>Jarl 0.5.0</h2>
-        <p>I’m glad to announce the release of <a href="https://jarl.etiennebacher.com/" target="_blank" rel="noopener noreferrer">Jarl</a> 0.5.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.</p>
+        <p>I’m glad to announce the release of <a href="https://jarl.etiennebacher.com/" target="_blank" rel="noopener noreferrer">Jarl</a> 0.5.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl <a href="https://jarl.etiennebacher.com/#installation" target="_blank" rel="noopener noreferrer">via the command line</a> or install the <a href="https://jarl.etiennebacher.com/howto/editors" target="_blank" rel="noopener noreferrer">Jarl extension</a> in Positron, VS Code, Zed, and more.</p>
         <p>This release comes with many new features and some bug fixes and deprecations.</p>
         <h3>Check R Markdown and Quarto documents</h3>
-        <p>Jarl now checks the content of R code chunks in R Markdown and Quarto documents by default:</p>
+        <p>Jarl now checks R Markdown and Quarto documents by default, in addition to R files. More specifically, it checks the content of R code chunks in <code>.Rmd</code>, <code>.rmd</code>, and <code>.qmd</code> files:</p>
         <pre><code data-lang="r"><span style="color: #d73948">-</span><span style="color: #d73948">-</span><span style="color: #d73948">-</span><br>title<span style="color: #d73948">:</span> <span style="color: #198810">"</span><span style="color: #198810">hello</span><span style="color: #198810">"</span><br><span style="color: #d73948">-</span><span style="color: #d73948">-</span><span style="color: #d73948">-</span><br><br>```{r}<br>x <span style="color: #d73948">&lt;-</span> <span style="color: #b60157">1</span><br><span style="color: #4b69c6">any</span>(<span style="color: #4b69c6">is.na</span>(x))<br>```</code></pre>
         <pre><code>$ jarl check test.Rmd<br>warning: any_is_na<br> --> test.Rmd:7:1<br>  |<br>7 | any(is.na(x))<br>  | ------------- `any(is.na(...))` is inefficient.<br>  |<br>  = help: Use `anyNA(...)` instead.</code></pre>
         <p>This new functionality also comes with a new suppression comment: <code>jarl-ignore-chunk</code>. Other suppression comments still work, but <code>jarl-ignore-chunk</code> will be parsed as a chunk option and therefore will not appear in the rendered output:</p>
@@ -71,7 +71,7 @@
         <div>
           <pre><code data-lang="r">data.table:::stopf</code></pre>
           <div>
-            <pre><code>function (fmt, ..., class = NULL, domain = "R-data.table") <br>{<br>    raise_condition(stop, gettextf(fmt, ..., domain = domain), <br>        c(class, "simpleError", "error", "condition"))<br>}<br>&lt;bytecode: 0x60fc9289b030><br>&lt;environment: namespace:data.table></code></pre>
+            <pre><code>function (fmt, ..., class = NULL, domain = "R-data.table") <br>{<br>    raise_condition(stop, gettextf(fmt, ..., domain = domain), <br>        c(class, "simpleError", "error", "condition"))<br>}<br>&lt;bytecode: 0x55cf6d283290><br>&lt;environment: namespace:data.table></code></pre>
           </div>
         </div>
         <p>As of Jarl 0.5.0, someone working on the <code>data.table</code> project could now add the following in <code>jarl.toml</code>:</p>
@@ -92,7 +92,7 @@
         <pre><code>$ jarl check mypkg1 mypkg2<br><br>warning: any_is_na<br> --> mypkg1/R/foo1.R:1:1<br>  |<br>1 | any(is.na(x))<br>  | ^^^^^^^^^^^^^ `any(is.na(...))` is inefficient.<br>  |<br>help: Use `anyNA(...)` instead.<br><br>warning: any_duplicated<br> --> mypkg2/R/foo2.R:2:1<br>  |<br>2 | any(duplicated(x))<br>  | ^^^^^^^^^^^^^^^^^^ `any(duplicated(...))` is inefficient.<br>  |<br>help: Use `anyDuplicated(...) > 0` instead.<br><br><br>── Summary ──────────────────────────────────────<br>Found 2 errors.<br>2 fixable with the `--fix` option.</code></pre>
         <h3>Package-specific rules</h3>
         <p>So far, Jarl’s rules were mostly copied from <a href="https://lintr.r-lib.org/dev/reference/index.html" target="_blank" rel="noopener noreferrer"><code>lintr</code>’s list</a>. Most of those rules focus on base R or other concerns (e.g. which assignment operator to prefer in the project).</p>
-        <p>As of 0.5.0, Jarl opens the door to package-specific rules. Those rules are written for particular packages and come with a performance tradeoff. The problem here comes from two components:</p>
+        <p>As of 0.5.0, Jarl opens the door to package-specific rules. Those rules apply to functions from particular packages, such as <code>dplyr::filter()</code>, and they come with a performance tradeoff. The problem here comes from two components:</p>
         <ol>
           <li>
             <p>a given function, say <code>filter()</code>, can be exported by several packages:</p>
@@ -118,15 +118,15 @@
           </li>
         </ul>
         <p>See the <a href="https://jarl.etiennebacher.com/howto/package-specific" target="_blank" rel="noopener noreferrer">package-specific rules</a> section in the docs for more details.</p>
-        <h3>Stuff for package developers</h3>
+        <h3>Other features for package developers</h3>
         <p>This release brings a couple of enhancements for R package developers.</p>
         <p>First, Jarl comes with two new rules that run in R packages only: <code>unused_function</code> and <code>duplicated_function_definition</code>. The former finds functions that are not used anywhere (in other functions or in tests) and are not exported by the package, meaning that they should either be fixed or removed. The latter finds functions that are defined several times in the package, leading to one definition being used and the other(s) being ignored by mistake.</p>
         <p>Second, Jarl now checks <code>roxygen2</code> comments by default and reports violations in <code>@examples</code> and <code>@examplesIf</code>. Diagnostics reported in those comments can be ignored with standard suppression comments:</p>
         <pre><code data-lang="r"><span style="color: #74747c">#'</span><span style="color: #74747c"> </span><span style="color: #d73948">@examples</span><br><span style="color: #74747c">#</span><span style="color: #74747c"> jarl-ignore any_is_na: &lt;reason></span><br><span style="color: #74747c">#'</span><span style="color: #74747c"> any(is.na(x))</span></code></pre>
         <p>Note that <code>jarl-ignore</code> starts with <code>#</code> and not <code>#'</code>.</p>
-        <p>This feature can be controlled with two new arguments in <code>jarl.toml</code>: <code>check-roxygen</code> (true by default) and <code>fix-roxygen</code> (false by default because not all formatters can format roxygen comments yet).</p>
+        <p>This feature can be controlled with two new arguments in <code>jarl.toml</code>: <code>check-roxygen</code> (true by default) and <code>fix-roxygen</code> (false by default because some formatters such as Air cannot format roxygen comments yet).</p>
         <h3>Conclusion</h3>
-        <p>Jarl 0.5.0 brings a lot of new stuff! If you find any issue, have feature ideas, or want to contribute, head to the <a href="https://github.com/etiennebacher/jarl" target="_blank" rel="noopener noreferrer">Github repository</a>.</p>
+        <p>Jarl 0.5.0 brings many exciting features, try them out! If you find any issue, have feature ideas, or want to contribute, head to the <a href="https://github.com/etiennebacher/jarl" target="_blank" rel="noopener noreferrer">Github repository</a>.</p>
         <p>Thanks to everyone who contributed one way or another to this release: <a href="https://github.com/bjyberg" target="_blank" rel="noopener noreferrer">@bjyberg</a>, <a href="https://github.com/larry77" target="_blank" rel="noopener noreferrer">@larry77</a>, <a href="https://github.com/maelle" target="_blank" rel="noopener noreferrer">@maelle</a>, <a href="https://github.com/novica" target="_blank" rel="noopener noreferrer">@novica</a>, and <a href="https://github.com/vincentarelbundock" target="_blank" rel="noopener noreferrer">@vincentarelbundock</a></p>
       </section>
     </article>

@@ -20,13 +20,14 @@ format:
 I'm glad to announce the release of [Jarl](https://jarl.etiennebacher.com/) 0.5.0.
 Jarl is a very fast R linter, written in Rust.
 It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds.
-Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.
+Install or update Jarl [via the command line](https://jarl.etiennebacher.com/#installation) or install the [Jarl extension](https://jarl.etiennebacher.com/howto/editors) in Positron, VS Code, Zed, and more.
 
 This release comes with many new features and some bug fixes and deprecations.
 
 ## Check R Markdown and Quarto documents
 
-Jarl now checks the content of R code chunks in R Markdown and Quarto documents by default:
+Jarl now checks R Markdown and Quarto documents by default, in addition to R files. 
+More specifically, it checks the content of R code chunks in `.Rmd`, `.rmd`, and `.qmd` files:
 
 ````{.r filename="test.Rmd"}
 ---
@@ -178,7 +179,7 @@ So far, Jarl's rules were mostly copied from [`lintr`'s list](https://lintr.r-li
 Most of those rules focus on base R or other concerns (e.g. which assignment operator to prefer in the project).
 
 As of 0.5.0, Jarl opens the door to package-specific rules.
-Those rules are written for particular packages and come with a performance tradeoff.
+Those rules apply to functions from particular packages, such as `dplyr::filter()`, and they come with a performance tradeoff.
 The problem here comes from two components:
 
 1. a given function, say `filter()`, can be exported by several packages:
@@ -265,7 +266,7 @@ So far, Jarl provides only two package-specific rules, both for `dplyr`:
 
 See the [package-specific rules](https://jarl.etiennebacher.com/howto/package-specific) section in the docs for more details.
 
-## Stuff for package developers
+## Other features for package developers
 
 This release brings a couple of enhancements for R package developers.
 
@@ -284,11 +285,11 @@ Diagnostics reported in those comments can be ignored with standard suppression 
 
 Note that `jarl-ignore` starts with `#` and not `#'`.
 
-This feature can be controlled with two new arguments in `jarl.toml`: `check-roxygen` (true by default) and `fix-roxygen` (false by default because not all formatters can format roxygen comments yet).
+This feature can be controlled with two new arguments in `jarl.toml`: `check-roxygen` (true by default) and `fix-roxygen` (false by default because some formatters such as Air cannot format roxygen comments yet).
 
 ## Conclusion
 
-Jarl 0.5.0 brings a lot of new stuff!
+Jarl 0.5.0 brings many exciting features, try them out!
 If you find any issue, have feature ideas, or want to contribute, head to the [Github repository](https://github.com/etiennebacher/jarl).
 
 Thanks to everyone who contributed one way or another to this release: [\@bjyberg](https://github.com/bjyberg), [\@larry77](https://github.com/larry77), [\@maelle](https://github.com/maelle), [\@novica](https://github.com/novica), and [\@vincentarelbundock](https://github.com/vincentarelbundock)

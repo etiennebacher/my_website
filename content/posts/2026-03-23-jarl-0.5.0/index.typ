@@ -379,19 +379,19 @@
 // 如需生成 RSS feed，必须填写 title、description 和 date 元数据
 #show: template.with(
   title: "Jarl 0.5.0",
-  date: datetime(year: 2026, month: 03, day: 20),
+  date: datetime(year: 2026, month: 03, day: 23),
   lang: "en",
 )
 
 = Jarl 0.5.0
 <jarl-0.5.0>
-I'm glad to announce the release of #link("https://jarl.etiennebacher.com/")[Jarl] 0.5.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.
+I'm glad to announce the release of #link("https://jarl.etiennebacher.com/")[Jarl] 0.5.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl #link("https://jarl.etiennebacher.com/#installation")[via the command line] or install the #link("https://jarl.etiennebacher.com/howto/editors")[Jarl extension] in Positron, VS Code, Zed, and more.
 
 This release comes with many new features and some bug fixes and deprecations.
 
 == Check R Markdown and Quarto documents
 <check-r-markdown-and-quarto-documents>
-Jarl now checks the content of R code chunks in R Markdown and Quarto documents by default:
+Jarl now checks R Markdown and Quarto documents by default, in addition to R files. More specifically, it checks the content of R code chunks in `.Rmd`, `.rmd`, and `.qmd` files:
 
 ````r
 ---
@@ -457,7 +457,7 @@ function (fmt, ..., class = NULL, domain = "R-data.table")
     raise_condition(stop, gettextf(fmt, ..., domain = domain), 
         c(class, "simpleError", "error", "condition"))
 }
-<bytecode: 0x60fc9289b030>
+<bytecode: 0x55cf6d283290>
 <environment: namespace:data.table>
 ```
 
@@ -548,7 +548,7 @@ Found 2 errors.
 <package-specific-rules>
 So far, Jarl's rules were mostly copied from #link("https://lintr.r-lib.org/dev/reference/index.html")[`lintr`'s list]. Most of those rules focus on base R or other concerns (e.g.~which assignment operator to prefer in the project).
 
-As of 0.5.0, Jarl opens the door to package-specific rules. Those rules are written for particular packages and come with a performance tradeoff. The problem here comes from two components:
+As of 0.5.0, Jarl opens the door to package-specific rules. Those rules apply to functions from particular packages, such as `dplyr::filter()`, and they come with a performance tradeoff. The problem here comes from two components:
 
 + a given function, say `filter()`, can be exported by several packages:
 
@@ -633,8 +633,8 @@ So far, Jarl provides only two package-specific rules, both for `dplyr`:
 
 See the #link("https://jarl.etiennebacher.com/howto/package-specific")[package-specific rules] section in the docs for more details.
 
-== Stuff for package developers
-<stuff-for-package-developers>
+== Other features for package developers
+<other-features-for-package-developers>
 This release brings a couple of enhancements for R package developers.
 
 First, Jarl comes with two new rules that run in R packages only: `unused_function` and `duplicated_function_definition`. The former finds functions that are not used anywhere (in other functions or in tests) and are not exported by the package, meaning that they should either be fixed or removed. The latter finds functions that are defined several times in the package, leading to one definition being used and the other(s) being ignored by mistake.
@@ -649,10 +649,10 @@ Second, Jarl now checks `roxygen2` comments by default and reports violations in
 
 Note that `jarl-ignore` starts with `#` and not `#'`.
 
-This feature can be controlled with two new arguments in `jarl.toml`: `check-roxygen` (true by default) and `fix-roxygen` (false by default because not all formatters can format roxygen comments yet).
+This feature can be controlled with two new arguments in `jarl.toml`: `check-roxygen` (true by default) and `fix-roxygen` (false by default because some formatters such as Air cannot format roxygen comments yet).
 
 == Conclusion
 <conclusion>
-Jarl 0.5.0 brings a lot of new stuff! If you find any issue, have feature ideas, or want to contribute, head to the #link("https://github.com/etiennebacher/jarl")[Github repository].
+Jarl 0.5.0 brings many exciting features, try them out! If you find any issue, have feature ideas, or want to contribute, head to the #link("https://github.com/etiennebacher/jarl")[Github repository].
 
 Thanks to everyone who contributed one way or another to this release: #link("https://github.com/bjyberg")[\@bjyberg], #link("https://github.com/larry77")[\@larry77], #link("https://github.com/maelle")[\@maelle], #link("https://github.com/novica")[\@novica], and #link("https://github.com/vincentarelbundock")[\@vincentarelbundock]
