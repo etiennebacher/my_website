@@ -1,9 +1,7 @@
 on:
   repository_dispatch:
-  push:
-    branches: [main, master]
 
-name: Render & Deploy Site
+name: Update CV
 
 permissions:
   contents: write
@@ -17,7 +15,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Download CV and commit
         run: |
-          curl -L -o cv.pdf https://raw.githubusercontent.com/etiennebacher/CV_perso/master/cv.pdf
-          git add cv.pdf
+          curl -L -o content/cv.pdf https://raw.githubusercontent.com/etiennebacher/CV_perso/master/cv.pdf
+          cp content/cv.pdf _site/cv.pdf
+          git add _site/cv.pdf content/cv.pdf
           git commit -m 'Update CV' || echo "No changes to commit"
           git push
