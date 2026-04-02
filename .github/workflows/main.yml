@@ -17,6 +17,9 @@ jobs:
         run: |
           curl -L -o content/cv.pdf https://raw.githubusercontent.com/etiennebacher/CV_perso/master/cv.pdf
           cp content/cv.pdf _site/cv.pdf
-          git add _site/cv.pdf content/cv.pdf
+          # https://github.com/orgs/community/discussions/26560#discussioncomment-3531273
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
           git commit -m 'Update CV' || echo "No changes to commit"
           git push
