@@ -8,7 +8,9 @@
 
 Hi there! I'm Etienne Bacher.
 
-I obtained my PhD in Economics as part of the #link("(https://sites.google.com/view/fredericdocquier/xingb-blog/across")[Doctoral Team Unit ACROSS] at the Luxembourg Institute for Socio-Economic Research (LISER). I focused on the relationship between cross-border mobility, attitudes and political preferences using both contemporaneous and historical data.
+I am a Research Software Engineer working at University College London on the #link("https://palaeoverse.org/")[Palaeoverse], a collection of R packages for palaeobiologists. 
+
+Before that, I completed a PhD in Economics as part of the #link("https://sites.google.com/view/fredericdocquier/xingb-blog/across")[Doctoral Team Unit ACROSS] at the Luxembourg Institute for Socio-Economic Research (LISER). I focused on the relationship between cross-border mobility, attitudes and political preferences using both contemporaneous and historical data.
 
 I then worked as a Research Associate at LISER, helping on the INSKILL project to study the effect of Artificial Intelligence on the labour market in Western Europe.
 
