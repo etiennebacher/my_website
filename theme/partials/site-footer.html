@@ -1,0 +1,51 @@
+{# Overrides the shared footer partial so a footer label can carry inline
+   markup — needed for "Made with Calepin", where only the word "Calepin"
+   should be a link.
+
+   Calepin's footer schema has no way to express that: an item is `label` plus
+   an optional `target`, and the whole label becomes the link text. Nor can the
+   markup be smuggled through the config, because Calepin HTML-escapes `label`
+   before the template sees it (`item.label_html` is likewise pre-rendered —
+   that is how `{icon:...}` labels become SVG), and it rejects unknown keys, so
+   a companion field such as `prefix` will not parse.
+
+   What is left is to reverse that escaping here, for text rows only. `&amp;`
+   is undone last so an escaped entity is not decoded twice.
+
+   Consequences, all fine for a footer whose text comes from calepin.toml
+   rather than from user input:
+     - a label on a row with no `target` is treated as HTML;
+     - such a label cannot contain a literal `&lt;`, `&gt;` or `&quot;`;
+     - keep HTML labels off rows that have a `target`, since `label` is also
+       used verbatim as that link's aria-label. #}
+
+{% set footer_items = site.menus.footer | default(value=[]) %}
+
+{% for item in footer_items if item.href or (item.label | trim) != "" %}
+  {% if loop.first %}
+  <footer class="calepin-site-footer" aria-label="Site footer">
+    <div class="calepin-site-footer-inner">
+      <ul class="calepin-site-footer-links" aria-label="Footer links">
+  {% endif %}
+
+  <li>
+      {% if item.href %}
+      <a href="{{ item.href }}" aria-label="{{ item.label }}">{{ item.label_html }}</a>
+      {% else %}
+      {% set text = item.label
+           | replace("&lt;", "<")
+           | replace("&gt;", ">")
+           | replace("&quot;", '"')
+           | replace("&#x27;", "'")
+           | replace("&#39;", "'")
+           | replace("&amp;", "&") %}
+      <span>{{ text | safe }}</span>
+      {% endif %}
+  </li>
+
+  {% if loop.last %}
+      </ul>
+    </div>
+  </footer>
+  {% endif %}
+{% endfor %}

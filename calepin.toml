@@ -1,0 +1,110 @@
+title = "Etienne Bacher"
+description = "Personal website of Etienne Bacher: blog posts about R, research, and software."
+base_url = "https://etiennebacher.com"
+
+# Local Tufte theme (see theme/theme.toml), a thin overlay on the built-in
+# `academic` theme. Swap for a bundled theme to compare:
+# theme = "calepin"
+# theme = "academic"
+theme = "./theme"
+
+pdf = false
+default_language = "en"
+
+# Uncomment to generate static search if Pagefind is available.
+# search = "pagefind"
+
+generate_feeds = true
+[feeds]
+filenames = ["atom.xml", "rss.xml"]
+
+# Floating "on this page" TOC. Enabled site-wide so new posts get one for free;
+# the standalone pages switch it off in their own `<website-metadata>`, matching
+# the old site, which only showed a TOC under /posts/<slug>/.
+[toc]
+enabled = true
+# Levels are HTML heading levels: `#title()` is h1, so this covers Typst `=`
+# and `==`, the same two levels the old site's TOC listed.
+depth = 3
+floating = true
+
+[languages.en]
+label = "English"
+content_dir = "."
+
+[static]
+include = [
+  "icons/**",
+  "imgs/**",
+  "gallery/*.png",
+  "cv.pdf",
+  "_redirects",
+  # Figures, data, and demo videos that live next to each post's source.
+  "posts/**/*.png",
+  "posts/**/*.svg",
+  "posts/**/*.gif",
+  "posts/**/*.jpg",
+  "posts/**/*.jpeg",
+  "posts/**/*.webm",
+  "posts/**/*.csv",
+  "posts/**/*.R",
+  "posts/**/*.txt",
+  "posts/**/*.xlsx",
+]
+
+[pages]
+include = ["posts/*/index.typ"]
+# `my_website/` is the previous (Quarto + Tufted) site, kept alongside for
+# reference. Its .typ files are Pandoc output with live R chunks; without this
+# they would be picked up as pages and executed.
+exclude = ["my_website/**", "theme/**"]
+
+[[menus.main]]
+target = "posts/index.typ"
+label = "Blog"
+
+[[menus.main]]
+target = "research/index.typ"
+label = "Research"
+
+[[menus.main]]
+target = "software/index.typ"
+label = "Software"
+
+[[menus.main]]
+target = "gallery/index.typ"
+label = "Gallery"
+
+[[menus.main]]
+target = "/cv.pdf"
+label = "CV"
+
+[[menus.social]]
+target = "https://github.com/etiennebacher/"
+label = "{icon:github}"
+aria-label = "GitHub"
+
+[[menus.social]]
+target = "https://mastodon.social/@etiennebacher"
+label = "{icon:simple-icons:mastodon}"
+aria-label = "Mastodon"
+
+[[menus.social]]
+target = "https://bsky.app/profile/etiennebacher.bsky.social"
+label = "{icon:simple-icons:bluesky}"
+aria-label = "Bluesky"
+
+[footer]
+
+[[footer.item]]
+label = "© 2026 Etienne Bacher"
+
+[[footer.item]]
+target = "https://github.com/etiennebacher/my_website"
+label = "Website source"
+
+# No `target`: the label carries its own markup so that only the word
+# "Calepin" is a link. See theme/partials/site-footer.html.
+[[footer.item]]
+label = 'Made with <a href="https://vincentarelbundock.github.io/calepin/index.html">Calepin</a>'
+
