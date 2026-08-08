@@ -1,0 +1,360 @@
+/*
+ * Tufte overlay for the whole website.
+ *
+ * Built as a lightweight CSS layer on top of the built-in `academic` theme
+ * (see `theme.toml`). Sidenotes, side figures, dark mode, and the reading
+ * column all keep the academic theme's behavior; this file only restyles it:
+ * warm paper colors, Palatino-ish serif typography, italic headings, flat
+ * surfaces, and a margin column that is used on every page, not just on
+ * standalone notebooks.
+ *
+ * Prefer overriding the public `--calepin-*` tokens over targeting theme
+ * internals.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Tokens                                                              */
+/* ------------------------------------------------------------------ */
+
+/* Warm paper and brick accents, from Calepin's Tufte case study. */
+:root,
+html[data-theme="light"] {
+  --calepin-font-body: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --calepin-font-heading: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --calepin-color-background: #fffff8;
+  --calepin-color-text: #12110f;
+  --calepin-color-heading: #12110f;
+  --calepin-color-muted: #5a5650;
+  --calepin-color-border: #ded8c8;
+  --calepin-surface: #fffdf0;
+  --calepin-surface-code: #fffdf0;
+  --calepin-surface-output: #fffdf0;
+  --calepin-surface-muted: #fff8eb;
+  --calepin-color-accent: #7a2e2a;
+  --calepin-color-accent-hover: #5f2520;
+  --calepin-color-link: #7a2e2a;
+  --calepin-color-link-hover: #5f2520;
+}
+
+html[data-theme="dark"] {
+  --calepin-color-background: #18130d;
+  --calepin-color-text: #f6efe8;
+  --calepin-color-heading: #f6efe8;
+  --calepin-color-muted: #c5baa7;
+  --calepin-color-border: #3b3227;
+  --calepin-surface: #1f1a14;
+  --calepin-surface-code: #1f1a14;
+  --calepin-surface-output: #1f1a14;
+  --calepin-surface-muted: #2b241b;
+  --calepin-color-accent: #d58a7f;
+  --calepin-color-accent-hover: #f0b7ab;
+  --calepin-color-link: #d58a7f;
+  --calepin-color-link-hover: #f0b7ab;
+}
+
+/* Reading measure, margin column, and the flat look Tufte's prints have. */
+:root {
+  --calepin-content-width: 39rem;
+  --calepin-margin-width: 16rem;
+  --calepin-margin-gap: 2rem;
+  --calepin-line-height: 1.6;
+  --calepin-heading-weight: 400;
+  --calepin-radius-sm: 0;
+  --calepin-radius-md: 0;
+  --calepin-radius-lg: 0;
+  --calepin-shadow-card: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography                                                          */
+/* ------------------------------------------------------------------ */
+
+/* Page titles are small caps; section headings are italic rather than bold.
+   `#title()` becomes the page <h1>, so a Typst `=` heading is <h2>. */
+h1 {
+  font-variant: small-caps;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-style: italic;
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--calepin-color-heading);
+}
+
+/* Tufte sets prose unindented with space between paragraphs, and reserves
+   italics and small caps for emphasis instead of bold. */
+strong,
+b {
+  font-weight: 600;
+}
+
+blockquote {
+  border-left: 0;
+  padding-left: 0;
+  font-style: italic;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--calepin-color-border);
+}
+
+/* Links get a thin, low-contrast underline instead of a heavy one. */
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.12em;
+}
+
+/* Site chrome: brand and navigation in small caps, no bold. */
+.calepin-site-brand,
+.academic-nav a {
+  font-variant: small-caps;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Margin column on website pages                                      */
+/* ------------------------------------------------------------------ */
+
+/* The academic theme reserves a margin column on standalone notebooks only
+   (`.academic-document-main`, which it widens to the full page width). Website
+   pages keep `.academic-main` at the reading width, so margin material has
+   nowhere to go. Two changes give site pages the same behavior:
+
+   1. widen the page shell so there is empty space to the right of the reading
+      column;
+   2. pull side figures out of that column with a negative right margin — the
+      inherited CSS already does this for sidenotes, but not for side figures,
+      which rely on the wider notebook container instead.
+
+   Below the theme's own breakpoint (content + margin + gutters = 59rem) the
+   inherited CSS reflows margin material into inline boxes, so both changes have
+   to stop there too. */
+@media (min-width: 59.01rem) {
+  body:has(.academic-main .calepin-sidenote) .academic-page,
+  body:has(.academic-main .calepin-sidefigure) .academic-page {
+    width: min(100% - 2rem, var(--calepin-page-width));
+  }
+
+  .academic-main .calepin-sidefigure {
+    margin-right: calc(-1 * (var(--calepin-margin-width) + var(--calepin-margin-gap)));
+  }
+}
+
+/* Below the breakpoint the inherited CSS reflows margin material inline at full
+   column width, which lets a tall margin image take over the screen. Keep it at
+   roughly its margin size and center it. */
+@media (max-width: 59rem) {
+  .calepin-sidefigure img {
+    display: block;
+    max-width: min(100%, var(--calepin-margin-width));
+    margin-inline: auto;
+  }
+}
+
+/* Margin material is set smaller and in the muted paper ink. */
+.calepin-sidenote,
+.calepin-sidefigure {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* Tufte numbers sidenotes with a superscript on both ends rather than a
+   bracketed reference. */
+.calepin-sidenote-numbered::before {
+  content: attr(data-sidenote-number);
+  vertical-align: super;
+  font-size: 0.72em;
+  font-weight: 400;
+  margin-right: 0.2rem;
+}
+
+[role="doc-noteref"] {
+  font-weight: 400;
+}
+
+/* ------------------------------------------------------------------ */
+/* Floating table of contents                                          */
+/* ------------------------------------------------------------------ */
+
+/* The inherited academic theme floats the TOC into the right margin, which is
+   where sidenotes and margin figures already live. Move it to a fixed column
+   on the left instead, as on the old site, and stop the shell from reserving
+   right-margin space for it — it is out of flow now, and the sidenote rule
+   above already widens the page where that is needed. */
+.academic-page .calepin-website-toc {
+  display: none;
+}
+
+.academic-page.has-toc {
+  width: min(100% - 2rem, var(--calepin-content-width));
+}
+
+/* Only show it once the viewport is wide enough for a full reading column, the
+   right-hand margin, and the TOC beside them; below that there is nowhere to
+   put it without overlapping the prose. */
+@media (min-width: 84rem) {
+  .academic-page .calepin-website-toc {
+    display: block;
+    position: fixed;
+    /* Track the left edge of the reading column rather than the window edge,
+       so the TOC stays near the text on very wide screens. */
+    left: max(1.5rem, calc(50% - (var(--calepin-page-width) / 2) - 13.5rem));
+    top: calc(var(--calepin-topbar-height) + 5.5rem);
+    width: 12rem;
+    max-height: calc(100vh - var(--calepin-topbar-height) - 7rem);
+    margin: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .academic-page.has-toc {
+    width: min(100% - 2rem, var(--calepin-page-width));
+  }
+}
+
+/* Quiet by default, and legible for the section you are actually reading —
+   the same treatment the old site's TOC used. */
+.calepin-website-toc a {
+  opacity: 0.45;
+  transition: opacity 0.2s;
+}
+
+.calepin-website-toc a:hover,
+.calepin-website-toc a:focus {
+  background: none;
+  opacity: 0.8;
+}
+
+.calepin-website-toc a.active {
+  background: none;
+  opacity: 1;
+  font-weight: 600;
+}
+
+.calepin-website-toc-title {
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Figures, tables, code                                               */
+/* ------------------------------------------------------------------ */
+
+figcaption {
+  color: var(--calepin-color-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Typst exports an image's intrinsic size as `width`/`height` attributes. When
+   Typst code sets only the height (`box(image(.., height: 12pt))`, e.g. an
+   inline icon), the intrinsic `width` attribute still applies and stretches the
+   image to its natural width at 12pt tall. Let the width follow the height. */
+.calepin-content img[style*="height:"] {
+  width: auto;
+}
+
+/* Those inline icons are monochrome SVGs inlined as data URIs, so in dark mode
+   they would be black on a near-black page. The selector is deliberately
+   narrow: only images sized by height are icons here, so plots and photographs
+   are left alone. */
+html[data-theme="dark"] .calepin-content img[style*="height:"] {
+  filter: invert(1);
+}
+
+/* Tufte's tables are ruled horizontally only. */
+table {
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  border: 0;
+  border-bottom: 1px solid var(--calepin-color-border);
+}
+
+table thead th {
+  border-bottom: 1.5px solid var(--calepin-color-text);
+  font-weight: 400;
+  font-variant: small-caps;
+}
+
+table tbody tr:last-child td {
+  border-bottom: 1.5px solid var(--calepin-color-text);
+}
+
+/* Code sits on the paper rather than in a boxed card. */
+pre {
+  border: 0;
+  border-left: 2px solid var(--calepin-color-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+.calepin-site-footer {
+  font-size: 0.82rem;
+  font-style: italic;
+  border: none;
+}
+
+/* Separate the footer rows with a middot instead of whitespace alone. The
+   inherited flex row spaces them with a `gap`, so drop the horizontal part of
+   it and let the separator's own margins do the spacing — that keeps the dot
+   centred between the two items rather than hugging the one it belongs to.
+   It trails its item, so a wrapped row ends on a dot rather than starting on
+   one. */
+.calepin-site-footer-links {
+  column-gap: 0;
+}
+
+.calepin-site-footer-links li:not(:last-child)::after {
+  content: "·";
+  margin-inline: 0.5rem;
+}
+
+/* Pages shorter than the viewport would otherwise leave the footer floating in
+   the middle of the paper. Make the body a column and let the page shell absorb
+   the leftover height, so the footer sits on the bottom edge when the content is
+   short and simply follows the text when it is not. Pinning it with `position:
+   fixed` would instead cover the end of long pages.
+
+   `dvh` tracks the browser chrome on mobile, where `100vh` is the taller
+   toolbars-hidden height and pushes the footer just off screen; the `vh` line
+   stays as a fallback. The topbar keeps its `position: sticky` — sticky flex
+   items stick within the flex container, which is the full-height body here. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.academic-page {
+  flex: 1 0 auto;
+}
+
+/* For the table of blog posts */
+tbody > tr > td {
+  background: transparent !important;
+}

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Etienne Bacher</title>
+  <id>https://etiennebacher.com</id>
+  <link href="https://etiennebacher.com"/>
+  <link href="https://etiennebacher.com/atom.xml" rel="self"/>
+  <updated>2026-03-23T00:00:00Z</updated>
+  <subtitle>Personal website of Etienne Bacher: blog posts about R, research, and software.</subtitle>
+  
+  <entry>
+    <title>Jarl 0.5.0</title>
+    <id>https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/index.html</id>
+    <link href="https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/index.html"/>
+    <updated>2026-03-23T00:00:00Z</updated>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Jarl 0.4.0</title>
+    <id>https://etiennebacher.com/posts/2026-02-03-jarl-0.4.0/index.html</id>
+    <link href="https://etiennebacher.com/posts/2026-02-03-jarl-0.4.0/index.html"/>
+    <updated>2026-02-03T00:00:00Z</updated>
+    
+    <summary>Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.</summary>
+  </entry>
+  
+  <entry>
+    <title>Jarl: just another R linter</title>
+    <id>https://etiennebacher.com/posts/2025-11-20-introducing-jarl/index.html</id>
+    <link href="https://etiennebacher.com/posts/2025-11-20-introducing-jarl/index.html"/>
+    <updated>2025-11-20T00:00:00Z</updated>
+    
+    <summary>Remove bad patterns in your R code in the blink of an eye.</summary>
+  </entry>
+  
+  <entry>
+    <title>Refactoring code with flir</title>
+    <id>https://etiennebacher.com/posts/2025-05-23-refactoring-code-with-flir/index.html</id>
+    <link href="https://etiennebacher.com/posts/2025-05-23-refactoring-code-with-flir/index.html"/>
+    <updated>2025-05-23T00:00:00Z</updated>
+    
+    <summary>How to efficiently rewrite many code patterns.</summary>
+  </entry>
+  
+  <entry>
+    <title>Using property-based testing in R</title>
+    <id>https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/index.html</id>
+    <link href="https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/index.html"/>
+    <updated>2024-10-01T00:00:00Z</updated>
+    
+    <summary>When you don&apos;t want to write dozens of versions of unit tests.</summary>
+  </entry>
+  
+  <entry>
+    <title>Making POST requests with R</title>
+    <id>https://etiennebacher.com/posts/2023-05-09-making-post-requests-with-r/index.html</id>
+    <link href="https://etiennebacher.com/posts/2023-05-09-making-post-requests-with-r/index.html"/>
+    <updated>2023-05-09T00:00:00Z</updated>
+    
+    <summary>An alternative to RSelenium to get data from dynamic webpages.</summary>
+  </entry>
+  
+  <entry>
+    <title>Do bonus points lead to more tries in 6 Nations matches?</title>
+    <id>https://etiennebacher.com/posts/2023-03-01-do-bonus-points-lead-to-more-tries-in-6-nations-matches/index.html</id>
+    <link href="https://etiennebacher.com/posts/2023-03-01-do-bonus-points-lead-to-more-tries-in-6-nations-matches/index.html"/>
+    <updated>2023-03-01T00:00:00Z</updated>
+    
+    <summary>A small post where rugby is an excuse to do some webscraping and some ggplot-ing.</summary>
+  </entry>
+  
+  <entry>
+    <title>Where should my family meet?</title>
+    <id>https://etiennebacher.com/posts/2023-01-14-where-should-my-family-meet/index.html</id>
+    <link href="https://etiennebacher.com/posts/2023-01-14-where-should-my-family-meet/index.html"/>
+    <updated>2023-01-14T00:00:00Z</updated>
+    
+    <summary>Or a mathematical way to evade the debate on the location of the next holidays.</summary>
+  </entry>
+  
+  <entry>
+    <title>Some notes about improving base R code</title>
+    <id>https://etiennebacher.com/posts/2022-11-28-some-notes-about-improving-base-r-code/index.html</id>
+    <link href="https://etiennebacher.com/posts/2022-11-28-some-notes-about-improving-base-r-code/index.html"/>
+    <updated>2022-11-28T00:00:00Z</updated>
+    
+    <summary>A small collection of tips to make base R code faster.</summary>
+  </entry>
+  
+  <entry>
+    <title>Mapping French rivers network</title>
+    <id>https://etiennebacher.com/posts/2021-12-27-mapping-french-rivers-network/index.html</id>
+    <link href="https://etiennebacher.com/posts/2021-12-27-mapping-french-rivers-network/index.html"/>
+    <updated>2021-12-27T00:00:00Z</updated>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Reproduce some maps about 3G and 4G access</title>
+    <id>https://etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/index.html</id>
+    <link href="https://etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/index.html"/>
+    <updated>2021-12-23T00:00:00Z</updated>
+    
+    <summary>I try to reproduce some maps made by Dominic Royé.</summary>
+  </entry>
+  
+  <entry>
+    <title>How to create a gallery in Distill</title>
+    <id>https://etiennebacher.com/posts/2021-04-11-how-to-create-a-gallery-in-distill/index.html</id>
+    <link href="https://etiennebacher.com/posts/2021-04-11-how-to-create-a-gallery-in-distill/index.html"/>
+    <updated>2021-04-11T00:00:00Z</updated>
+    
+    <summary>Use lightgallery.js to create a gallery for your plots or images.</summary>
+  </entry>
+  
+  <entry>
+    <title>Use GitHub actions with R Markdown and Distill</title>
+    <id>https://etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/index.html</id>
+    <link href="https://etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/index.html"/>
+    <updated>2021-03-19T00:00:00Z</updated>
+    
+    <summary>How can you automatically render README, Distill website...</summary>
+  </entry>
+  
+  <entry>
+    <title>Visualize data on Nobel laureates per country</title>
+    <id>https://etiennebacher.com/posts/2020-10-18-nobel-laureates/index.html</id>
+    <link href="https://etiennebacher.com/posts/2020-10-18-nobel-laureates/index.html"/>
+    <updated>2020-10-18T00:00:00Z</updated>
+    
+    <summary>A post where I make animated graphs and maps to visualize the repartition of Nobel laureates per country.</summary>
+  </entry>
+  
+  <entry>
+    <title>What to do when your code doesn&apos;t work?</title>
+    <id>https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/index.html</id>
+    <link href="https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/index.html"/>
+    <updated>2020-05-22T00:00:00Z</updated>
+    
+    <summary>This is the list of actions I make when I have an error in R.</summary>
+  </entry>
+  
+  <entry>
+    <title>My application for the Shiny Contest (2020)</title>
+    <id>https://etiennebacher.com/posts/2020-04-08-my-shiny-app/index.html</id>
+    <link href="https://etiennebacher.com/posts/2020-04-08-my-shiny-app/index.html"/>
+    <updated>2020-04-08T00:00:00Z</updated>
+    
+    <summary>A presentation of the application I submitted to the Shiny Contest 2nd edition.</summary>
+  </entry>
+  
+  <entry>
+    <title>My favorite shortcuts in RStudio</title>
+    <id>https://etiennebacher.com/posts/2020-04-06-my-favorite-shortcuts/index.html</id>
+    <link href="https://etiennebacher.com/posts/2020-04-06-my-favorite-shortcuts/index.html"/>
+    <updated>2020-04-06T00:00:00Z</updated>
+    
+    <summary>Did you know that RStudio contains a lot of shortcuts to write code faster? Here are my favorites.</summary>
+  </entry>
+  
+  <entry>
+    <title>First contact with the data on R</title>
+    <id>https://etiennebacher.com/posts/2020-01-22-first-contact/index.html</id>
+    <link href="https://etiennebacher.com/posts/2020-01-22-first-contact/index.html"/>
+    <updated>2020-01-22T00:00:00Z</updated>
+    
+    <summary>A blog post describing the first steps of data cleaning and analysis using R.</summary>
+  </entry>
+  
+  <entry>
+    <title>Why you should move from Stata to R</title>
+    <id>https://etiennebacher.com/posts/2019-12-01-why-moving/index.html</id>
+    <link href="https://etiennebacher.com/posts/2019-12-01-why-moving/index.html"/>
+    <updated>2019-12-01T00:00:00Z</updated>
+    
+    <summary>Some reasons that explain why I prefer R to Stata.</summary>
+  </entry>
+  
+</feed>

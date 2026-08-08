@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Etienne Bacher</title>
+    <link>https://etiennebacher.com</link>
+    <description>Personal website of Etienne Bacher: blog posts about R, research, and software.</description>
+    <lastBuildDate>Mon, 23 Mar 2026 00:00:00 GMT</lastBuildDate>
+    
+    <item>
+      <title>Jarl 0.5.0</title>
+      <link>https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/index.html</link>
+      <guid>https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/index.html</guid>
+      <pubDate>Mon, 23 Mar 2026 00:00:00 GMT</pubDate>
+      
+      
+    </item>
+    
+    <item>
+      <title>Jarl 0.4.0</title>
+      <link>https://etiennebacher.com/posts/2026-02-03-jarl-0.4.0/index.html</link>
+      <guid>https://etiennebacher.com/posts/2026-02-03-jarl-0.4.0/index.html</guid>
+      <pubDate>Tue, 03 Feb 2026 00:00:00 GMT</pubDate>
+      
+      <description>Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.</description>
+    </item>
+    
+    <item>
+      <title>Jarl: just another R linter</title>
+      <link>https://etiennebacher.com/posts/2025-11-20-introducing-jarl/index.html</link>
+      <guid>https://etiennebacher.com/posts/2025-11-20-introducing-jarl/index.html</guid>
+      <pubDate>Thu, 20 Nov 2025 00:00:00 GMT</pubDate>
+      
+      <description>Remove bad patterns in your R code in the blink of an eye.</description>
+    </item>
+    
+    <item>
+      <title>Refactoring code with flir</title>
+      <link>https://etiennebacher.com/posts/2025-05-23-refactoring-code-with-flir/index.html</link>
+      <guid>https://etiennebacher.com/posts/2025-05-23-refactoring-code-with-flir/index.html</guid>
+      <pubDate>Fri, 23 May 2025 00:00:00 GMT</pubDate>
+      
+      <description>How to efficiently rewrite many code patterns.</description>
+    </item>
+    
+    <item>
+      <title>Using property-based testing in R</title>
+      <link>https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/index.html</link>
+      <guid>https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/index.html</guid>
+      <pubDate>Tue, 01 Oct 2024 00:00:00 GMT</pubDate>
+      
+      <description>When you don&apos;t want to write dozens of versions of unit tests.</description>
+    </item>
+    
+    <item>
+      <title>Making POST requests with R</title>
+      <link>https://etiennebacher.com/posts/2023-05-09-making-post-requests-with-r/index.html</link>
+      <guid>https://etiennebacher.com/posts/2023-05-09-making-post-requests-with-r/index.html</guid>
+      <pubDate>Tue, 09 May 2023 00:00:00 GMT</pubDate>
+      
+      <description>An alternative to RSelenium to get data from dynamic webpages.</description>
+    </item>
+    
+    <item>
+      <title>Do bonus points lead to more tries in 6 Nations matches?</title>
+      <link>https://etiennebacher.com/posts/2023-03-01-do-bonus-points-lead-to-more-tries-in-6-nations-matches/index.html</link>
+      <guid>https://etiennebacher.com/posts/2023-03-01-do-bonus-points-lead-to-more-tries-in-6-nations-matches/index.html</guid>
+      <pubDate>Wed, 01 Mar 2023 00:00:00 GMT</pubDate>
+      
+      <description>A small post where rugby is an excuse to do some webscraping and some ggplot-ing.</description>
+    </item>
+    
+    <item>
+      <title>Where should my family meet?</title>
+      <link>https://etiennebacher.com/posts/2023-01-14-where-should-my-family-meet/index.html</link>
+      <guid>https://etiennebacher.com/posts/2023-01-14-where-should-my-family-meet/index.html</guid>
+      <pubDate>Sat, 14 Jan 2023 00:00:00 GMT</pubDate>
+      
+      <description>Or a mathematical way to evade the debate on the location of the next holidays.</description>
+    </item>
+    
+    <item>
+      <title>Some notes about improving base R code</title>
+      <link>https://etiennebacher.com/posts/2022-11-28-some-notes-about-improving-base-r-code/index.html</link>
+      <guid>https://etiennebacher.com/posts/2022-11-28-some-notes-about-improving-base-r-code/index.html</guid>
+      <pubDate>Mon, 28 Nov 2022 00:00:00 GMT</pubDate>
+      
+      <description>A small collection of tips to make base R code faster.</description>
+    </item>
+    
+    <item>
+      <title>Mapping French rivers network</title>
+      <link>https://etiennebacher.com/posts/2021-12-27-mapping-french-rivers-network/index.html</link>
+      <guid>https://etiennebacher.com/posts/2021-12-27-mapping-french-rivers-network/index.html</guid>
+      <pubDate>Mon, 27 Dec 2021 00:00:00 GMT</pubDate>
+      
+      
+    </item>
+    
+    <item>
+      <title>Reproduce some maps about 3G and 4G access</title>
+      <link>https://etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/index.html</link>
+      <guid>https://etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/index.html</guid>
+      <pubDate>Thu, 23 Dec 2021 00:00:00 GMT</pubDate>
+      
+      <description>I try to reproduce some maps made by Dominic Royé.</description>
+    </item>
+    
+    <item>
+      <title>How to create a gallery in Distill</title>
+      <link>https://etiennebacher.com/posts/2021-04-11-how-to-create-a-gallery-in-distill/index.html</link>
+      <guid>https://etiennebacher.com/posts/2021-04-11-how-to-create-a-gallery-in-distill/index.html</guid>
+      <pubDate>Sun, 11 Apr 2021 00:00:00 GMT</pubDate>
+      
+      <description>Use lightgallery.js to create a gallery for your plots or images.</description>
+    </item>
+    
+    <item>
+      <title>Use GitHub actions with R Markdown and Distill</title>
+      <link>https://etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/index.html</link>
+      <guid>https://etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/index.html</guid>
+      <pubDate>Fri, 19 Mar 2021 00:00:00 GMT</pubDate>
+      
+      <description>How can you automatically render README, Distill website...</description>
+    </item>
+    
+    <item>
+      <title>Visualize data on Nobel laureates per country</title>
+      <link>https://etiennebacher.com/posts/2020-10-18-nobel-laureates/index.html</link>
+      <guid>https://etiennebacher.com/posts/2020-10-18-nobel-laureates/index.html</guid>
+      <pubDate>Sun, 18 Oct 2020 00:00:00 GMT</pubDate>
+      
+      <description>A post where I make animated graphs and maps to visualize the repartition of Nobel laureates per country.</description>
+    </item>
+    
+    <item>
+      <title>What to do when your code doesn&apos;t work?</title>
+      <link>https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/index.html</link>
+      <guid>https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/index.html</guid>
+      <pubDate>Fri, 22 May 2020 00:00:00 GMT</pubDate>
+      
+      <description>This is the list of actions I make when I have an error in R.</description>
+    </item>
+    
+    <item>
+      <title>My application for the Shiny Contest (2020)</title>
+      <link>https://etiennebacher.com/posts/2020-04-08-my-shiny-app/index.html</link>
+      <guid>https://etiennebacher.com/posts/2020-04-08-my-shiny-app/index.html</guid>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 GMT</pubDate>
+      
+      <description>A presentation of the application I submitted to the Shiny Contest 2nd edition.</description>
+    </item>
+    
+    <item>
+      <title>My favorite shortcuts in RStudio</title>
+      <link>https://etiennebacher.com/posts/2020-04-06-my-favorite-shortcuts/index.html</link>
+      <guid>https://etiennebacher.com/posts/2020-04-06-my-favorite-shortcuts/index.html</guid>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 GMT</pubDate>
+      
+      <description>Did you know that RStudio contains a lot of shortcuts to write code faster? Here are my favorites.</description>
+    </item>
+    
+    <item>
+      <title>First contact with the data on R</title>
+      <link>https://etiennebacher.com/posts/2020-01-22-first-contact/index.html</link>
+      <guid>https://etiennebacher.com/posts/2020-01-22-first-contact/index.html</guid>
+      <pubDate>Wed, 22 Jan 2020 00:00:00 GMT</pubDate>
+      
+      <description>A blog post describing the first steps of data cleaning and analysis using R.</description>
+    </item>
+    
+    <item>
+      <title>Why you should move from Stata to R</title>
+      <link>https://etiennebacher.com/posts/2019-12-01-why-moving/index.html</link>
+      <guid>https://etiennebacher.com/posts/2019-12-01-why-moving/index.html</guid>
+      <pubDate>Sun, 01 Dec 2019 00:00:00 GMT</pubDate>
+      
+      <description>Some reasons that explain why I prefer R to Stata.</description>
+    </item>
+    
+  </channel>
+</rss>

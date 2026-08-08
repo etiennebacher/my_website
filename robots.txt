@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://etiennebacher.com/sitemap.xml
