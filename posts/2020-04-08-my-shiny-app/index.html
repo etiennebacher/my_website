@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [My application for the Shiny Contest (2020)])\n#metadata((\n  title: \"My application for the Shiny Contest (2020)\",\n  kind: \"post\",\n  date: \"2020-04-08\",\n  summary: \"A presentation of the application I submitted to the Shiny Contest 2nd edition.\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\nOne of the greatest things about R is the possibility to build websites quite easily with R Shiny. I started to create apps with Shiny almost immediately after having discovered it. This was in May last year and two months later I thought it would be a great idea to build an app to treat more easily World Bank data. Indeed, in my field, World Development Indicators (WDI) are often used and I thought it would be useful to have a graphical interface where we can import and treat these indicators.\n\nSo in July last year I started to work on this. Besides building something useful, I considered this as a good opportunity to practice with R Shiny. I worked on that irregularly during the rest of the year. Sometimes I considerably improved my app in a week and sometimes I spent two months not thinking about it.\n\nIn January, I was quite stuck: my app required to generate pieces of UI (User Interface) on the fly and I didn't know how to do that. But when I saw the #link(\"https://community.rstudio.com/t/shiny-contest-2020-is-here/51002\")[announcement] for the second edition of the Shiny Contest, I convinced myself to give it a try and worked a lot on my app, especially since I finally understood how to use #link(\"https://shiny.rstudio.com/articles/modules.html\")[modules]. Therefore, after a few weeks, I could finally deploy my app and participate to the contest. Given the incredible apps of other participants (just look at the \"Shiny Contest\" tag on #link(\"https://community.rstudio.com/\")[RStudio Community]), I know that there is not a chance that I win something but nonetheless I am very proud of having the possibility to show what I can do.\n\n\"That's very good\", you may say, \"but what does your app do?\". Well if you are familiar with the WDIs, you know that each indicator has an ID (like \"NV.AGR.TOTL.ZS\"). Using this ID in my app, you can import the dataset related, choose the type of data you want (cross-country, time series, panel data), the country/countries and year(s) you want and compute the logarithm, the squared value and the lagged value of the variable. You may also generate a plot that you can download for this dataset. You can import and manipulate as many datasets as you desire and when you are done, you can merge them in a final dataset that is also downloadable. Finally, since reproducibility is a big aspect in science, all the manipulations you did are translated into R code so that you can copy and paste this code in a fresh R session and it will reproduce everything you have done. This was made possible thanks the great (but still experimental) `shinymeta` package#calepin.elements.sidenote[Luckily, I have discovered this package a month before I launched my app, in a rstudio::conf 2020 #link(\"https://resources.rstudio.com/rstudio-conf-2020/reproducible-shiny-apps-with-shinymeta-dr-carson-sievert\")[presentation by Carson Sievert]].\n\nYou can try the app #link(\"https://etiennebacher.shinyapps.io/woRldbank/\")[here], but if it has been removed by the time you go checking it, you may find the source code for the whole app #link(\"https://github.com/etiennebacher/woRldbank\")[on GitHub].\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [My application for the Shiny Contest (2020)])\r\n#metadata((\r\n  title: \"My application for the Shiny Contest (2020)\",\r\n  kind: \"post\",\r\n  date: \"2020-04-08\",\r\n  summary: \"A presentation of the application I submitted to the Shiny Contest 2nd edition.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nOne of the greatest things about R is the possibility to build websites quite easily with R Shiny. I started to create apps with Shiny almost immediately after having discovered it. This was in May last year and two months later I thought it would be a great idea to build an app to treat more easily World Bank data. Indeed, in my field, World Development Indicators (WDI) are often used and I thought it would be useful to have a graphical interface where we can import and treat these indicators.\r\n\r\nSo in July last year I started to work on this. Besides building something useful, I considered this as a good opportunity to practice with R Shiny. I worked on that irregularly during the rest of the year. Sometimes I considerably improved my app in a week and sometimes I spent two months not thinking about it.\r\n\r\nIn January, I was quite stuck: my app required to generate pieces of UI (User Interface) on the fly and I didn't know how to do that. But when I saw the #link(\"https://community.rstudio.com/t/shiny-contest-2020-is-here/51002\")[announcement] for the second edition of the Shiny Contest, I convinced myself to give it a try and worked a lot on my app, especially since I finally understood how to use #link(\"https://shiny.rstudio.com/articles/modules.html\")[modules]. Therefore, after a few weeks, I could finally deploy my app and participate to the contest. Given the incredible apps of other participants (just look at the \"Shiny Contest\" tag on #link(\"https://community.rstudio.com/\")[RStudio Community]), I know that there is not a chance that I win something but nonetheless I am very proud of having the possibility to show what I can do.\r\n\r\n\"That's very good\", you may say, \"but what does your app do?\". Well if you are familiar with the WDIs, you know that each indicator has an ID (like \"NV.AGR.TOTL.ZS\"). Using this ID in my app, you can import the dataset related, choose the type of data you want (cross-country, time series, panel data), the country/countries and year(s) you want and compute the logarithm, the squared value and the lagged value of the variable. You may also generate a plot that you can download for this dataset. You can import and manipulate as many datasets as you desire and when you are done, you can merge them in a final dataset that is also downloadable. Finally, since reproducibility is a big aspect in science, all the manipulations you did are translated into R code so that you can copy and paste this code in a fresh R session and it will reproduce everything you have done. This was made possible thanks the great (but still experimental) `shinymeta` package#calepin.elements.sidenote[Luckily, I have discovered this package a month before I launched my app, in a rstudio::conf 2020 #link(\"https://resources.rstudio.com/rstudio-conf-2020/reproducible-shiny-apps-with-shinymeta-dr-carson-sievert\")[presentation by Carson Sievert]].\r\n\r\nYou can try the app #link(\"https://etiennebacher.shinyapps.io/woRldbank/\")[here], but if it has been removed by the time you go checking it, you may find the source code for the whole app #link(\"https://github.com/etiennebacher/woRldbank\")[on GitHub].\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2934,6 +2954,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

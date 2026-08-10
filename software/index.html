@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#set document(title: [Software])\n#metadata((title: \"Software\", toc: (enabled: false))) <website-metadata>\n\n#title()\n\n= Tutorials & presentations\n\n*At University of Innsbruck (May 2025)*\n\n- #link(\"https://innsbruck-webscraping-part-1.etiennebacher.com\")[Webscraping Part 1: static webscraping]:\n  a tutorial on webscraping static pages with rvest.\n\n- #link(\"https://innsbruck-webscraping-part-2.etiennebacher.com\")[Webscraping Part 2: dynamic webscraping]:\n  a tutorial on webscraping dynamic pages with RSelenium.\n\n- #link(\"https://innsbruck-large-data-r-python.etiennebacher.com\")[Handling large data in Python and R]:\n  a tutorial on handling datasets with tens of millions of observations using\n  Polars (and tidypolars) in Python and R.\n\n*At LISER (2022-2024)*\n\n- #link(\"https://www.rselenium-teaching.etiennebacher.com\")[Webscraping with RSelenium]:\n  a tutorial on performing webscraping with RSelenium, 100+ slides.\n\n- #link(\"https://www.rselenium-teaching-short.etiennebacher.com\")[Webscraping with RSelenium (short)]:\n  a shorter version of the RSelenium tutorial, ~40 slides.\n\n- #link(\"https://www.good-practices.etiennebacher.com\")[Good practices for research with R]:\n  a small list of what I consider to be good practices for reproducible\n  research with R, ~40 slides.\n\n- #link(\"https://www.handling-large-data.etiennebacher.com\")[Handling large data with polars and tidypolars]:\n  a brief introduction (not a tutorial) to the Python and R packages polars and\n  tidypolars, ~30 slides.\n\n= Tools (selection)\n\n- #link(\"https://jarl.etiennebacher.com/\")[Jarl]: a very fast R linter, written\n  in Rust.\n\n- #link(\"https://rpolars.github.io/\")[polars]: port of the Rust/Python polars\n  library to R.\n\n- #link(\"https://tidypolars.etiennebacher.com\")[tidypolars]: get the\n  functionalities of Polars with the syntax of the tidyverse in R.\n\n- #link(\"https://flir.etiennebacher.com\")[flir]: efficiently rewrite patterns of\n  R code.\n\n- #link(\"https://altdoc.etiennebacher.com\")[altdoc]: use docute, docsify, mkdocs\n  or quarto to create a website for your R package.\n\n- #link(\"https://prompter.etiennebacher.com\")[prompter]: easily add tooltips to\n  HTML elements in R Shiny applications, using hint.css under the hood.\n\n- #link(\"https://conductor.etiennebacher.com\")[conductor]: create tours in R\n  Shiny applications using shepherd.js.\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#set document(title: [Software])\r\n#metadata((title: \"Software\", toc: (enabled: false))) <website-metadata>\r\n\r\n#title()\r\n\r\n= Tutorials & presentations\r\n\r\n*At University of Innsbruck (May 2025)*\r\n\r\n- #link(\"https://innsbruck-webscraping-part-1.etiennebacher.com\")[Webscraping Part 1: static webscraping]:\r\n  a tutorial on webscraping static pages with rvest.\r\n\r\n- #link(\"https://innsbruck-webscraping-part-2.etiennebacher.com\")[Webscraping Part 2: dynamic webscraping]:\r\n  a tutorial on webscraping dynamic pages with RSelenium.\r\n\r\n- #link(\"https://innsbruck-large-data-r-python.etiennebacher.com\")[Handling large data in Python and R]:\r\n  a tutorial on handling datasets with tens of millions of observations using\r\n  Polars (and tidypolars) in Python and R.\r\n\r\n*At LISER (2022-2024)*\r\n\r\n- #link(\"https://www.rselenium-teaching.etiennebacher.com\")[Webscraping with RSelenium]:\r\n  a tutorial on performing webscraping with RSelenium, 100+ slides.\r\n\r\n- #link(\"https://www.rselenium-teaching-short.etiennebacher.com\")[Webscraping with RSelenium (short)]:\r\n  a shorter version of the RSelenium tutorial, ~40 slides.\r\n\r\n- #link(\"https://www.good-practices.etiennebacher.com\")[Good practices for research with R]:\r\n  a small list of what I consider to be good practices for reproducible\r\n  research with R, ~40 slides.\r\n\r\n- #link(\"https://www.handling-large-data.etiennebacher.com\")[Handling large data with polars and tidypolars]:\r\n  a brief introduction (not a tutorial) to the Python and R packages polars and\r\n  tidypolars, ~30 slides.\r\n\r\n= Tools (selection)\r\n\r\n- #link(\"https://jarl.etiennebacher.com/\")[Jarl]: a very fast R linter, written\r\n  in Rust.\r\n\r\n- #link(\"https://rpolars.github.io/\")[polars]: port of the Rust/Python polars\r\n  library to R.\r\n\r\n- #link(\"https://tidypolars.etiennebacher.com\")[tidypolars]: get the\r\n  functionalities of Polars with the syntax of the tidyverse in R.\r\n\r\n- #link(\"https://flir.etiennebacher.com\")[flir]: efficiently rewrite patterns of\r\n  R code.\r\n\r\n- #link(\"https://altdoc.etiennebacher.com\")[altdoc]: use docute, docsify, mkdocs\r\n  or quarto to create a website for your R package.\r\n\r\n- #link(\"https://prompter.etiennebacher.com\")[prompter]: easily add tooltips to\r\n  HTML elements in R Shiny applications, using hint.css under the hood.\r\n\r\n- #link(\"https://conductor.etiennebacher.com\")[conductor]: create tours in R\r\n  Shiny applications using shepherd.js.\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2934,6 +2954,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

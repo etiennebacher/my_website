@@ -1,0 +1,14 @@
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}

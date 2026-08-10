@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [Jarl: just another R linter])\n#metadata((\n  title: \"Jarl: just another R linter\",\n  kind: \"post\",\n  date: \"2025-11-20\",\n  summary: \"Remove bad patterns in your R code in the blink of an eye.\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\nI'm very excited to introduce #link(\"https://jarl.etiennebacher.com/\")[Jarl]#calepin.elements.sidenote[Jarl stands for \"Just Another R Linter\".], a new R linter. A linter is a tool that statically parses code (meaning that it doesn't run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.\n\nJarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on #link(\"https://github.com/wch/r-source/\")[r-source] (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:\n\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it.\", controls: \"\"))[\n  #html.elem(\"source\", attrs: (src: \"demos/lint-r-source.webm\", type: \"video/mp4\"))\n]\n\nOn top of that, Jarl can apply automatic fixes#calepin.elements.sidenote[This is not always possible, it depends on the rule.]. Suppose that we have the following file `foo.R`:\n\n```r\nx <- any(is.na(mtcars))\n\nf <- function(x) {\n  apply(x, 1, mean)\n}\n```\n\nThere are two rule violations in this file:\n\n+ `any(is.na(mtcars))` should be replaced by `anyNA(mtcars)`#calepin.elements.sidenote[`anyNA(x)` is more efficient than `any(is.na(x))`.]\\;\n+ `apply(x, 1, mean)` should be replaced by `rowMeans(x)`#calepin.elements.sidenote[`rowMeans(x)` is more efficient than `apply(x, 1, mean)`.].\n\nInstead of fixing those cases by hand, we can run the following command in the terminal (not in the R console):\n\n```sh\njarl check foo.R --fix\n```\n\nAfter running this, `foo.R` now contains the following code:\n\n```r\nx <- anyNA(mtcars)\n\nf <- function(x) {\n  rowMeans(x)\n}\n```\n\n\\(Note that `f` is now useless since it is equivalent to `rowMeans()`.)\n\nJarl stands on the shoulders of giants, in particular:\n\n- #link(\"https://lintr.r-lib.org/\")[lintr]: this R package provides dozens of rules from various sources to lint R code, and Jarl wouldn't exist without this package. Jarl currently supports 25 `lintr` rules.\n- #link(\"https://posit-dev.github.io/air/\")[Air]: this is a fast R formatter written in Rust, developed by Lionel Henry and Davis Vaughan, and released earlier this year. It is also a command-line tool that runs in the terminal. It is the technical foundation on which Jarl is built since Air provides the infrastructure to parse and manipulate R code.\n\nJarl is a single binary, meaning that it doesn't need an R installation to work. This makes it a very attractive option for continuous integration for instance, since it takes less than 10 seconds to download the binary and run it on the repository.\n\n== Using Jarl\n<using-jarl>\nThere are two ways to use Jarl:\n\n+ via the terminal, using `jarl check [OPTIONS]`\\;\n+ using the integration in your coding editor (at the time of writing, a Jarl extension is available in VS Code, Positron, and Zed).\n\nThe Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.\n\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic.\", controls: \"\"))[\n  #html.elem(\"source\", attrs: (src: \"demos/hover.webm\", type: \"video/mp4\"))\n]\n\nThe latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.\n\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked.\", controls: \"\"))[\n  #html.elem(\"source\", attrs: (src: \"demos/quick-fixes.webm\", type: \"video/mp4\"))\n]\n\nIn the future, those extensions could have a \"Fix on save\" feature similar to the \"Format on save\" functionality provided by Air.\n\n== Configuring Jarl\n<configuring-jarl>\nBy default, Jarl will report violations for almost of its rules. It is possible to configure its behavior using a configuration file named `jarl.toml`. In particular, in this file, you can specify:\n\n- the rules you want to apply,\n- the files to include or exclude,\n- the rules for which you want to apply automatic fixes,\n\nand more.\n\n== Conclusion\n<conclusion>\nJarl is in its early days, there are more rules and options to add. Still, it can already be used in interactive use or in continuous integration (check out the #link(\"https://github.com/etiennebacher/setup-jarl\")[`setup-jarl` workflow]!). Eventually, many `lintr` rules should be supported in Jarl, but the end goal is not to have perfect compatibility. `lintr` provides many rules related to code formatting (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/spaces_inside_linter.html\")[spaces\\_inside\\_linter]). Those will not be integrated in Jarl since they are already covered by Air. Additionally (for now), Jarl cannot perform semantic analysis#calepin.elements.sidenote[Semantic analysis refers to using the context surrounding an expression to explore rule violations.], meaning that some `lintr` rules are out of scope (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/unreachable_code_linter.html\")[unreachable\\_code\\_linter]).\n\nThis was a very light introduction, go to the #link(\"https://jarl.etiennebacher.com/\")[Jarl website] for more information.\n\nIf you want to help developing Jarl, check out the #link(\"https://jarl.etiennebacher.com/contributing\")[\"Contributing\" page]. Jarl is written in Rust, which may be a barrier to contributing but is also a very powerful language which is a real pleasure to use. I will add a more detailed tutorial soon so that this can also be a nice introduction to this language. You can also contribute to the documentation!\n\n= Acknowledgements\n<acknowledgements>\nAs I said above, Jarl depends enormously on the work of #link(\"https://lintr.r-lib.org/authors.html\")[`lintr`] and Air developers, so thank you!\n\nJarl is also very inspired by similar tools in other languages, in particular #link(\"https://docs.astral.sh/ruff/\")[Ruff] in Python and #link(\"https://github.com/rust-lang/rust-clippy\")[Cargo clippy] in Rust.\n\nFinally, thanks to the #link(\"https://r-consortium.org/\")[R Consortium] for funding part of the development of Jarl via the ISC Grant Program.\n\nAnd thank you, Maëlle, for improving the draft!\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Jarl: just another R linter])\r\n#metadata((\r\n  title: \"Jarl: just another R linter\",\r\n  kind: \"post\",\r\n  date: \"2025-11-20\",\r\n  summary: \"Remove bad patterns in your R code in the blink of an eye.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI'm very excited to introduce #link(\"https://jarl.etiennebacher.com/\")[Jarl]#calepin.elements.sidenote[Jarl stands for \"Just Another R Linter\".], a new R linter. A linter is a tool that statically parses code (meaning that it doesn't run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.\r\n\r\nJarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on #link(\"https://github.com/wch/r-source/\")[r-source] (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/lint-r-source.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nOn top of that, Jarl can apply automatic fixes#calepin.elements.sidenote[This is not always possible, it depends on the rule.]. Suppose that we have the following file `foo.R`:\r\n\r\n```r\r\nx <- any(is.na(mtcars))\r\n\r\nf <- function(x) {\r\n  apply(x, 1, mean)\r\n}\r\n```\r\n\r\nThere are two rule violations in this file:\r\n\r\n+ `any(is.na(mtcars))` should be replaced by `anyNA(mtcars)`#calepin.elements.sidenote[`anyNA(x)` is more efficient than `any(is.na(x))`.]\\;\r\n+ `apply(x, 1, mean)` should be replaced by `rowMeans(x)`#calepin.elements.sidenote[`rowMeans(x)` is more efficient than `apply(x, 1, mean)`.].\r\n\r\nInstead of fixing those cases by hand, we can run the following command in the terminal (not in the R console):\r\n\r\n```sh\r\njarl check foo.R --fix\r\n```\r\n\r\nAfter running this, `foo.R` now contains the following code:\r\n\r\n```r\r\nx <- anyNA(mtcars)\r\n\r\nf <- function(x) {\r\n  rowMeans(x)\r\n}\r\n```\r\n\r\n\\(Note that `f` is now useless since it is equivalent to `rowMeans()`.)\r\n\r\nJarl stands on the shoulders of giants, in particular:\r\n\r\n- #link(\"https://lintr.r-lib.org/\")[lintr]: this R package provides dozens of rules from various sources to lint R code, and Jarl wouldn't exist without this package. Jarl currently supports 25 `lintr` rules.\r\n- #link(\"https://posit-dev.github.io/air/\")[Air]: this is a fast R formatter written in Rust, developed by Lionel Henry and Davis Vaughan, and released earlier this year. It is also a command-line tool that runs in the terminal. It is the technical foundation on which Jarl is built since Air provides the infrastructure to parse and manipulate R code.\r\n\r\nJarl is a single binary, meaning that it doesn't need an R installation to work. This makes it a very attractive option for continuous integration for instance, since it takes less than 10 seconds to download the binary and run it on the repository.\r\n\r\n== Using Jarl\r\n<using-jarl>\r\nThere are two ways to use Jarl:\r\n\r\n+ via the terminal, using `jarl check [OPTIONS]`\\;\r\n+ using the integration in your coding editor (at the time of writing, a Jarl extension is available in VS Code, Positron, and Zed).\r\n\r\nThe Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/hover.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nThe latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/quick-fixes.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nIn the future, those extensions could have a \"Fix on save\" feature similar to the \"Format on save\" functionality provided by Air.\r\n\r\n== Configuring Jarl\r\n<configuring-jarl>\r\nBy default, Jarl will report violations for almost of its rules. It is possible to configure its behavior using a configuration file named `jarl.toml`. In particular, in this file, you can specify:\r\n\r\n- the rules you want to apply,\r\n- the files to include or exclude,\r\n- the rules for which you want to apply automatic fixes,\r\n\r\nand more.\r\n\r\n== Conclusion\r\n<conclusion>\r\nJarl is in its early days, there are more rules and options to add. Still, it can already be used in interactive use or in continuous integration (check out the #link(\"https://github.com/etiennebacher/setup-jarl\")[`setup-jarl` workflow]!). Eventually, many `lintr` rules should be supported in Jarl, but the end goal is not to have perfect compatibility. `lintr` provides many rules related to code formatting (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/spaces_inside_linter.html\")[spaces\\_inside\\_linter]). Those will not be integrated in Jarl since they are already covered by Air. Additionally (for now), Jarl cannot perform semantic analysis#calepin.elements.sidenote[Semantic analysis refers to using the context surrounding an expression to explore rule violations.], meaning that some `lintr` rules are out of scope (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/unreachable_code_linter.html\")[unreachable\\_code\\_linter]).\r\n\r\nThis was a very light introduction, go to the #link(\"https://jarl.etiennebacher.com/\")[Jarl website] for more information.\r\n\r\nIf you want to help developing Jarl, check out the #link(\"https://jarl.etiennebacher.com/contributing\")[\"Contributing\" page]. Jarl is written in Rust, which may be a barrier to contributing but is also a very powerful language which is a real pleasure to use. I will add a more detailed tutorial soon so that this can also be a nice introduction to this language. You can also contribute to the documentation!\r\n\r\n= Acknowledgements\r\n<acknowledgements>\r\nAs I said above, Jarl depends enormously on the work of #link(\"https://lintr.r-lib.org/authors.html\")[`lintr`] and Air developers, so thank you!\r\n\r\nJarl is also very inspired by similar tools in other languages, in particular #link(\"https://docs.astral.sh/ruff/\")[Ruff] in Python and #link(\"https://github.com/rust-lang/rust-clippy\")[Cargo clippy] in Rust.\r\n\r\nFinally, thanks to the #link(\"https://r-consortium.org/\")[R Consortium] for funding part of the development of Jarl via the ISC Grant Program.\r\n\r\nAnd thank you, Maëlle, for improving the draft!\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2962,6 +2982,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

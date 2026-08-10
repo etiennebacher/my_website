@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [Blog])\n#metadata((title: \"Blog\", toc: (enabled: false))) <website-metadata>\n\n#title()\n\n// Built from page metadata rather than a hand-maintained list: every file in\n// `posts/*/index.typ` that declares `kind: \"post\"` shows up here automatically.\n#context {\n  let posts = calepin\n    .pages()\n    .filter(p => p.meta.at(\"kind\", default: \"\") == \"post\")\n    .sorted(key: p => p.meta.at(\"date\", default: \"\"))\n    .rev()\n\n  table(\n    columns: (auto, 1fr),\n    align: (left + top, left + top),\n    ..posts\n      .map(p => (\n        text(fill: luma(40%))[#p.meta.at(\"date\", default: \"\")],\n        link(p.href)[#p.title],\n      ))\n      .flatten(),\n  )\n}\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Blog])\r\n#metadata((title: \"Blog\", toc: (enabled: false))) <website-metadata>\r\n\r\n#title()\r\n\r\n// Built from page metadata rather than a hand-maintained list: every file in\r\n// `posts/*/index.typ` that declares `kind: \"post\"` shows up here automatically.\r\n#context {\r\n  let posts = calepin\r\n    .pages()\r\n    .filter(p => p.meta.at(\"kind\", default: \"\") == \"post\")\r\n    .sorted(key: p => p.meta.at(\"date\", default: \"\"))\r\n    .rev()\r\n\r\n  table(\r\n    columns: (auto, 1fr),\r\n    align: (left + top, left + top),\r\n    ..posts\r\n      .map(p => (\r\n        text(fill: luma(40%))[#p.meta.at(\"date\", default: \"\")],\r\n        link(p.href)[#p.title],\r\n      ))\r\n      .flatten(),\r\n  )\r\n}\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2934,6 +2954,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>
