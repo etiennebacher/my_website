@@ -214,4 +214,21 @@ See the #link("https://jarl.etiennebacher.com/dev/#other")[installation instruct
 <conclusion>
 Jarl 0.6.0 brings many exciting features, try them out! If you find any issue, have feature ideas, or want to contribute, head to the #link("https://github.com/etiennebacher/jarl")[Github repository].
 
-I'm glad that this release got code contributions from six people (besides myself), and I want to thank them and everyone else who contributed one way or another: #link("https://github.com/atsyplenkov")[\@atsyplenkov], #link("https://github.com/Bisaloo")[\@Bisaloo], #link("https://github.com/dieghernan")[\@dieghernan], #link("https://github.com/gisler")[\@gisler], #link("https://github.com/ilyaZar")[\@ilyaZar], #link("https://github.com/JosephBARBIERDARNAL")[\@JosephBARBIERDARNAL], #link("https://github.com/JosiahParry")[\@JosiahParry], #link("https://github.com/lwjohnst86")[\@lwjohnst86], #link("https://github.com/maelle")[\@maelle], #link("https://github.com/novica")[\@novica], #link("https://github.com/randy3k")[\@randy3k], and #link("https://github.com/Yousa-Mirage")[\@Yousa-Mirage]
+I'm glad that this release got code contributions from six people (besides myself), and I want to thank them and everyone else who contributed one way or another: #link("https://github.com/atsyplenkov")[\@atsyplenkov], #link("https://github.com/Bisaloo")[\@Bisaloo], #link("https://github.com/dieghernan")[\@dieghernan], #link("https://github.com/gisler")[\@gisler], #link("https://github.com/ilyaZar")[\@ilyaZar], #link("https://github.com/JosephBARBIERDARNAL")[\@JosephBARBIERDARNAL], #link("https://github.com/JosiahParry")[\@JosiahParry], #link("https://github.com/lwjohnst86")[\@lwjohnst86], #link("https://github.com/maelle")[\@maelle], #link("https://github.com/novica")[\@novica], #link("https://github.com/randy3k")[\@randy3k], and #link("https://github.com/Yousa-Mirage")[\@Yousa-Mirage].
+
+// x <- gh::gh(
+//   "/repos/:owner/:repo/issues",
+//   owner = "etiennebacher",
+//   repo = "jarl",
+//   since = "2026-03-24",
+//   state = "closed",
+//   .limit = Inf
+// )
+// users <- sort(unique(purrr::map_chr(x, c("user", "login"))))
+// users <- grep("dependabot", users, invert = TRUE, value = TRUE)
+// users <- grep("etiennebacher", users, invert = TRUE, value = TRUE)
+// clipr::write_clip(glue::glue_collapse(
+//   glue::glue('#link("https://github.com/{users}")[\\@{users}]'),
+//   ", ",
+//   last = ", and "
+// ))
