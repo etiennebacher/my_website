@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [My favorite shortcuts in RStudio])\n#metadata((\n  title: \"My favorite shortcuts in RStudio\",\n  kind: \"post\",\n  date: \"2020-04-06\",\n  summary: \"Did you know that RStudio contains a lot of shortcuts to write code faster? Here are my favorites.\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\nCurrently working on my master's thesis, I spend almost half on my day on R (the other half being spent reading articles). I have learnt a few very useful shortcuts by reading blog posts or free R books here and there and I have decided to make a small list of those I use most.\n\n= \"Ctrl+Shift+Enter\": run the whole script\n<ctrlshiftenter-run-the-whole-script>\nThis combination will run all of your script, wherever the mouse is in the script. This considerably saves some time and is much more convenient than having to drag the mouse up to the \"Run\" button.\n\n= \"Ctrl+Shift+F10\": restart R session\n<ctrlshiftf10-restart-r-session>\nAlmost all your work will have to be done again one day, either by you or by somebody else. That day, you will regret not having saved all the packages you needed in your R script. How is that possible? Well, it comes from the fact that I (and presumably other people too) load some packages #emph[and their dependencies] in the same session because we test some packages, or because we are trying to solve a StackOverflow problem during a break, etc. Therefore, when you were writing it, some of your code was running only thanks to some packages you didn't keep in your script.\n\nTo prevent this to happen again, you can run \"Ctrl+Shift+F10\" sometimes: it restarts the R session (but does not close RStudio) and allows to see quickly if your code can run all by itself. When I have finished writing a chunk of code, I always do \"Ctrl+Shift+F10\" and \"Ctrl+Shift+Enter\" to make sure that my code can run again in three months or more.\n\n= \"Ctrl+Shift+K\": knit Markdown documents\n<ctrlshiftk-knit-markdown-documents>\nI do not use this everywhere but only in Markdown documents: it knits the document. As \"Ctrl+Shift+Enter\" replaces the \"Run\" button, \"Ctrl+Shift+K\" replaces the \"Knit\" button.\n\n= \"Ctrl+Alt+B\": run the script from the beginning to where I am\n<ctrlaltb-run-the-script-from-the-beginning-to-where-i-am>\nThis is similar to \"Ctrl+Shift+Enter\" but it runs the script only until your mouse.\n\n= \"Ctrl+Shift+A\": good alignment\n<ctrlshifta-good-alignment>\nIndentation is quite important to have a code that is readable, especially when you begin to write more than 10 lines of code. Select your code (or just a piece of it) and do this combination to apply indentation rules automatically.\n\n= \"Ctrl+Shift+R\": new section label\n<ctrlshiftr-new-section-label>\nThis creates a new section in your code, with the title you choose. Quite convenient to keep a readable code.\n\n= \"Ctrl+Shift+N\": new file\n<ctrlshiftn-new-file>\nIf you want to try a chunk of code quickly, you can run this combination to open a new file in RStudio.\n\n= \"Ctrl+Shift+C\": comment and un-comment lines of code\n<ctrlshiftc-comment-and-un-comment-lines-of-code>\nTo me, this is one of the most convenient shortcut. It simply allows to comment (and un-comment) at once all the lines selected.\n\nThe complete list of shortcuts is available in \"Tools -\\> Keyboard Shortcuts Help\" in RStudio. Other useful tools:\n\n- #link(\"https://rstudio.github.io/rstudio-extensions/rstudio_snippets.html\")[snippets]\n- #link(\"https://rstudio.github.io/rstudioaddins/\")[addins]\n- #link(\"https://twitter.com/rstudiotips\")[RStudio tips] (on Twitter)\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [My favorite shortcuts in RStudio])\r\n#metadata((\r\n  title: \"My favorite shortcuts in RStudio\",\r\n  kind: \"post\",\r\n  date: \"2020-04-06\",\r\n  summary: \"Did you know that RStudio contains a lot of shortcuts to write code faster? Here are my favorites.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nCurrently working on my master's thesis, I spend almost half on my day on R (the other half being spent reading articles). I have learnt a few very useful shortcuts by reading blog posts or free R books here and there and I have decided to make a small list of those I use most.\r\n\r\n= \"Ctrl+Shift+Enter\": run the whole script\r\n<ctrlshiftenter-run-the-whole-script>\r\nThis combination will run all of your script, wherever the mouse is in the script. This considerably saves some time and is much more convenient than having to drag the mouse up to the \"Run\" button.\r\n\r\n= \"Ctrl+Shift+F10\": restart R session\r\n<ctrlshiftf10-restart-r-session>\r\nAlmost all your work will have to be done again one day, either by you or by somebody else. That day, you will regret not having saved all the packages you needed in your R script. How is that possible? Well, it comes from the fact that I (and presumably other people too) load some packages #emph[and their dependencies] in the same session because we test some packages, or because we are trying to solve a StackOverflow problem during a break, etc. Therefore, when you were writing it, some of your code was running only thanks to some packages you didn't keep in your script.\r\n\r\nTo prevent this to happen again, you can run \"Ctrl+Shift+F10\" sometimes: it restarts the R session (but does not close RStudio) and allows to see quickly if your code can run all by itself. When I have finished writing a chunk of code, I always do \"Ctrl+Shift+F10\" and \"Ctrl+Shift+Enter\" to make sure that my code can run again in three months or more.\r\n\r\n= \"Ctrl+Shift+K\": knit Markdown documents\r\n<ctrlshiftk-knit-markdown-documents>\r\nI do not use this everywhere but only in Markdown documents: it knits the document. As \"Ctrl+Shift+Enter\" replaces the \"Run\" button, \"Ctrl+Shift+K\" replaces the \"Knit\" button.\r\n\r\n= \"Ctrl+Alt+B\": run the script from the beginning to where I am\r\n<ctrlaltb-run-the-script-from-the-beginning-to-where-i-am>\r\nThis is similar to \"Ctrl+Shift+Enter\" but it runs the script only until your mouse.\r\n\r\n= \"Ctrl+Shift+A\": good alignment\r\n<ctrlshifta-good-alignment>\r\nIndentation is quite important to have a code that is readable, especially when you begin to write more than 10 lines of code. Select your code (or just a piece of it) and do this combination to apply indentation rules automatically.\r\n\r\n= \"Ctrl+Shift+R\": new section label\r\n<ctrlshiftr-new-section-label>\r\nThis creates a new section in your code, with the title you choose. Quite convenient to keep a readable code.\r\n\r\n= \"Ctrl+Shift+N\": new file\r\n<ctrlshiftn-new-file>\r\nIf you want to try a chunk of code quickly, you can run this combination to open a new file in RStudio.\r\n\r\n= \"Ctrl+Shift+C\": comment and un-comment lines of code\r\n<ctrlshiftc-comment-and-un-comment-lines-of-code>\r\nTo me, this is one of the most convenient shortcut. It simply allows to comment (and un-comment) at once all the lines selected.\r\n\r\nThe complete list of shortcuts is available in \"Tools -\\> Keyboard Shortcuts Help\" in RStudio. Other useful tools:\r\n\r\n- #link(\"https://rstudio.github.io/rstudio-extensions/rstudio_snippets.html\")[snippets]\r\n- #link(\"https://rstudio.github.io/rstudioaddins/\")[addins]\r\n- #link(\"https://twitter.com/rstudiotips\")[RStudio tips] (on Twitter)\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2959,6 +2979,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

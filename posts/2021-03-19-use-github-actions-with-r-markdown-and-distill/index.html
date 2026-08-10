@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [Use GitHub actions with R Markdown and Distill])\n#metadata((\n  title: \"Use GitHub actions with R Markdown and Distill\",\n  kind: \"post\",\n  date: \"2021-03-19\",\n  summary: \"How can you automatically render README, Distill website...\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\n#emph[ The preview image comes from: https:\\/\\/github.com/marketplace/actions/cancel-workflow-action ]\n\nSometimes, it is useful to automatically render an R Markdown document or a website, made with #link(\"https://rstudio.github.io/distill/\")[`distill`] for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.\n\n= Render a README\n<render-a-readme>\nOne of my GitHub repos is a list of JavaScript libraries that have been adapted in R. You can find the repo #link(\"https://github.com/etiennebacher/r-js-adaptation\")[here]. I wanted this list to be easy to update, so that it can be done on GitHub directly. The idea is that when I (or someone else) find a JavaScript library that has been adapted into an R package, I add it to a CSV file on GitHub. The problem is that this CSV file is then used into an R Markdown file, that creates a clean README with all the information.\n\nWithout GitHub Actions, in addition to modify the CSV file, I would have to clone the repo, open it in RStudio, render the README, and push it back on GitHub.\n\nBut this task is repetitive: apart from the details I add to the CSV file, it can be automated. This is where GitHub Actions comes into play. The idea is that you create a `.yml` file that contains the R code you want to run to render the README. This is what mine looks like:\n\n```{yaml}\non:\n  push:\n    branches: master\n\nname: Render README\n\njobs:\n  render:\n    name: Render README\n    runs-on: macOS-latest\n    steps:\n      - uses: actions/checkout@v2\n      - uses: r-lib/actions/setup-r@v1\n      - uses: r-lib/actions/setup-pandoc@v1\n      - name: Install rmarkdown\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\n      - name: Render README\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\n      - name: Commit results\n        run: |\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\n          git push origin || echo \"No changes to commit\"\n```\n\nThe first two parts are quite self-explanatory:\n\n- the jobs run every time there's a push on the master branch;\n\n- the name of this process is \"Render README\".\n\nThe third part needs a bit more details. There are some parts that I just copied and pasted from the #link(\"https://github.com/r-lib/actions\")[R actions repository], but basically you can see that first it initiates R and pandoc (`setup-r@v1`, `setup-pandoc@v1`). Then, I run an R script to install the `rmarkdown` package and I use it to render the Rmd file to create `README.md`.\n\nLast but not least, GitHub Actions rendered the README, but the changes are not on the repo yet. Hence, the last step is to commit the changes with a message and to push them on the master branch. Now, every time I change the CSV file on the master branch, the README will be automatically rendered (after a few minutes, since all the actions have to run first).\n\nI said this was the `.yaml` file I use on my repo, but I lied a bit. Actually, for my list of JavaScript libraries to be up-to-date, I also need to scrape the #link(\"https://gallery.htmlwidgets.org/\")[htmlwidgets gallery] once in a while. Hence, I use `cron` to run GitHub Actions every Monday at 00:00. See #link(\"https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule\")[the documentation] to know how to format your schedule. Finally, here's the `.yaml` file I use:\n\n```{yaml}\non:\n  push:\n    branches: master\n  schedule:\n    - cron: '0 0 * * MON'\n\nname: Render README\n\njobs:\n  render:\n    name: Render README\n    runs-on: macOS-latest\n    steps:\n      - uses: actions/checkout@v2\n      - uses: r-lib/actions/setup-r@v1\n      - uses: r-lib/actions/setup-pandoc@v1\n      - name: Install rmarkdown\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\n      - name: Render README\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\n      - name: Commit results\n        run: |\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\n          git push origin || echo \"No changes to commit\"\n```\n\n= Render a Distill website\n<render-a-distill-website>\nTo automatically render your `distill` website on every push on master branch, the logic is very similar. In my `.yml` file, there are two main differences.\n\nThe first one is that I need to install more packages to render my `distill` website. Some will be essential for everyone (e.g `distill`) but other packages won't be (e.g `postcards`).\n\nThe second one is more tricky, but could be useful for several people. Before using `distill`, I used `blogdown`. For some reasons (and mostly because `distill` is much easier in my opinion), I switched to `distill`. However, this switch changed a few URLs addresses, for my posts for instance. Therefore, I needed a #link(\"https://yihui.org/en/2017/11/301-redirect/\")[`_redirects`] file to, well, redirect the old URLs to the new ones and prevent 404 errors. The `_redirects` file needs to be in the `_site` folder, because it is the folder that is used by Netlify to build the site. The problem here is that this folder is deleted and re-generated every time `rmarkdown::render_site()` is called, i.e every time the website is locally built. Therefore, the `_redirects` file couldn't just stay there. I had to add it manually after every build.\n\nThe solution to that is to automate this in GitHub Actions. After having rendered the website, I just copy `_redirects` from its location on the repo to the `_site` folder. Now, every time I change something on the master branch, the `distill` website is rebuilt, and then the `_redirects` file is added.\n\nOne drawback though: since these files are changed on GitHub only, the first thing you have to do when opening your site project in RStudio is to pull the changes (or, like me, you will struggle with merge conflicts).\n\nTo finish this post, here's the `.yml` file for my `distill` website:\n\n```{yaml}\non:\n  push:\n    branches: master\n\nname: Render & Deploy Site\n\njobs:\n  build:\n    runs-on: macOS-latest\n    steps:\n      - uses: actions/checkout@v2\n\n      - uses: r-lib/actions/setup-r@master\n\n      - uses: r-lib/actions/setup-pandoc@master\n\n      - name: Install dependencies\n        run: |\n          install.packages(\"rmarkdown\")\n          install.packages(\"distill\")\n          install.packages(\"postcards\")\n          install.packages(\"devtools\")\n          install.packages(\"fs\")\n          devtools::install_github(\"etiennebacher/ebmisc\")\n        shell: Rscript {0}\n\n      - name: Render Site\n        run: Rscript -e 'rmarkdown::render_site(encoding = \"UTF-8\")'\n      - name: Copy redirects\n        run: Rscript -e 'fs::file_copy(\"_redirects\", \"_site/_redirects\")'\n      - name: Commit results\n        run: |\n          git add -A\n          git commit -m 'Rebuild site' || echo \"No changes to commit\"\n          git push origin || echo \"No changes to commit\"\n```\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Use GitHub actions with R Markdown and Distill])\r\n#metadata((\r\n  title: \"Use GitHub actions with R Markdown and Distill\",\r\n  kind: \"post\",\r\n  date: \"2021-03-19\",\r\n  summary: \"How can you automatically render README, Distill website...\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\n#emph[ The preview image comes from: https:\\/\\/github.com/marketplace/actions/cancel-workflow-action ]\r\n\r\nSometimes, it is useful to automatically render an R Markdown document or a website, made with #link(\"https://rstudio.github.io/distill/\")[`distill`] for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.\r\n\r\n= Render a README\r\n<render-a-readme>\r\nOne of my GitHub repos is a list of JavaScript libraries that have been adapted in R. You can find the repo #link(\"https://github.com/etiennebacher/r-js-adaptation\")[here]. I wanted this list to be easy to update, so that it can be done on GitHub directly. The idea is that when I (or someone else) find a JavaScript library that has been adapted into an R package, I add it to a CSV file on GitHub. The problem is that this CSV file is then used into an R Markdown file, that creates a clean README with all the information.\r\n\r\nWithout GitHub Actions, in addition to modify the CSV file, I would have to clone the repo, open it in RStudio, render the README, and push it back on GitHub.\r\n\r\nBut this task is repetitive: apart from the details I add to the CSV file, it can be automated. This is where GitHub Actions comes into play. The idea is that you create a `.yml` file that contains the R code you want to run to render the README. This is what mine looks like:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n\r\nname: Render README\r\n\r\njobs:\r\n  render:\r\n    name: Render README\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n      - uses: r-lib/actions/setup-r@v1\r\n      - uses: r-lib/actions/setup-pandoc@v1\r\n      - name: Install rmarkdown\r\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\r\n      - name: Render README\r\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\r\n      - name: Commit results\r\n        run: |\r\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n\r\nThe first two parts are quite self-explanatory:\r\n\r\n- the jobs run every time there's a push on the master branch;\r\n\r\n- the name of this process is \"Render README\".\r\n\r\nThe third part needs a bit more details. There are some parts that I just copied and pasted from the #link(\"https://github.com/r-lib/actions\")[R actions repository], but basically you can see that first it initiates R and pandoc (`setup-r@v1`, `setup-pandoc@v1`). Then, I run an R script to install the `rmarkdown` package and I use it to render the Rmd file to create `README.md`.\r\n\r\nLast but not least, GitHub Actions rendered the README, but the changes are not on the repo yet. Hence, the last step is to commit the changes with a message and to push them on the master branch. Now, every time I change the CSV file on the master branch, the README will be automatically rendered (after a few minutes, since all the actions have to run first).\r\n\r\nI said this was the `.yaml` file I use on my repo, but I lied a bit. Actually, for my list of JavaScript libraries to be up-to-date, I also need to scrape the #link(\"https://gallery.htmlwidgets.org/\")[htmlwidgets gallery] once in a while. Hence, I use `cron` to run GitHub Actions every Monday at 00:00. See #link(\"https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule\")[the documentation] to know how to format your schedule. Finally, here's the `.yaml` file I use:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n  schedule:\r\n    - cron: '0 0 * * MON'\r\n\r\nname: Render README\r\n\r\njobs:\r\n  render:\r\n    name: Render README\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n      - uses: r-lib/actions/setup-r@v1\r\n      - uses: r-lib/actions/setup-pandoc@v1\r\n      - name: Install rmarkdown\r\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\r\n      - name: Render README\r\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\r\n      - name: Commit results\r\n        run: |\r\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n\r\n= Render a Distill website\r\n<render-a-distill-website>\r\nTo automatically render your `distill` website on every push on master branch, the logic is very similar. In my `.yml` file, there are two main differences.\r\n\r\nThe first one is that I need to install more packages to render my `distill` website. Some will be essential for everyone (e.g `distill`) but other packages won't be (e.g `postcards`).\r\n\r\nThe second one is more tricky, but could be useful for several people. Before using `distill`, I used `blogdown`. For some reasons (and mostly because `distill` is much easier in my opinion), I switched to `distill`. However, this switch changed a few URLs addresses, for my posts for instance. Therefore, I needed a #link(\"https://yihui.org/en/2017/11/301-redirect/\")[`_redirects`] file to, well, redirect the old URLs to the new ones and prevent 404 errors. The `_redirects` file needs to be in the `_site` folder, because it is the folder that is used by Netlify to build the site. The problem here is that this folder is deleted and re-generated every time `rmarkdown::render_site()` is called, i.e every time the website is locally built. Therefore, the `_redirects` file couldn't just stay there. I had to add it manually after every build.\r\n\r\nThe solution to that is to automate this in GitHub Actions. After having rendered the website, I just copy `_redirects` from its location on the repo to the `_site` folder. Now, every time I change something on the master branch, the `distill` website is rebuilt, and then the `_redirects` file is added.\r\n\r\nOne drawback though: since these files are changed on GitHub only, the first thing you have to do when opening your site project in RStudio is to pull the changes (or, like me, you will struggle with merge conflicts).\r\n\r\nTo finish this post, here's the `.yml` file for my `distill` website:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n\r\nname: Render & Deploy Site\r\n\r\njobs:\r\n  build:\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n\r\n      - uses: r-lib/actions/setup-r@master\r\n\r\n      - uses: r-lib/actions/setup-pandoc@master\r\n\r\n      - name: Install dependencies\r\n        run: |\r\n          install.packages(\"rmarkdown\")\r\n          install.packages(\"distill\")\r\n          install.packages(\"postcards\")\r\n          install.packages(\"devtools\")\r\n          install.packages(\"fs\")\r\n          devtools::install_github(\"etiennebacher/ebmisc\")\r\n        shell: Rscript {0}\r\n\r\n      - name: Render Site\r\n        run: Rscript -e 'rmarkdown::render_site(encoding = \"UTF-8\")'\r\n      - name: Copy redirects\r\n        run: Rscript -e 'fs::file_copy(\"_redirects\", \"_site/_redirects\")'\r\n      - name: Commit results\r\n        run: |\r\n          git add -A\r\n          git commit -m 'Rebuild site' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -3028,6 +3048,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

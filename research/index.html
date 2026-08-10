@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#set document(title: [Research])\n#metadata((title: \"Research\", toc: (enabled: false))) <website-metadata>\n\n#title()\n\n= Publications\n\n- Brodeur, A., Mikola, D., Cook, N., ..., *Bacher, E.*, ... (2026),\n  *Reproducibility and robustness of economics and political science research*,\n  Nature, 652\n\n  - Paper: #link(\"https://doi.org/10.1038/s41586-026-10251-x\")\n\n- Patil, I., Makowski, D., Ben-Shachar, M. S., Wiernik, B., *Bacher, E.*,\n  Lüdecke, D. (2022), *datawizard: An R Package for Easy Data Preparation and\n  Statistical Transformations*, Journal of Open Source Software, 7(78)\n\n  - Paper: #link(\"https://joss.theoj.org/papers/10.21105/joss.04684\")\n  - Code: #link(\"https://github.com/easystats/datawizard/\")\n\n- *Bacher, E.*, Herrera-Rodriguez, M., Marino Fages, D., Stips, F. (2023),\n  *A replication of Jones & Marinescu (2022)*\n\n  - Paper: #link(\"https://www.econstor.eu/handle/10419/278842\")\n  - Code: #link(\"https://osf.io/6atfw/overview\")\n\n= Work in progress\n\n- *Do anti-immigration attitudes discourage immigration? Evidence from a new\n  instrument*, with\n  #link(\"https://sites.google.com/site/michelbeineeconomics/home\")[_Michel Beine_]\n  and\n  #link(\"https://www.parisschoolofeconomics.eu/en/rapoport-hillel/\")[_Hillel Rapoport_],\n  R&R at Journal of International Economics\n\n- *Migrant Voices*, with\n  #link(\"https://sites.google.com/view/martinfernandezsanchez/\")[_Martín Fernández_]\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#set document(title: [Research])\r\n#metadata((title: \"Research\", toc: (enabled: false))) <website-metadata>\r\n\r\n#title()\r\n\r\n= Publications\r\n\r\n- Brodeur, A., Mikola, D., Cook, N., ..., *Bacher, E.*, ... (2026),\r\n  *Reproducibility and robustness of economics and political science research*,\r\n  Nature, 652\r\n\r\n  - Paper: #link(\"https://doi.org/10.1038/s41586-026-10251-x\")\r\n\r\n- Patil, I., Makowski, D., Ben-Shachar, M. S., Wiernik, B., *Bacher, E.*,\r\n  Lüdecke, D. (2022), *datawizard: An R Package for Easy Data Preparation and\r\n  Statistical Transformations*, Journal of Open Source Software, 7(78)\r\n\r\n  - Paper: #link(\"https://joss.theoj.org/papers/10.21105/joss.04684\")\r\n  - Code: #link(\"https://github.com/easystats/datawizard/\")\r\n\r\n- *Bacher, E.*, Herrera-Rodriguez, M., Marino Fages, D., Stips, F. (2023),\r\n  *A replication of Jones & Marinescu (2022)*\r\n\r\n  - Paper: #link(\"https://www.econstor.eu/handle/10419/278842\")\r\n  - Code: #link(\"https://osf.io/6atfw/overview\")\r\n\r\n= Work in progress\r\n\r\n- *Do anti-immigration attitudes discourage immigration? Evidence from a new\r\n  instrument*, with\r\n  #link(\"https://sites.google.com/site/michelbeineeconomics/home\")[_Michel Beine_]\r\n  and\r\n  #link(\"https://www.parisschoolofeconomics.eu/en/rapoport-hillel/\")[_Hillel Rapoport_],\r\n  R&R at Journal of International Economics\r\n\r\n- *Migrant Voices*, with\r\n  #link(\"https://sites.google.com/view/martinfernandezsanchez/\")[_Martín Fernández_]\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2934,6 +2954,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

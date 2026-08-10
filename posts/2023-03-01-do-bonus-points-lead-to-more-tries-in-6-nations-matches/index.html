@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [Do bonus points lead to more tries in 6 Nations matches?])\n#metadata((\n  title: \"Do bonus points lead to more tries in 6 Nations matches?\",\n  kind: \"post\",\n  date: \"2023-03-01\",\n  summary: \"A small post where rugby is an excuse to do some webscraping and some ggplot-ing.\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\nThe 6 Nations is a rugby tournament that takes place every year in February-March between the six strongest national teams in Europe: England, France, Ireland, Italy, Scotland, and Wales. Each team plays against the other five. A victory gives 4 points, a draw gives 2 points, and a loss gives 0 point.\n\nIn 2017, bonus points were introduced:\n\n- a try bonus point: you get one extra point if you score 4 tries or more during the match, whatever the final result;\n- a losing bonus point: you get one extra point if you lose the match by 7 points or less.\n\nTherefore, a victory can now give you 5 points maximum and a loss can give you 1 point. Additionally, a team that makes the Grand Slam (wins all 5 matches) gets a bonus of 3 points#calepin.elements.sidenote[This is to ensure that a team that makes the Grand Slam also wins the tournament.].\n\nThe idea behind these new rules were to improve the drama by pushing teams to score more tries. In this post, I'd like to check if we saw an increase in the number of tries since 2017.\n\nI'm not going to make a deep exploration or to find whether or not there is a true causal effect between this new rule and the number of tries. It's just a good pretext to do some scraping and some graphs.\n\n= Getting the data\n<getting-the-data>\n```r\nlibrary(rvest)\nlibrary(tidyverse)\n```\n\n```\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.0.9000     ✔ readr     2.1.6     \n✔ forcats   1.0.1          ✔ stringr   1.6.0     \n✔ ggplot2   4.0.2          ✔ tibble    3.3.1     \n✔ lubridate 1.9.5          ✔ tidyr     1.3.2     \n✔ purrr     1.2.1          \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter()         masks stats::filter()\n✖ readr::guess_encoding() masks rvest::guess_encoding()\n✖ dplyr::lag()            masks stats::lag()\nℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n```\n\n```r\nlibrary(patchwork)\n```\n\nI didn't find a clean dataset with the results for the latest editions, so we can scrape the #link(\"https://www.espn.co.uk/rugby/table/_/league/180659/season/2022\")[ESPN website] instead. It only goes back to 2008 but it will do the job.\n\nThe URLs are identical except for the tournament year. Once we get the HTML for one year, we can extract the table with its CSS classes, and then format it nicely with `html_table()`.\n\n```r\nresults <- list()\nfor (i in 2008:2022) {\n  print(paste0(\"Scraping year \", i))\n  html <- read_html(\n    paste0(\"https://www.espn.co.uk/rugby/table/_/league/180659/season/\", i)\n  )\n  countries <- html |> \n    html_element(css = \"div.ResponsiveTable.ResponsiveTable--fixed-left > div.flex > table\") |>\n    html_table() \n  names(countries) <- \"country\"\n\n  res <- html |> \n    html_element(css = \"div.Table__ScrollerWrapper\") |> \n    html_table()\n  \n  results[[as.character(i)]] <- bind_cols(countries, res) |> \n    mutate(year = i)\n}\n```\n\n```\n[1] \"Scraping year 2008\"\n[1] \"Scraping year 2009\"\n[1] \"Scraping year 2010\"\n[1] \"Scraping year 2011\"\n[1] \"Scraping year 2012\"\n[1] \"Scraping year 2013\"\n[1] \"Scraping year 2014\"\n[1] \"Scraping year 2015\"\n[1] \"Scraping year 2016\"\n[1] \"Scraping year 2017\"\n[1] \"Scraping year 2018\"\n[1] \"Scraping year 2019\"\n[1] \"Scraping year 2020\"\n[1] \"Scraping year 2021\"\n[1] \"Scraping year 2022\"\n```\n\nWe can then aggregate this list into a single dataframe.\n\n```r\nall_results <- data.table::rbindlist(results) |>\n  mutate(\n    country = case_when(\n      grepl(\"Wales\", country) ~ \"Wales\",\n      grepl(\"England\", country) ~ \"England\",\n      grepl(\"Italy\", country) ~ \"Italy\",\n      grepl(\"France\", country) ~ \"France\",\n      grepl(\"Scotland\", country) ~ \"Scotland\",\n      grepl(\"Ireland\", country) ~ \"Ireland\"\n    )\n  )\n```\n\n= Plotting the data\n<plotting-the-data>\nFirst, let's see the total number of tries for each year.\n\n```r\nFONT <- \"Cinzel\"\n\nshowtext::showtext_auto()\nsysfonts::font_add_google(FONT)\n\ntheme_custom <- function(...) {\n  theme_light() +\n  theme(\n    panel.grid.minor = element_blank(),\n    text = element_text(family = FONT)\n  )\n}\n\nlabs <- list(\n  x = \"Year\",\n  y = \"Tries per year\"\n)\n\nall_results |> \n  summarise(tries_per_year = sum(TF), .by = year) |> \n  ggplot(aes(year, tries_per_year)) +\n  geom_point(color = \"black\", fill = \"#99b3e6\", shape = 21, size = 2.5) +\n  geom_vline(xintercept = 2016.5, linetype = \"dashed\") +\n  ylim(c(0, 100)) +\n  labs(\n    title = \"Number of tries per tournament\",\n    x = labs$x,\n    y = labs$y\n  ) +\n  theme_custom() +\n  theme(\n    axis.title = element_text(size = 28),\n    axis.text = element_text(size = 25),\n    plot.title = element_text(size = 35)\n  )\n```\n\n#box(image(\"index_files/figure-typst/unnamed-chunk-4-1.svg\"))\n\nWe see an increase in the number of tries, but this upward trend started before 2017, putting into question the real causal effect of this new rule. Was this increase similar for all countries?\n\n```r\nplots <- list()\nfor (i in unique(all_results$country)) {\n  \n  main_color <- switch(i,\n    \"Ireland\" = \"#339966\",\n    \"France\" = \"#0044cc\",\n    \"England\" = \"white\",\n    \"Wales\" = \"#cc0000\",\n    \"Scotland\" = \"#00004d\",\n    \"Italy\" = \"#1a1aff\"\n  )\n  \n  text_color <- switch(i,\n    \"Ireland\" = \"white\",\n    \"France\" = \"white\",\n    \"England\" = \"red\",\n    \"Wales\" = \"white\",\n    \"Scotland\" = \"white\",\n    \"Italy\" = \"white\"\n  )\n  \n  plots[[i]] <-\n    all_results |>\n    filter(country == i) |>\n    mutate(after = as.numeric(year >= 2017)) |>\n    rename(tries_per_year = TF) |>\n    mutate(\n      mean = mean(tries_per_year), .by = after\n    ) |>\n    mutate(\n      mean_before = ifelse(after == 0, mean, NA),\n      mean_after = ifelse(after == 1, mean, NA)\n    ) |>\n    ggplot(aes(year, tries_per_year)) +\n    geom_point(\n      color = \"black\", \n      fill = ifelse(main_color == \"white\", text_color, main_color), \n      alpha = 0.3, \n      shape = 21, \n      size = 2.5\n    ) +\n    geom_line(\n      aes(y = mean_before), \n      linetype = \"longdash\", \n      color = ifelse(main_color == \"white\", text_color, main_color), \n      linewidth = 0.8\n    ) +\n    geom_line(\n      aes(y = mean_after), \n      linetype = \"longdash\", \n      color = ifelse(main_color == \"white\", text_color, main_color), \n      linewidth = 0.8\n    ) +\n    geom_vline(xintercept = 2016.5, linetype = \"dotted\") +\n    ylim(c(0, 30)) +\n    labs(\n      x = labs$x,\n      y = labs$y\n    ) +\n    facet_grid(. ~ country) +\n    theme_custom() +\n    theme(\n      strip.background = element_rect(fill = main_color, color = \"black\"),\n      strip.text = element_text(size = 36, colour = text_color),\n      axis.title = element_text(size = 28),\n      axis.text = element_text(size = 25)\n    )\n}\n\nwrap_plots(plots, ncol = 2)\n```\n\n#box(image(\"patchwork.png\"))\n\nThe dashed lines before and after 2017 show the average number of tries per country and per tournament. We can see that, on average, all teams scored more tries after 2017 than before 2017.\n\nHowever, this change is very heterogenous: some countries had a large increase (Ireland, Scotland), some had a moderate change (France, England), and other didn't seem to be affected a lot (Wales, Italy).\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Do bonus points lead to more tries in 6 Nations matches?])\r\n#metadata((\r\n  title: \"Do bonus points lead to more tries in 6 Nations matches?\",\r\n  kind: \"post\",\r\n  date: \"2023-03-01\",\r\n  summary: \"A small post where rugby is an excuse to do some webscraping and some ggplot-ing.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nThe 6 Nations is a rugby tournament that takes place every year in February-March between the six strongest national teams in Europe: England, France, Ireland, Italy, Scotland, and Wales. Each team plays against the other five. A victory gives 4 points, a draw gives 2 points, and a loss gives 0 point.\r\n\r\nIn 2017, bonus points were introduced:\r\n\r\n- a try bonus point: you get one extra point if you score 4 tries or more during the match, whatever the final result;\r\n- a losing bonus point: you get one extra point if you lose the match by 7 points or less.\r\n\r\nTherefore, a victory can now give you 5 points maximum and a loss can give you 1 point. Additionally, a team that makes the Grand Slam (wins all 5 matches) gets a bonus of 3 points#calepin.elements.sidenote[This is to ensure that a team that makes the Grand Slam also wins the tournament.].\r\n\r\nThe idea behind these new rules were to improve the drama by pushing teams to score more tries. In this post, I'd like to check if we saw an increase in the number of tries since 2017.\r\n\r\nI'm not going to make a deep exploration or to find whether or not there is a true causal effect between this new rule and the number of tries. It's just a good pretext to do some scraping and some graphs.\r\n\r\n= Getting the data\r\n<getting-the-data>\r\n```r\r\nlibrary(rvest)\r\nlibrary(tidyverse)\r\n```\r\n\r\n```\r\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\r\n✔ dplyr     1.2.0.9000     ✔ readr     2.1.6     \r\n✔ forcats   1.0.1          ✔ stringr   1.6.0     \r\n✔ ggplot2   4.0.2          ✔ tibble    3.3.1     \r\n✔ lubridate 1.9.5          ✔ tidyr     1.3.2     \r\n✔ purrr     1.2.1          \r\n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\r\n✖ dplyr::filter()         masks stats::filter()\r\n✖ readr::guess_encoding() masks rvest::guess_encoding()\r\n✖ dplyr::lag()            masks stats::lag()\r\nℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\r\n```\r\n\r\n```r\r\nlibrary(patchwork)\r\n```\r\n\r\nI didn't find a clean dataset with the results for the latest editions, so we can scrape the #link(\"https://www.espn.co.uk/rugby/table/_/league/180659/season/2022\")[ESPN website] instead. It only goes back to 2008 but it will do the job.\r\n\r\nThe URLs are identical except for the tournament year. Once we get the HTML for one year, we can extract the table with its CSS classes, and then format it nicely with `html_table()`.\r\n\r\n```r\r\nresults <- list()\r\nfor (i in 2008:2022) {\r\n  print(paste0(\"Scraping year \", i))\r\n  html <- read_html(\r\n    paste0(\"https://www.espn.co.uk/rugby/table/_/league/180659/season/\", i)\r\n  )\r\n  countries <- html |> \r\n    html_element(css = \"div.ResponsiveTable.ResponsiveTable--fixed-left > div.flex > table\") |>\r\n    html_table() \r\n  names(countries) <- \"country\"\r\n\r\n  res <- html |> \r\n    html_element(css = \"div.Table__ScrollerWrapper\") |> \r\n    html_table()\r\n  \r\n  results[[as.character(i)]] <- bind_cols(countries, res) |> \r\n    mutate(year = i)\r\n}\r\n```\r\n\r\n```\r\n[1] \"Scraping year 2008\"\r\n[1] \"Scraping year 2009\"\r\n[1] \"Scraping year 2010\"\r\n[1] \"Scraping year 2011\"\r\n[1] \"Scraping year 2012\"\r\n[1] \"Scraping year 2013\"\r\n[1] \"Scraping year 2014\"\r\n[1] \"Scraping year 2015\"\r\n[1] \"Scraping year 2016\"\r\n[1] \"Scraping year 2017\"\r\n[1] \"Scraping year 2018\"\r\n[1] \"Scraping year 2019\"\r\n[1] \"Scraping year 2020\"\r\n[1] \"Scraping year 2021\"\r\n[1] \"Scraping year 2022\"\r\n```\r\n\r\nWe can then aggregate this list into a single dataframe.\r\n\r\n```r\r\nall_results <- data.table::rbindlist(results) |>\r\n  mutate(\r\n    country = case_when(\r\n      grepl(\"Wales\", country) ~ \"Wales\",\r\n      grepl(\"England\", country) ~ \"England\",\r\n      grepl(\"Italy\", country) ~ \"Italy\",\r\n      grepl(\"France\", country) ~ \"France\",\r\n      grepl(\"Scotland\", country) ~ \"Scotland\",\r\n      grepl(\"Ireland\", country) ~ \"Ireland\"\r\n    )\r\n  )\r\n```\r\n\r\n= Plotting the data\r\n<plotting-the-data>\r\nFirst, let's see the total number of tries for each year.\r\n\r\n```r\r\nFONT <- \"Cinzel\"\r\n\r\nshowtext::showtext_auto()\r\nsysfonts::font_add_google(FONT)\r\n\r\ntheme_custom <- function(...) {\r\n  theme_light() +\r\n  theme(\r\n    panel.grid.minor = element_blank(),\r\n    text = element_text(family = FONT)\r\n  )\r\n}\r\n\r\nlabs <- list(\r\n  x = \"Year\",\r\n  y = \"Tries per year\"\r\n)\r\n\r\nall_results |> \r\n  summarise(tries_per_year = sum(TF), .by = year) |> \r\n  ggplot(aes(year, tries_per_year)) +\r\n  geom_point(color = \"black\", fill = \"#99b3e6\", shape = 21, size = 2.5) +\r\n  geom_vline(xintercept = 2016.5, linetype = \"dashed\") +\r\n  ylim(c(0, 100)) +\r\n  labs(\r\n    title = \"Number of tries per tournament\",\r\n    x = labs$x,\r\n    y = labs$y\r\n  ) +\r\n  theme_custom() +\r\n  theme(\r\n    axis.title = element_text(size = 28),\r\n    axis.text = element_text(size = 25),\r\n    plot.title = element_text(size = 35)\r\n  )\r\n```\r\n\r\n#box(image(\"index_files/figure-typst/unnamed-chunk-4-1.svg\"))\r\n\r\nWe see an increase in the number of tries, but this upward trend started before 2017, putting into question the real causal effect of this new rule. Was this increase similar for all countries?\r\n\r\n```r\r\nplots <- list()\r\nfor (i in unique(all_results$country)) {\r\n  \r\n  main_color <- switch(i,\r\n    \"Ireland\" = \"#339966\",\r\n    \"France\" = \"#0044cc\",\r\n    \"England\" = \"white\",\r\n    \"Wales\" = \"#cc0000\",\r\n    \"Scotland\" = \"#00004d\",\r\n    \"Italy\" = \"#1a1aff\"\r\n  )\r\n  \r\n  text_color <- switch(i,\r\n    \"Ireland\" = \"white\",\r\n    \"France\" = \"white\",\r\n    \"England\" = \"red\",\r\n    \"Wales\" = \"white\",\r\n    \"Scotland\" = \"white\",\r\n    \"Italy\" = \"white\"\r\n  )\r\n  \r\n  plots[[i]] <-\r\n    all_results |>\r\n    filter(country == i) |>\r\n    mutate(after = as.numeric(year >= 2017)) |>\r\n    rename(tries_per_year = TF) |>\r\n    mutate(\r\n      mean = mean(tries_per_year), .by = after\r\n    ) |>\r\n    mutate(\r\n      mean_before = ifelse(after == 0, mean, NA),\r\n      mean_after = ifelse(after == 1, mean, NA)\r\n    ) |>\r\n    ggplot(aes(year, tries_per_year)) +\r\n    geom_point(\r\n      color = \"black\", \r\n      fill = ifelse(main_color == \"white\", text_color, main_color), \r\n      alpha = 0.3, \r\n      shape = 21, \r\n      size = 2.5\r\n    ) +\r\n    geom_line(\r\n      aes(y = mean_before), \r\n      linetype = \"longdash\", \r\n      color = ifelse(main_color == \"white\", text_color, main_color), \r\n      linewidth = 0.8\r\n    ) +\r\n    geom_line(\r\n      aes(y = mean_after), \r\n      linetype = \"longdash\", \r\n      color = ifelse(main_color == \"white\", text_color, main_color), \r\n      linewidth = 0.8\r\n    ) +\r\n    geom_vline(xintercept = 2016.5, linetype = \"dotted\") +\r\n    ylim(c(0, 30)) +\r\n    labs(\r\n      x = labs$x,\r\n      y = labs$y\r\n    ) +\r\n    facet_grid(. ~ country) +\r\n    theme_custom() +\r\n    theme(\r\n      strip.background = element_rect(fill = main_color, color = \"black\"),\r\n      strip.text = element_text(size = 36, colour = text_color),\r\n      axis.title = element_text(size = 28),\r\n      axis.text = element_text(size = 25)\r\n    )\r\n}\r\n\r\nwrap_plots(plots, ncol = 2)\r\n```\r\n\r\n#box(image(\"patchwork.png\"))\r\n\r\nThe dashed lines before and after 2017 show the average number of tries per country and per tournament. We can see that, on average, all teams scored more tries after 2017 than before 2017.\r\n\r\nHowever, this change is very heterogenous: some countries had a large increase (Ireland, Scotland), some had a moderate change (France, England), and other didn't seem to be affected a lot (Wales, Italy).\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -3108,6 +3128,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

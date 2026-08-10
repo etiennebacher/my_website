@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [Mapping French rivers network])\n#metadata((\n  title: \"Mapping French rivers network\",\n  kind: \"post\",\n  date: \"2021-12-27\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\n#figure([\n#box(image(\"original_map.png\", alt: \"Spanish rivers network, by Dominic Royé\"))\n], caption: figure.caption(\nposition: bottom, \n[\nSpanish rivers network, by Dominic Royé\n]), \nkind: \"quarto-float-fig\", \nsupplement: \"Figure\", \n)\n\nOnce again inspired by #link(\"https://dominicroye.github.io/en/graphs/geography/\")[Dominic Royé]'s maps, I decided to map rivers in France. The dataset I use comes from #link(\"https://hydrosheds.org/\")[HydroSHEDS]. The code below is quite similar to the code in my #link(\"https://www.etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/\")[previous post] so I don't spend a lot of time on it.\n\n```r\nlibrary(ggplot2)\nlibrary(ggtext)\nlibrary(sf)\n```\n\n```\nLinking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE\n```\n\n```r\nlibrary(rnaturalearth)\n```\n\n```r\nfrance <- ne_countries(country = \"France\", scale = 'medium',\n                       type = 'map_units', returnclass = 'sf')\n\nrivers_30sec <- read_sf(\"eu_riv_30s.shp\") |>\n  st_intersection(france)\n```\n\n```\nWarning: attribute variables are assumed to be spatially constant throughout\nall geometries\n```\n\n```r\nx <- ggplot() +\n  geom_sf(\n    data = rivers_30sec,\n    color = \"#002266\"\n  ) +\n  labs(\n    title = \"Rivers network in France\",\n    subtitle = \"This map displays 18,099 rivers. These are<br> measured at a grid resolution of 30 arc-seconds<br> (approx. 1km at the equator).\",\n    caption = \"Made by Etienne Bacher &middot; Data from HydroSHEDS\"\n  ) +\n  theme_void() +\n  theme(\n    plot.background = element_rect(fill = \"white\", color = \"white\"),\n    panel.background = element_rect(fill = \"white\", color = \"white\"),\n    plot.title = element_markdown(\n      hjust = 0.5,\n      size = 30,\n      margin = margin(t = 10, b = -20)\n    ),\n    plot.subtitle = element_markdown(\n      margin = margin(t = 40, b = -60, l = 10),\n      size = 12\n    ),\n    plot.caption = element_markdown(\n      hjust = 0.5,\n      margin = margin(l = 10, b = 20, t = -30)\n    ),\n    text = element_text(family = \"Roboto Condensed\")\n  )\n\nggsave(\"france_30sec.png\", plot = x, width = 8, height = 8)\n```\n\n#box(image(\"france_30sec.png\"))\n\nThis plot shows the density of rivers in France. Now, if we want to show which rivers are the most important, we can modify the opacity of the lines depending on their flow:\n\n```r\nx <- ggplot() +\n  geom_sf(\n    data = rivers_30sec,\n    mapping = aes(alpha = UP_CELLS),\n    color = \"#002266\"\n  ) +\n  labs(\n    title = \"Rivers network in France\",\n    subtitle = \"This map displays 18,099 rivers. These are<br> measured at a grid resolution of 30 arc-seconds<br> (approx. 1km at the equator). Line opacity<br> represents the size of the flow.\",\n    caption = \"Made by Etienne Bacher &middot; Data from HydroSHEDS\"\n  ) +\n  theme_void() +\n  theme(\n    plot.background = element_rect(fill = \"white\", color = \"white\"),\n    panel.background = element_rect(fill = \"white\", color = \"white\"),\n    plot.title = element_markdown(\n      hjust = 0.5,\n      size = 30,\n      margin = margin(t = 10, b = -20)\n    ),\n    plot.subtitle = element_markdown(\n      margin = margin(t = 40, b = -60, l = 10),\n      size = 12\n    ),\n    legend.position = \"none\",\n    plot.caption = element_markdown(\n      hjust = 0.5,\n      margin = margin(l = 10, b = 20, t = -30)\n    ),\n    text = element_text(family = \"Roboto Condensed\")\n  )\n\nggsave(\"france_30sec_opac.png\", plot = x, height = 8, width = 8)\n```\n\n#box(image(\"france_30sec_opac.png\"))\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Mapping French rivers network])\r\n#metadata((\r\n  title: \"Mapping French rivers network\",\r\n  kind: \"post\",\r\n  date: \"2021-12-27\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\n#figure([\r\n#box(image(\"original_map.png\", alt: \"Spanish rivers network, by Dominic Royé\"))\r\n], caption: figure.caption(\r\nposition: bottom, \r\n[\r\nSpanish rivers network, by Dominic Royé\r\n]), \r\nkind: \"quarto-float-fig\", \r\nsupplement: \"Figure\", \r\n)\r\n\r\nOnce again inspired by #link(\"https://dominicroye.github.io/en/graphs/geography/\")[Dominic Royé]'s maps, I decided to map rivers in France. The dataset I use comes from #link(\"https://hydrosheds.org/\")[HydroSHEDS]. The code below is quite similar to the code in my #link(\"https://www.etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/\")[previous post] so I don't spend a lot of time on it.\r\n\r\n```r\r\nlibrary(ggplot2)\r\nlibrary(ggtext)\r\nlibrary(sf)\r\n```\r\n\r\n```\r\nLinking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE\r\n```\r\n\r\n```r\r\nlibrary(rnaturalearth)\r\n```\r\n\r\n```r\r\nfrance <- ne_countries(country = \"France\", scale = 'medium',\r\n                       type = 'map_units', returnclass = 'sf')\r\n\r\nrivers_30sec <- read_sf(\"eu_riv_30s.shp\") |>\r\n  st_intersection(france)\r\n```\r\n\r\n```\r\nWarning: attribute variables are assumed to be spatially constant throughout\r\nall geometries\r\n```\r\n\r\n```r\r\nx <- ggplot() +\r\n  geom_sf(\r\n    data = rivers_30sec,\r\n    color = \"#002266\"\r\n  ) +\r\n  labs(\r\n    title = \"Rivers network in France\",\r\n    subtitle = \"This map displays 18,099 rivers. These are<br> measured at a grid resolution of 30 arc-seconds<br> (approx. 1km at the equator).\",\r\n    caption = \"Made by Etienne Bacher &middot; Data from HydroSHEDS\"\r\n  ) +\r\n  theme_void() +\r\n  theme(\r\n    plot.background = element_rect(fill = \"white\", color = \"white\"),\r\n    panel.background = element_rect(fill = \"white\", color = \"white\"),\r\n    plot.title = element_markdown(\r\n      hjust = 0.5,\r\n      size = 30,\r\n      margin = margin(t = 10, b = -20)\r\n    ),\r\n    plot.subtitle = element_markdown(\r\n      margin = margin(t = 40, b = -60, l = 10),\r\n      size = 12\r\n    ),\r\n    plot.caption = element_markdown(\r\n      hjust = 0.5,\r\n      margin = margin(l = 10, b = 20, t = -30)\r\n    ),\r\n    text = element_text(family = \"Roboto Condensed\")\r\n  )\r\n\r\nggsave(\"france_30sec.png\", plot = x, width = 8, height = 8)\r\n```\r\n\r\n#box(image(\"france_30sec.png\"))\r\n\r\nThis plot shows the density of rivers in France. Now, if we want to show which rivers are the most important, we can modify the opacity of the lines depending on their flow:\r\n\r\n```r\r\nx <- ggplot() +\r\n  geom_sf(\r\n    data = rivers_30sec,\r\n    mapping = aes(alpha = UP_CELLS),\r\n    color = \"#002266\"\r\n  ) +\r\n  labs(\r\n    title = \"Rivers network in France\",\r\n    subtitle = \"This map displays 18,099 rivers. These are<br> measured at a grid resolution of 30 arc-seconds<br> (approx. 1km at the equator). Line opacity<br> represents the size of the flow.\",\r\n    caption = \"Made by Etienne Bacher &middot; Data from HydroSHEDS\"\r\n  ) +\r\n  theme_void() +\r\n  theme(\r\n    plot.background = element_rect(fill = \"white\", color = \"white\"),\r\n    panel.background = element_rect(fill = \"white\", color = \"white\"),\r\n    plot.title = element_markdown(\r\n      hjust = 0.5,\r\n      size = 30,\r\n      margin = margin(t = 10, b = -20)\r\n    ),\r\n    plot.subtitle = element_markdown(\r\n      margin = margin(t = 40, b = -60, l = 10),\r\n      size = 12\r\n    ),\r\n    legend.position = \"none\",\r\n    plot.caption = element_markdown(\r\n      hjust = 0.5,\r\n      margin = margin(l = 10, b = 20, t = -30)\r\n    ),\r\n    text = element_text(family = \"Roboto Condensed\")\r\n  )\r\n\r\nggsave(\"france_30sec_opac.png\", plot = x, height = 8, width = 8)\r\n```\r\n\r\n#box(image(\"france_30sec_opac.png\"))\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -3008,6 +3028,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>

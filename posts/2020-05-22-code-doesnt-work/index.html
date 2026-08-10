@@ -85,6 +85,8 @@
     
       
     
+      
+    
 
     <style>
 @charset "UTF-8";/*!
@@ -1970,10 +1972,28 @@ tbody > tr > td {
 
     </style>
 
+    <style>
+/*
+ * Utterances comment box, ported from the previous site's assets/custom.css
+ * ("align utterances box with content"). Paired with theme/js/utterances.js.
+ *
+ * The widget injects its own `.utterances` rule with `max-width: 760px` and
+ * auto side margins, which is wider than the reading column and centres the
+ * box independently of the text. Pin it to the reading measure instead so it
+ * lines up with the post above it.
+ */
+
+.utterances {
+  max-width: var(--calepin-content-width) !important;
+  margin-left: 0 !important;
+}
+
+    </style>
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\n\n#set document(title: [What to do when your code doesn't work?])\n#metadata((\n  title: \"What to do when your code doesn't work?\",\n  kind: \"post\",\n  date: \"2020-05-22\",\n  summary: \"This is the list of actions I make when I have an error in R.\",\n)) <website-metadata>\n\n// Code blocks in these posts are already-rendered output from the original\n// Quarto build, not live chunks. Keep Calepin from executing them.\n#calepin.setup(eval: false, fenced-chunks: false)\n\n#title()\n\nAs #link(\"https://rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/\")[Jenny Bryan said], one of the first things people do when there is a problem with the code is run it a second time. But in 95% of the cases (in my small programming experience), this does not solve the problem, and I realized I developed a small pattern of reactions when I am in this situation.\n\n= Read the error message\n<read-the-error-message>\nThis may seem obvious since this is the first thing we see when there is an error. However, some messages (like those in the `tidyverse` packages) are really helpful and are enough to solve the problem.\n\nAs you spend time programming, some error messages become quite familiar over time. You don't necessarily need to fully understand the message, just remember how you solved the error when you saw this. But this does not help if this is the first time you see the message.\n\n= Search on StackOverflow and RStudio Community\n<search-on-stackoverflow-and-rstudio-community>\nIf the error message was not helpful, I quickly go to step 2: search online (which is almost always equivalent to \"search on StackOverflow and RStudio Community\"). Those are the two places where you have the most odds of finding an answer to your problem. If your problem concerns mainstream packages (once again, such as the `tidyverse` ones), then there will always be at least one person who had a similar problem for which a solution was given.\n\n= Search on Github\n<search-on-github>\nIf no answer was available on these two websites, I usually go a step further and search about it on GitHub, especially if the problem comes from an unknown and/or new package. Indeed, the source code of a lot of R packages is available on GitHub, as well as the brand-new versions (not on CRAN yet). It is also the place where people make feedback on some issues or help develop the package.\n\nIt happens that somebody reported a similar issue and that the package maintainer answered. If not, well, it is always useful to see the situations in which people use the package, or to learn new functions of this package.\n\n= Post my question online - Part 1\n<post-my-question-online---part-1>\nI have an error, I don't understand the error message and there are no answers online. What can I do now?\n\nYou can post your question on one of the websites I mentioned. My order of preference is:\n\n- StackOverflow: in general, more people see your message and therefore more people might answer your question.\n\n- RStudio Community: more \"specialized\" and some mainstream packages maintainers are there. Also useful when the question is about RStudio IDE (not to be confused with the R language) since they developed it.\n\n- GitHub: clearly the problem comes from an error specific to the package and I couldn't find an answer online. Most of the time, there is no need to create new issues.\n\n#strong[However:] posting a question online implies that you need to create a reproducible example. What is a reproducible example?\n\nSuppose that you are working on your data and have a problem. You may want to copy and paste your code online. It's quick and easy. But try to imagine you're someone on StackOverflow that sees your code for the first time. This person needs to run it to understand what your code does and what the problem is. But that's impossible, because you load CSV data that is only available for you, or because you forgot to mention the packages you're using. Therefore, no one can run your code and the odds of someone solving your problem plummet.\n\nIf you post online, your post MUST contain:\n\n- A description of what you're trying to do and of your problem in plain text.\n\n- Some code that contains:\n\n  - the `library()` calls needed to run every function you use (but no need to put packages that you never use in your example)\n\n  - a code that can be copied and pasted in a new R session and that ends up in the same situation as you're in. That means that the data you use must be reproducible.\n\n  - the expected output, if possible. If you can easily show the output you want, do it. It will be easier to help you if you show what you want. In some cases (#emph[e.g] Shiny apps), it is not always possible or easy to provide this, so it is not a 100% necessary.\n\nMaking a reproducible example takes time but is incredibly helpful. Open a new tab in RStudio, try to simplify your situation as much as possible and to make it reproducible by using data available for everyone. For example, some datasets are automatically in R, such as `mtcars` or `iris`. Don't forget to mention the packages you use in `library()`. Once you think you have finished (you show what packages you use, you keep your example as small as possible and you show the expected output), restart the session (ctrl + shift + F10) and see if it runs and if it reproduces the same error. If it doesn't, it means your example is not reproducible and that you have to improve it.\n\nI would say that I solve the problem myself by making a reproducible example in 70% of the cases, so taking the time to make one is worth it!\n\n= Post my question online - Part 2\n<post-my-question-online---part-2>\nHowever, if you didn't solve your problem with this (and if your example is reproducible), you can post it on StackOverflow or RStudio Community. Don't forget to explain your situation and your code, don't paste it without any details!\n\nHopefully, you'll have an answer.\n\n= Additional resources\n<additional-resources>\nHere are two pages with details about making a reproducible example:\n\n- https:\\/\\/stackoverflow.com/help/minimal-reproducible-example\n\n- https:\\/\\/stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example\n"</script>
+
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [What to do when your code doesn't work?])\r\n#metadata((\r\n  title: \"What to do when your code doesn't work?\",\r\n  kind: \"post\",\r\n  date: \"2020-05-22\",\r\n  summary: \"This is the list of actions I make when I have an error in R.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nAs #link(\"https://rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/\")[Jenny Bryan said], one of the first things people do when there is a problem with the code is run it a second time. But in 95% of the cases (in my small programming experience), this does not solve the problem, and I realized I developed a small pattern of reactions when I am in this situation.\r\n\r\n= Read the error message\r\n<read-the-error-message>\r\nThis may seem obvious since this is the first thing we see when there is an error. However, some messages (like those in the `tidyverse` packages) are really helpful and are enough to solve the problem.\r\n\r\nAs you spend time programming, some error messages become quite familiar over time. You don't necessarily need to fully understand the message, just remember how you solved the error when you saw this. But this does not help if this is the first time you see the message.\r\n\r\n= Search on StackOverflow and RStudio Community\r\n<search-on-stackoverflow-and-rstudio-community>\r\nIf the error message was not helpful, I quickly go to step 2: search online (which is almost always equivalent to \"search on StackOverflow and RStudio Community\"). Those are the two places where you have the most odds of finding an answer to your problem. If your problem concerns mainstream packages (once again, such as the `tidyverse` ones), then there will always be at least one person who had a similar problem for which a solution was given.\r\n\r\n= Search on Github\r\n<search-on-github>\r\nIf no answer was available on these two websites, I usually go a step further and search about it on GitHub, especially if the problem comes from an unknown and/or new package. Indeed, the source code of a lot of R packages is available on GitHub, as well as the brand-new versions (not on CRAN yet). It is also the place where people make feedback on some issues or help develop the package.\r\n\r\nIt happens that somebody reported a similar issue and that the package maintainer answered. If not, well, it is always useful to see the situations in which people use the package, or to learn new functions of this package.\r\n\r\n= Post my question online - Part 1\r\n<post-my-question-online---part-1>\r\nI have an error, I don't understand the error message and there are no answers online. What can I do now?\r\n\r\nYou can post your question on one of the websites I mentioned. My order of preference is:\r\n\r\n- StackOverflow: in general, more people see your message and therefore more people might answer your question.\r\n\r\n- RStudio Community: more \"specialized\" and some mainstream packages maintainers are there. Also useful when the question is about RStudio IDE (not to be confused with the R language) since they developed it.\r\n\r\n- GitHub: clearly the problem comes from an error specific to the package and I couldn't find an answer online. Most of the time, there is no need to create new issues.\r\n\r\n#strong[However:] posting a question online implies that you need to create a reproducible example. What is a reproducible example?\r\n\r\nSuppose that you are working on your data and have a problem. You may want to copy and paste your code online. It's quick and easy. But try to imagine you're someone on StackOverflow that sees your code for the first time. This person needs to run it to understand what your code does and what the problem is. But that's impossible, because you load CSV data that is only available for you, or because you forgot to mention the packages you're using. Therefore, no one can run your code and the odds of someone solving your problem plummet.\r\n\r\nIf you post online, your post MUST contain:\r\n\r\n- A description of what you're trying to do and of your problem in plain text.\r\n\r\n- Some code that contains:\r\n\r\n  - the `library()` calls needed to run every function you use (but no need to put packages that you never use in your example)\r\n\r\n  - a code that can be copied and pasted in a new R session and that ends up in the same situation as you're in. That means that the data you use must be reproducible.\r\n\r\n  - the expected output, if possible. If you can easily show the output you want, do it. It will be easier to help you if you show what you want. In some cases (#emph[e.g] Shiny apps), it is not always possible or easy to provide this, so it is not a 100% necessary.\r\n\r\nMaking a reproducible example takes time but is incredibly helpful. Open a new tab in RStudio, try to simplify your situation as much as possible and to make it reproducible by using data available for everyone. For example, some datasets are automatically in R, such as `mtcars` or `iris`. Don't forget to mention the packages you use in `library()`. Once you think you have finished (you show what packages you use, you keep your example as small as possible and you show the expected output), restart the session (ctrl + shift + F10) and see if it runs and if it reproduces the same error. If it doesn't, it means your example is not reproducible and that you have to improve it.\r\n\r\nI would say that I solve the problem myself by making a reproducible example in 70% of the cases, so taking the time to make one is worth it!\r\n\r\n= Post my question online - Part 2\r\n<post-my-question-online---part-2>\r\nHowever, if you didn't solve your problem with this (and if your example is reproducible), you can post it on StackOverflow or RStudio Community. Don't forget to explain your situation and your code, don't paste it without any details!\r\n\r\nHopefully, you'll have an answer.\r\n\r\n= Additional resources\r\n<additional-resources>\r\nHere are two pages with details about making a reproducible example:\r\n\r\n- https:\\/\\/stackoverflow.com/help/minimal-reproducible-example\r\n\r\n- https:\\/\\/stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2957,6 +2977,63 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowLeft") show(currentIndex - 1);
     if (e.key === "ArrowRight") show(currentIndex + 1);
   });
+});
+
+    </script>
+    
+    <script>
+/*
+ * Utterances comment threads. Paired with theme/css/80_utterances.css.
+ *
+ * The theme bundles every js/ file into every page, so this bails out on
+ * anything that is not a single post.
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // Posts live at /posts/<slug>/; /posts/ itself is the blog listing, which
+  // should not get a comment box. Strip the file name so the check works both
+  // on the deployed site and under `calepin serve`.
+  var path = location.pathname.replace(/index\.html$/, "");
+  if (!/^\/posts\/[^/]+\/$/.test(path)) {
+    return;
+  }
+
+  // The previous site appended to <article>; this theme wraps the post body in
+  // <main class="calepin-content"> instead.
+  var container = document.querySelector("main.calepin-content");
+  if (!container) {
+    return;
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "dark"
+      ? "github-dark"
+      : "github-light";
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://utteranc.es/client.js";
+  script.setAttribute("repo", "etiennebacher/my_website");
+  // The previous site used `og:title`, which was the bare post title there.
+  // Calepin appends " | Etienne Bacher" to og:title, so use `title`
+  // (document.title), which still holds the bare post title and therefore maps
+  // to the same issue titles as before.
+  script.setAttribute("issue-term", "title");
+  script.setAttribute("crossorigin", "anonymous");
+  script.setAttribute("label", "comment_thread");
+  script.setAttribute("theme", currentTheme());
+  container.appendChild(script);
+
+  // Follow the site's light/dark toggle, which rewrites data-theme on <html>.
+  new MutationObserver(function () {
+    var frame = document.querySelector(".utterances-frame");
+    if (!frame || !frame.contentWindow) {
+      return;
+    }
+    frame.contentWindow.postMessage(
+      { type: "set-theme", theme: currentTheme() },
+      "https://utteranc.es"
+    );
+  }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 });
 
     </script>
