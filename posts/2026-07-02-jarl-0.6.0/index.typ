@@ -17,12 +17,12 @@ I'm glad to announce the release of #link("https://jarl.etiennebacher.com/")[Jar
 
 A quick summary before diving into the details:
 
-- Jarl has a new experimental rule (`unused_object`) to detect objects that are defined but never used. This is disabled by default as it can have false positives, and bug reports would be greatly appreciated!
-- XXX new rules (on top of `unused_object`)
+- Jarl has a new experimental rule (`unused_object`) to detect objects that are defined but never used. This is disabled by default because there may be false positives, but it can already be very useful and bug reports would be greatly appreciated!
+- 16 new rules (in addition to `unused_object`)
 - better experience with the command-line interface (CLI)
 - Jarl can be installed via `uv`, `pixi`, `mise`, and more!
 
-As usual, this release also comes with bug fixes. Find the full list of changes in the #link("https://jarl.etiennebacher.com/changelog")[changelog].
+As usual, this release also comes with other small features and a whole lot of bug fixes. You can find the full list of changes in the #link("https://jarl.etiennebacher.com/changelog")[changelog].
 
 = Find unused objects
 <find-unused-objects>
@@ -36,9 +36,11 @@ The first one is shared across all languages: we need to have a good representat
 
 So far, most rules rely on #emph[patterns]. For example, if we find a piece of code that follows the pattern `any(is.na(<other code>))`, then we can report a violation of the `any_is_na` rule. This is relatively easy to implement because this is a small pattern that follows a logical construct: if we find a call to `any()` containing a call to `is.na()`, we report it.
 
-In the case of `unused_object`, we need to find whether an object that was just defined is used anywhere in the subsequent code, and potentially in different files! We need to be able to analyze the relationship of all R objects in our code. In other words, we need to do some semantic analysis.
+In the case of `unused_object`, we need to find whether an object that was just defined is used anywhere in the subsequent code, whether it is called in a different file, whether it is overwritten before actually being used, etc.
 
-I haven't done this myself. Instead, I relied upon the work of Lionel Henry and Davis Vaughan in #link("https://github.com/posit-dev/ark")[Ark] (in particular the `Oak` project). Thanks to their work, Jarl can now read the entire semantic structure of R code, which also requires handling the case of multi-file projects that share objects, such as R packages or scripts that call `source()`. Big thanks to both of them for their work!
+We need to be able to analyze the relationship of all R objects in our code. In other words, we need to do some semantic analysis.
+
+This is a big challenge that I haven't tackled myself. Instead, I relied upon the work of Lionel Henry and Davis Vaughan in #link("https://github.com/posit-dev/ark")[Ark] (in particular the `Oak` project). Thanks to their work, Jarl can now read the entire semantic structure of R code, which also requires handling the case of multi-file projects that share objects, such as R packages or scripts that call `source()`. Big thanks to both of them for their work!
 
 == Everyone can manipulate R
 <everyone-can-manipulate-r>
@@ -59,15 +61,16 @@ We have a strong foundation for our semantic analysis, and this already covers a
 
   ]
   ]
-  Jarl automatically handles string interpolation in the `glue` and `cli` packages, but anyone could come up with their own functions like this and Jarl wouldn't be able to handle them.
+  Jarl automatically handles string interpolation in the `glue`, `cli`, and `stringr` packages, but anyone could create their own functions to do string interpolation (see for instance #link("https://lrberge.github.io/stringmagic/")[stringmagic]) and Jarl isn't capable of handling them.
 
 - non-standard evaluation (NSE):
 
   #block[
   ```r
   x <- 1
-  env <- environment()
   q <- quote(x)
+
+  env <- environment()
   eval(q, envir = env)
   #> [1] 1
 
@@ -77,7 +80,7 @@ We have a strong foundation for our semantic analysis, and this already covers a
   ```
   ]
 
-  Should we consider that our `x <- 1` definition above is used? Hard to say because it entirely depends on `env`, which may have been modified in another place. When we do static analysis, we don't evaluate R code so we can't explore the content of `env` to determine whether `x <- 1` is used.
+  Suppose we cannot run any code (as-is the case in a static analysis tool like Jarl), should we consider that our `x <- 1` definition above is used? Hard to say because it entirely depends on `env`, which may have been modified in another place, and we can't explore its contents. Currently, Jarl reports `x` as unused.
 
   Similarly, in the following code, can we detect that `x` is actually used?
 
@@ -100,25 +103,27 @@ We have a strong foundation for our semantic analysis, and this already covers a
   ]
   When we evaluate the code, we can see that it is used, but in static analysis this is much harder to do because once we are in the function body, we would need to guess that `x` #emph[might] be used in `eval()`, walk back to `expr`, leading to `my_expr`, detect that `quote()` is used and that `x` is part of it.
 
-  This might be doable in this simple example, but it is much harder to generalize.
+  This might be doable in this simple example, but it is much harder to generalize. Currently, Jarl reports `x` as unused.
 
-Nevertheless, despite these flaws, I believe that `unused_object` will be very useful in many projects. If you consider it reports too many false positives, you can always ignore this rule with the `ignore` parameter in `jarl.toml` or with `--ignore` in the command line.
+Nevertheless, despite these flaws, I believe that `unused_object` will be very useful in many projects.
+
+*Reminder:* for now, you need to explicitly opt-in to use this rule.
 
 = New rules
 <new-rules>
-XXX new rules have been added since 0.5.0, thanks to several external contributors. Most of these rules also exist in `lintr`, meaning that Jarl slowly but surely gets closer to feature parity, but a few of them are not found there. In particular, Jarl now reports cases of unused parentheses and empty R files.
+16 new rules have been added since 0.5.0 (in addition to `unused_object`), thanks to several contributors. Most of these rules also exist in `lintr`, meaning that Jarl slowly but surely gets closer to feature parity, but a few of them are not found there. In particular, Jarl now reports cases of unused parentheses and empty R files.
 
 = Better CLI experience
 <better-cli-experience>
 The CLI received some small but useful improvements.
 
-#strong[Autocomplete suggestions]
+== Autocomplete suggestions
 
 It is now possible to press `<TAB>` to have suggestions of commands or rule names accepted by Jarl. For instance, `jarl check . --select any<TAB>` would suggest either `any_is_na` or `any_duplicated`.
 
-This is supported in several shells, such as `fish`, `zsh`, and `bash`. See the #link("https://jarl.etiennebacher.com/dev/howto/shell-completions")[documentation] to know how set this up with your shell.
+This is supported in several shells, such as `fish`, `zsh`, and `bash`. See the #link("https://jarl.etiennebacher.com/dev/howto/shell-completions")[documentation] to know how to set this up with your shell.
 
-#strong[`jarl rule`]
+== `jarl rule`
 
 Jarl now has a new command `jarl rule <rulename>` to print the documentation of a specific rule directly in the terminal, hence avoiding an extra trip to the website.
 
@@ -138,9 +143,9 @@ Checks for usage of `any(is.na(...))`, `NA %in% x`, and `NA %notin% x`.
 [...]
 ```
 
-#strong[Rule name suggestions]
+== Rule name suggestions
 
-It now suggests similar rule names when there is a typo in one of the names:
+Jarl now suggests similar rule names when there is a typo in one of the names:
 
 ```sh
 > jarl check . --select duplicated_argument,any_i_na
@@ -151,15 +156,15 @@ jarl failed
   Help: Did you mean "any_is_na"?
 ```
 
-#strong[Exclude folders]
+== Exclude folders
 
-It can exclude folders with the `--exclude` argument, similar to the `exclude` argument in `jarl.toml`. Note that this argument must take a `=`:
+Jarl can exclude folders with the `--exclude` argument, similar to the `exclude` argument in `jarl.toml`. Note that this argument must take a `=`:
 
 ```sh
 > jarl check . --exclude=inst,tests
 ```
 
-#strong[Better help docs organization]
+== Better help docs organization
 
 The help page is now clearly split into various sections:
 
@@ -214,19 +219,27 @@ See the #link("https://jarl.etiennebacher.com/dev/#other")[installation instruct
 <conclusion>
 Jarl 0.6.0 brings many exciting features, try them out! If you find any issue, have feature ideas, or want to contribute, head to the #link("https://github.com/etiennebacher/jarl")[Github repository].
 
-I'm glad that this release got code contributions from six people (besides myself), and I want to thank them and everyone else who contributed one way or another: #link("https://github.com/atsyplenkov")[\@atsyplenkov], #link("https://github.com/Bisaloo")[\@Bisaloo], #link("https://github.com/dieghernan")[\@dieghernan], #link("https://github.com/gisler")[\@gisler], #link("https://github.com/ilyaZar")[\@ilyaZar], #link("https://github.com/JosephBARBIERDARNAL")[\@JosephBARBIERDARNAL], #link("https://github.com/JosiahParry")[\@JosiahParry], #link("https://github.com/lwjohnst86")[\@lwjohnst86], #link("https://github.com/maelle")[\@maelle], #link("https://github.com/novica")[\@novica], #link("https://github.com/randy3k")[\@randy3k], and #link("https://github.com/Yousa-Mirage")[\@Yousa-Mirage].
+I'm glad that this release got code contributions from six people (in addition to myself), and I want to thank them and everyone else who contributed one way or another: #link("https://github.com/atsyplenkov")[\@atsyplenkov], #link("https://github.com/Bisaloo")[\@Bisaloo], #link("https://github.com/christopherkenny")[\@christopherkenny], #link("https://github.com/dieghernan")[\@dieghernan], #link("https://github.com/fh-mthomson")[\@fh-mthomson], #link("https://github.com/gisler")[\@gisler], #link("https://github.com/Goldziher")[\@Goldziher], #link("https://github.com/hfrick")[\@hfrick], #link("https://github.com/ilyaZar")[\@ilyaZar], #link("https://github.com/JosephBARBIERDARNAL")[\@JosephBARBIERDARNAL], #link("https://github.com/JosiahParry")[\@JosiahParry], #link("https://github.com/lwjohnst86")[\@lwjohnst86], #link("https://github.com/maelle")[\@maelle], #link("https://github.com/njtierney")[\@njtierney], #link("https://github.com/novica")[\@novica], #link("https://github.com/randy3k")[\@randy3k], #link("https://github.com/sebffischer")[\@sebffischer], #link("https://github.com/snystrom")[\@snystrom], and #link("https://github.com/Yousa-Mirage")[\@Yousa-Mirage].
 
+// since <- "2026-03-24"
+//
 // x <- gh::gh(
 //   "/repos/:owner/:repo/issues",
 //   owner = "etiennebacher",
 //   repo = "jarl",
-//   since = "2026-03-24",
-//   state = "closed",
+//   since = since,
+//   state = "all",
 //   .limit = Inf
 // )
+
+// # closed items, plus those opened after the cutoff and still open
+// x <- purrr::keep(x, \(i) {
+//   i$state == "closed" || substr(i$created_at, 1, 10) >= since
+// })
+
 // users <- sort(unique(purrr::map_chr(x, c("user", "login"))))
-// users <- grep("dependabot", users, invert = TRUE, value = TRUE)
-// users <- grep("etiennebacher", users, invert = TRUE, value = TRUE)
+// users <- grep("dependabot|etiennebacher", users, invert = TRUE, value = TRUE)
+
 // clipr::write_clip(glue::glue_collapse(
 //   glue::glue('#link("https://github.com/{users}")[\\@{users}]'),
 //   ", ",
