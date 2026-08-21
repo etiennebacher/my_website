@@ -7,8 +7,6 @@
   date: "2026-07-02",
 )) <website-metadata>
 
-// Code blocks in these posts are already-rendered output from the original
-// Quarto build, not live chunks. Keep Calepin from executing them.
 #calepin.setup(eval: false, fenced-chunks: false)
 
 #title()
