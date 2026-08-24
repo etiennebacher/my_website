@@ -109,7 +109,16 @@ Nevertheless, despite these flaws, I believe that `unused_object` will be very u
 
 = New rules
 <new-rules>
-16 new rules have been added since 0.5.0 (in addition to `unused_object`), thanks to several contributors. Most of these rules also exist in `lintr`, meaning that Jarl slowly but surely gets closer to feature parity, but a few of them are not found there. In particular, Jarl now reports cases of unused parentheses and empty R files.
+16 new rules have been added since 0.5.0 (in addition to `unused_object`), thanks to several contributors. Most of these rules also exist in `lintr`, meaning that Jarl slowly but surely gets closer to feature parity, but a few of them are not found there. In particular, Jarl now detects #link("https://jarl.etiennebacher.com/dev/rules/glue.html")[possible mistakes in `glue::glue()`], such as calls without any string interpolation:
+
+```sh
+warning: glue
+ --> foo.R:1:1
+  |
+1 | glue('{a}', .open = '<', .close = '>')
+  | -------------------------------------- This `glue()` call isn't necessary because it performs no interpolation.
+  |
+```
 
 = Better CLI experience
 <better-cli-experience>
