@@ -15,7 +15,7 @@ I'm glad to announce the release of #link("https://jarl.etiennebacher.com/")[Jar
 
 A quick summary before diving into the details:
 
-- Jarl has a new experimental rule (`unused_object`) to detect objects that are defined but never used. This is disabled by default because there may be false positives, but it can already be very useful and bug reports would be greatly appreciated!
+- Jarl has a new experimental rule (`unused_object`) to detect objects that are defined but never used. This is disabled by default because there may be false positives. However, we released it both because it can already be very useful and because it can be improved thanks to your bug reports!
 - 16 new rules (in addition to `unused_object`)
 - better experience with the command-line interface (CLI)
 - Jarl can be installed via `uv`, `pixi`, `mise`, and more!
