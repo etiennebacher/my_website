@@ -220,7 +220,7 @@ Global options:
 <new-ways-to-install-jarl>
 Jarl is now available on #link("https://pypi.org/project/jarl-linter/")[PyPI] and #link("https://anaconda.org/channels/conda-forge/packages/jarl/overview")[conda-forge], meaning that it can be installed by `uv`, `mise`, `pixi`, and potentially more tools.
 
-See the #link("https://jarl.etiennebacher.com/dev/#other")[installation instructions] for more info.
+It can also be installed via #link("https://formulae.brew.sh/formula/jarl")[Homebrew]. See the #link("https://jarl.etiennebacher.com/dev/#other")[installation instructions] for more info.
 
 = Conclusion
 <conclusion>
