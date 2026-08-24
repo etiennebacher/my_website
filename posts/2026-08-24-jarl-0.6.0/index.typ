@@ -61,7 +61,7 @@ We have a strong foundation for our semantic analysis, and this already covers a
   ]
   Jarl automatically handles string interpolation in the `glue`, `cli`, and `stringr` packages, but anyone could create their own functions to do string interpolation (see for instance #link("https://lrberge.github.io/stringmagic/")[stringmagic]) and Jarl isn't capable of handling them.
 
-- non-standard evaluation (NSE):
+- metaprogramming:
 
   #block[
   ```r
