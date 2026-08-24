@@ -38,7 +38,7 @@ In the case of `unused_object`, we need to find whether an object that was just 
 
 We need to be able to analyze the relationship of all R objects in our code. In other words, we need to do some semantic analysis.
 
-This is a big challenge that I haven't tackled myself. Instead, I relied upon the work of Lionel Henry and Davis Vaughan in #link("https://github.com/posit-dev/ark")[Ark] (in particular the `Oak` project). Thanks to their work, Jarl can now read the entire semantic structure of R code, which also requires handling the case of multi-file projects that share objects, such as R packages or scripts that call `source()`. Big thanks to both of them for their work!
+This is a big challenge that I haven't tackled myself. Instead, I relied upon the work of Lionel Henry and Davis Vaughan in #link("https://github.com/posit-dev/ark")[Ark] (in particular the `Oak` project). With this, Jarl can now read the entire semantic structure of R code, which also requires handling the case of multi-file projects that share objects, such as R packages or scripts that call `source()`. Big thanks to both of them for their work!
 
 == Everyone can manipulate R
 <everyone-can-manipulate-r>
