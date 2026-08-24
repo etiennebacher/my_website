@@ -4,8 +4,17 @@
   <id>https://etiennebacher.com</id>
   <link href="https://etiennebacher.com"/>
   <link href="https://etiennebacher.com/atom.xml" rel="self"/>
-  <updated>2026-03-23T00:00:00Z</updated>
+  <updated>2026-08-24T00:00:00Z</updated>
   <subtitle>Personal website of Etienne Bacher: blog posts about R, research, and software.</subtitle>
+  
+  <entry>
+    <title>Jarl 0.6.0</title>
+    <id>https://etiennebacher.com/posts/2026-08-24-jarl-0.6.0/index.html</id>
+    <link href="https://etiennebacher.com/posts/2026-08-24-jarl-0.6.0/index.html"/>
+    <updated>2026-08-24T00:00:00Z</updated>
+    
+    
+  </entry>
   
   <entry>
     <title>Jarl 0.5.0</title>

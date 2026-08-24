@@ -4,7 +4,16 @@
     <title>Etienne Bacher</title>
     <link>https://etiennebacher.com</link>
     <description>Personal website of Etienne Bacher: blog posts about R, research, and software.</description>
-    <lastBuildDate>Mon, 23 Mar 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 24 Aug 2026 00:00:00 GMT</lastBuildDate>
+    
+    <item>
+      <title>Jarl 0.6.0</title>
+      <link>https://etiennebacher.com/posts/2026-08-24-jarl-0.6.0/index.html</link>
+      <guid>https://etiennebacher.com/posts/2026-08-24-jarl-0.6.0/index.html</guid>
+      <pubDate>Mon, 24 Aug 2026 00:00:00 GMT</pubDate>
+      
+      
+    </item>
     
     <item>
       <title>Jarl 0.5.0</title>
