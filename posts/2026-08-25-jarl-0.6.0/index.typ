@@ -116,7 +116,9 @@ warning: glue
  --> foo.R:1:1
   |
 1 | glue('{a}', .open = '<', .close = '>')
-  | -------------------------------------- This `glue()` call isn't necessary because it performs no interpolation.
+  | -------------------------------------- This `glue()`
+  |      call isn't necessary because it performs no
+  |      interpolation.
   |
 ```
 
@@ -171,7 +173,7 @@ Jarl can exclude folders with the `--exclude` argument, similar to the `exclude`
 > jarl check . --exclude=inst,tests
 ```
 
-== Better help docs organization
+== Better help page organization
 
 The help page is now clearly split into various sections:
 
