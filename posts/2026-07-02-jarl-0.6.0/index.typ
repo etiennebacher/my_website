@@ -24,7 +24,7 @@ As usual, this release also comes with other small features and a whole lot of b
 
 = Find unused objects
 <find-unused-objects>
-Jarl 0.6.0 brings many new rules but `unused_object` probably is the most significant, and definitely is the most complicated to implement. `unused_object` is a rule that finds objects that are defined but never used, meaning that these definitions can be removed without affecting the rest of the code. Unused objects are usually pieces of code that were forgotten while refactoring some code, but they can also signal a bug somewhere if we expected this object to be used.
+Jarl 0.6.0 brings many new rules but `unused_object` probably is the most significant, and definitely was the most complicated to implement. `unused_object` is a rule that finds objects that are defined but never used, meaning that these definitions can be removed without affecting the rest of the code. Unused objects are usually pieces of code that were forgotten while refactoring some code, but they can also signal a bug somewhere if we expected this object to be used.
 
 This rule is hard to implement for two reasons.
 
