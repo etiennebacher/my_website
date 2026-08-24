@@ -4,7 +4,7 @@
 #metadata((
   title: "Jarl 0.6.0",
   kind: "post",
-  date: "2026-08-25",
+  date: "2026-08-24",
 )) <website-metadata>
 
 #calepin.setup(eval: false, fenced-chunks: false)
