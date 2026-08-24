@@ -78,7 +78,7 @@ We have a strong foundation for our semantic analysis, and this already covers a
   ```
   ]
 
-  Suppose we cannot run any code (as-is the case in a static analysis tool like Jarl), should we consider that our `x <- 1` definition above is used? Hard to say because it entirely depends on `env`, which may have been modified in another place, and we can't explore its contents. Currently, Jarl reports `x` as unused.
+  Suppose we cannot run any code (as is the case in a static analysis tool like Jarl), should we consider that our `x <- 1` definition above is used? Hard to say because it entirely depends on `env`, which may have been modified in another place, and we can't explore its contents. Currently, Jarl reports `x` as unused.
 
   Similarly, in the following code, can we detect that `x` is actually used?
 
