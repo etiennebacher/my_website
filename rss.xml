@@ -4,13 +4,13 @@
     <title>Etienne Bacher</title>
     <link>https://etiennebacher.com</link>
     <description>Personal website of Etienne Bacher: blog posts about R, research, and software.</description>
-    <lastBuildDate>Tue, 15 Sep 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 21 Sep 2026 00:00:00 GMT</lastBuildDate>
     
     <item>
       <title>Snapshotting error messages</title>
-      <link>https://etiennebacher.com/posts/2026-09-15-snapshot-errors/index.html</link>
-      <guid>https://etiennebacher.com/posts/2026-09-15-snapshot-errors/index.html</guid>
-      <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+      <link>https://etiennebacher.com/posts/2026-09-21-snapshot-errors/index.html</link>
+      <guid>https://etiennebacher.com/posts/2026-09-21-snapshot-errors/index.html</guid>
+      <pubDate>Mon, 21 Sep 2026 00:00:00 GMT</pubDate>
       
       <description>A snapshot is a file that contains the output of a function as it would appear to the user. For instance, you could save snapshots to capture the output of plot() so that you can check that it looks correct, and so that you know if this output changes even by just a few pixels in…</description>
     </item>
