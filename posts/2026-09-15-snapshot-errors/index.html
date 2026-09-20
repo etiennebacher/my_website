@@ -2062,12 +2062,6 @@ pre {
   border-left: 2px solid var(--calepin-color-border);
 }
 
-/* Inline code that is a link. The base theme colors every <code> with the body
-   text color, which wins over the color inherited from the enclosing <a>, so a
-   linked `package` was indistinguishable from an unlinked one. Take the
-   anchor's color instead — that covers the hover color too — and underline the
-   code span itself rather than the whole anchor, so a link that mixes prose and
-   code marks only the code. */
 a > code {
   color: inherit;
   text-decoration: underline;
