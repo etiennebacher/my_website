@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gallery</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="Data visualization gallery">
+    <meta property="og:description" content="Data visualization gallery">
+    <meta name="twitter:description" content="Data visualization gallery">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Gallery | Etienne Bacher">
+    <meta name="twitter:title" content="Gallery | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/gallery/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#set document(title: [Gallery])\r\n#metadata((title: \"Gallery\", summary: \"Data visualization gallery\", toc: (enabled: false))) <website-metadata>\r\n\r\n#title()\r\n\r\nA selection of the plots I made for \\#TidyTuesday. Find the whole list\r\n#link(\"https://github.com/etiennebacher/tidytuesday\")[here].\r\n\r\n#let images = (\r\n  \"2021-12-steam-games.png\",\r\n  \"2021-13-un-votes.png\",\r\n  \"2021-15-deforestation.png\",\r\n  \"2021-16-us-post-offices.png\",\r\n  \"2021-17-netflix-titles.png\",\r\n  \"2021-23-survivor-tv.png\",\r\n  \"2021-27-animal-rescue.png\",\r\n  \"2021-40-nber-papers.png\",\r\n  \"2022-09-alternative-fuel-stations.png\",\r\n  \"2022-28-european-flights.png\",\r\n  \"2022-47-uk-museums.png\",\r\n  \"2022-51-temperature-predictions.png\",\r\n)\r\n\r\n// The grid shows the thumbnails; the lightbox (theme/js/gallery.js) opens the\r\n// full-size image from each link's href.\r\n#html.div(\r\n  class: \"gallery-grid\",\r\n  for img in images {\r\n    html.a(\r\n      href: img,\r\n      html.elem(\"img\", \"\", attrs: (\r\n        src: \"thumb-\" + img,\r\n        alt: img.slice(0, -4),\r\n        loading: \"lazy\",\r\n        decoding: \"async\",\r\n      )),\r\n    )\r\n  },\r\n)\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#set document(title: [Gallery])\r\n#metadata((title: \"Gallery\", summary: \"Data visualization gallery\", toc: (enabled: false))) \u003cwebsite-metadata\u003e\r\n\r\n#title()\r\n\r\nA selection of the plots I made for \\#TidyTuesday. Find the whole list\r\n#link(\"https://github.com/etiennebacher/tidytuesday\")[here].\r\n\r\n#let images = (\r\n  \"2021-12-steam-games.png\",\r\n  \"2021-13-un-votes.png\",\r\n  \"2021-15-deforestation.png\",\r\n  \"2021-16-us-post-offices.png\",\r\n  \"2021-17-netflix-titles.png\",\r\n  \"2021-23-survivor-tv.png\",\r\n  \"2021-27-animal-rescue.png\",\r\n  \"2021-40-nber-papers.png\",\r\n  \"2022-09-alternative-fuel-stations.png\",\r\n  \"2022-28-european-flights.png\",\r\n  \"2022-47-uk-museums.png\",\r\n  \"2022-51-temperature-predictions.png\",\r\n)\r\n\r\n// The grid shows the thumbnails; the lightbox (theme/js/gallery.js) opens the\r\n// full-size image from each link's href.\r\n#html.div(\r\n  class: \"gallery-grid\",\r\n  for img in images {\r\n    html.a(\r\n      href: img,\r\n      html.elem(\"img\", \"\", attrs: (\r\n        src: \"thumb-\" + img,\r\n        alt: img.slice(0, -4),\r\n        loading: \"lazy\",\r\n        decoding: \"async\",\r\n      )),\r\n    )\r\n  },\r\n)\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2106,7 +2333,11 @@ tbody > tr > td {
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {

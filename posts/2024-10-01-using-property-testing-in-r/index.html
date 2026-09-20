@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Using property-based testing in R</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="When you don&#39;t want to write dozens of versions of unit tests.">
+    <meta property="og:description" content="When you don&#39;t want to write dozens of versions of unit tests.">
+    <meta name="twitter:description" content="When you don&#39;t want to write dozens of versions of unit tests.">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Using property-based testing in R | Etienne Bacher">
+    <meta name="twitter:title" content="Using property-based testing in R | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Using property-based testing in R])\r\n#metadata((\r\n  title: \"Using property-based testing in R\",\r\n  kind: \"post\",\r\n  date: \"2024-10-01\",\r\n  summary: \"When you don't want to write dozens of versions of unit tests.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI had never heard of property-based testing until a few months ago when I started looking at some pull requests in #link(\"https://github.com/pola-rs/polars/\")[polars] (the Python implementation, not the R one) where they use #link(\"https://hypothesis.readthedocs.io/en/latest/\")[hypothesis], for example #link(\"https://github.com/pola-rs/polars/pull/17992/files#diff-728b25c64b205cf575fb186611d9e63eff7cd1ea2c32cf811a6e68d6e3d0f4bc\")[polars\\#17992].\r\n\r\nI have contributed to a fair amount of R packages but I have never seen this type of tests before: unit tests, plenty; snapshot tests, sometimes; but property-based tests? Never. And at first, I didn't really see the point, but I've had a couple of situations recently where I thought it could help, so the aim of this post is to explain (briefly) what property-based testing is and to provide some examples where it can be useful.\r\n\r\n= What is property-based testing?\r\n<what-is-property-based-testing>\r\nMost of the time, unit tests check that the function performs well on a few different inputs: does it give correct results? Nice error messages? What about this corner case?\r\n\r\nProperty-based testing is a way of testing where we give random inputs to the function we want to test and we want to ensure that no matter the inputs, the output will respect some properties. For example, suppose we made a function to reverse the input, so if I pass `3, 1, 4`, it should return `4, 1, 3`#calepin.elements.sidenote[Example taken from the Rust crate #link(\"https://github.com/BurntSushi/quickcheck\")[`quickcheck`].]. We can pass several inputs and see if the output is correctly reversed. But a more efficient way would be to check that our function respects a basic property, which is that #emph[reversing the input twice should return the original input]:\r\n\r\n```r\r\nrev(rev(c(3, 1, 4)))\r\n```\r\n\r\n```\r\n[1] 3 1 4\r\n```\r\n\r\nTherefore, property-based testing doesn't use hardcoded values to check the output but ensures that our function respects a list of properties.\r\n\r\n= Property-based testing in R\r\n<property-based-testing-in-r>\r\nTo the best of my knowledge, there are two R packages to do property-based testing in R: #link(\"https://cran.r-project.org/web/packages/hedgehog/\")[`hedgehog`] and #link(\"https://cran.r-project.org/web/packages/quickcheck/\")[`quickcheck`] (which is based on `hedgehog`). If you already use `testthat` for testing, then integrating them in the test suite is not hard. Using the example above, we could do:\r\n\r\n```r\r\nlibrary(quickcheck)\r\nlibrary(testthat)\r\n\r\ntest_that(\"reversing twice returns the original input\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    property = function(a) {\r\n      expect_equal(rev(rev(a)), a)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\nTest passed with 1 success 🎉.\r\n```\r\n\r\nThis example generated 100 random inputs and checked that the `expect_equal()` clause was respected for all of them. We can see that by adding a `print()` call (I reduce the number of tests to 5 to avoid too much clutter).\r\n\r\n```r\r\ntest_that(\"reversing twice returns the original input\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      print(a)\r\n      expect_equal(rev(rev(a)), a)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\n[1]  180299485         NA  169233443 -556327963  671813836 -172893223  650735145\r\n[8]          0         NA\r\n[1] -7477 -3579    NA\r\n[1] -750718822  762579998  288089702  305956068          0         NA\r\n[1] -153870964 -603204715 -104236120  855887186         NA         NA -156238835\r\n[8]         NA\r\n[1]  -65501381 -577303308         NA          0         NA         NA  243810326\r\n[8]  921447592\r\nTest passed with 1 success 🎉.\r\n```\r\n\r\nAs we can see, a lot of different examples were generated: some have single values while other have multiple, some only have negative values while others have a mix, etc.\r\n\r\nThe example above checked only on numeric inputs, but we could check on any type of vector using `any_atomic()`:\r\n\r\n```r\r\ntest_that(\"reversing twice returns the original input\", {\r\n  for_all(\r\n    a = any_atomic(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      print(a)\r\n      expect_equal(rev(rev(a)), a)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\n[1] \"Sz4y$L.V\" NA         NA         \"-\"        \"B\"       \r\n07:01:15.942289\r\n09:19:36.781132\r\n09:25:10.975813\r\n22:06:55.508066\r\n             NA\r\n             NA\r\n03:28:01.363436\r\n08:08:18.982272\r\n[1] -945034635  561650411  862721611          0\r\n[1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE    NA\r\n[1] -995090807 -500356911          0 -703492650 -551443511          0         NA\r\nTest passed with 1 success 🥇.\r\n```\r\n\r\nFinally, if a particular input fails, `quickcheck` will first try to reduce the size of this input as much as possible (a process called \"shrinking\"). To illustrate that, let's say we make a function to normalize a numeric vector to a \\[0, 1\\] interval:\r\n\r\n```r\r\nnormalize <- function(x) {\r\n  (x - min(x)) / (max(x) - min(x))\r\n}\r\n\r\nnormalize(c(-1, 2, 0, -4))\r\n```\r\n\r\n```\r\n[1] 0.5000000 1.0000000 0.6666667 0.0000000\r\n```\r\n\r\nOne property of this function is that all output values should be in the interval \\[0, 1\\]. Does this function pass property-based tests?\r\n\r\n```r\r\ntest_that(\"output is in interval [0, 1]\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      res <- normalize(a)\r\n      expect_true(all(res >= 0 & res <= 1))\r\n    }\r\n  )\r\n})\r\n\r\n── Failure: output is in interval [0, 1] ───────────────────────────────────────\r\nFalsifiable after 1 tests, and 3 shrinks\r\n<expectation_failure/expectation/error/condition>\r\nall(res >= 0 & res <= 1) is not TRUE\r\n\r\n`actual`:   <NA>\r\n`expected`: TRUE\r\nBacktrace:\r\n     ▆\r\n  1. └─quickcheck::for_all(...)\r\n      [TRUNCATED...]\r\nCounterexample:\r\n$a\r\n[1] -4037\r\n\r\nBacktrace:\r\n    ▆\r\n 1. └─quickcheck::for_all(...)\r\n 2.   └─hedgehog::forall(...)\r\n```\r\n\r\nHah-ah! Problem: what happens if the input is a single value? Then `max(x) - min(x)` is 0, so the division gives `NaN`. In the error message, we can see:\r\n\r\n#quote(block: true)[\r\nFalsifiable after 1 tests, #strong[and 3 shrinks]\r\n]\r\n\r\nShrinking is the action of reducing as much as possible the size of the input that makes the function fail. Having the smallest example possible is extremely useful when debugging.\r\n\r\nLet's fix the function and try again:\r\n\r\n```r\r\nnormalize <- function(x) {\r\n  if (length(x) == 1) {\r\n    return(0.5) # WARNING: this is for the sake of example, I don't \r\n                # guarantee this is the correct behavior\r\n  }\r\n  (x - min(x)) / (max(x) - min(x))\r\n}\r\n\r\ntest_that(\"output is in interval [0, 1]\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      res <- normalize(a)\r\n      expect_true(all(res >= 0 & res <= 1))\r\n    }\r\n  )\r\n})\r\n\r\n── Failure: output is in interval [0, 1] ───────────────────────────────────────\r\nFalsifiable after 1 tests, and 8 shrinks\r\n<expectation_failure/expectation/error/condition>\r\nall(res >= 0 & res <= 1) is not TRUE\r\n\r\n`actual`:   <NA>\r\n`expected`: TRUE\r\nBacktrace:\r\n     ▆\r\n  1. └─quickcheck::for_all(...)\r\n     [TRUNCATED...]\r\nCounterexample:\r\n$a\r\n[1] -2413 -2413\r\n\r\nBacktrace:\r\n    ▆\r\n 1. └─quickcheck::for_all(...)\r\n 2.   └─hedgehog::forall(...)\r\n```\r\n\r\nDang it, now it fails when I pass a two identical values! This is for the same reason as above, `max(x) - min(x)` will return 0, but I won't spend more time on this example, you get the idea.\r\n\r\nBesides this basic example, where could this be useful?\r\n\r\n= Ensuring that a package doesn't crash R\r\n<ensuring-that-a-package-doesnt-crash-r>\r\nWhen working with compiled code (C++, Rust, etc.), it can happen that a bug makes the R session crash (== segfault == \"bomb icon\" in RStudio). This can be extremely annoying as we lose all data and computations that were stored in memory. When we work with compiled code, there's one property that our code should follow:\r\n\r\n#quote(block: true)[\r\nCalling a function should never lead to a segfault.\r\n]\r\n\r\nThis happened to me a few months ago. I investigated some code that used `igraph::cluster_fast_greedy()`. I know almost nothing about `igraph`, I was just playing around with arguments, and suddenly… crash. I reported this situation (#link(\"https://github.com/igraph/igraph/issues/2459\")[igraph\\#2459]), which was promptly fixed (thank you `igraph` devs!), but one sentence in the explanation caught my eye: \"it is a rare use case to only want modularity but not membership, and avoiding membership calculation doesn't have any advantages.\"\r\n\r\nI have no particular problem with this sentence or the rationale behind, it makes sense to prioritize fixes that affect a larger audience. But it got me thinking: could we try all combinations of inputs to see if it makes the session crash? We could use #link(\"https://cran.r-project.org/web/packages/patrick/\")[parametric testing] for this, but then again we need to hardcode at least some possible values for parameters. We could say that we start by testing only `TRUE`/`FALSE` values for all combinations of params, but what if the user passes a string?\r\n\r\nI think this is a situation where property-based testing would be helpful: we know that no matter the input type, its length, and the value of other inputs, #emph[the session shouldn't crash]. Implementing it with `quickcheck` looks fairly simple:\r\n\r\n```r\r\nlibrary(igraph, warn.conflicts = FALSE)\r\n\r\ntest_that(\"cluster_fast_greedy doesn't crash\", {\r\n  # setup a graph, from the examples of ?cluster_fast_greedy\r\n  g <- make_full_graph(5) %du% make_full_graph(5) %du% make_full_graph(5)\r\n  g <- add_edges(g, c(1, 6, 1, 11, 6, 11))\r\n\r\n  for_all(\r\n    merges = any_atomic(any_na = TRUE), \r\n    modularity = any_atomic(any_na = TRUE), \r\n    membership = any_atomic(any_na = TRUE), \r\n    weights = any_atomic(any_na = TRUE),\r\n    property = function(merges, modularity, membership, weights) {\r\n      suppressWarnings(\r\n        try(\r\n          cluster_fast_greedy(g, merges = merges, modularity = modularity, membership = membership, weights = weights),\r\n          silent = TRUE\r\n        )\r\n      )\r\n      expect_true(TRUE)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\nTest passed with 1 success 😀.\r\n```\r\n\r\nI didn't really know what expectation to put, I don't care if the function errors or not, I just want it not to segfault. So I put `try(silent = TRUE)` and added a fake expectation.\r\n\r\n= Ensuring that a package and its variants give the same results\r\n<ensuring-that-a-package-and-its-variants-give-the-same-results>\r\nI have spent some time working on #link(\"https://www.tidypolars.etiennebacher.com/\")[`tidypolars`], a package that provides the same interface as the `tidyverse` but uses `polars` under the hood. This means that there should be the lowest amount of \"surprises\" for the user: the behavior of functions that are available in `tidypolars` should match the behavior of those in `tidyverse`. Once again this can be tedious to check. One example is the function `stringr::str_sub()`. For instance, we can start with basic examples, such as:\r\n\r\n```r\r\nstringr::str_sub(string = \"foo\", start = 1, end = 2)\r\n```\r\n\r\n```\r\n[1] \"fo\"\r\n```\r\n\r\nEasy enough to test. But what happens if `string` is missing? Or if `start > end`? Or if `end` is negative? Or if `start` is negative #emph[and] `end` is `NULL` #emph[and] the length of `start` is greater than the length of `string`? Manually adding tests for all of those is painful and increases the risk of forgetting a corner case.\r\n\r\nIt is better here to use property-based testing: we don't need to check the value of the output of functions implemented in `tidypolars`, #emph[we only need to check that they match the output of functions in `tidyverse`].\r\n\r\nHere, one additional difficulty is that sometimes throwing an error is the correct behavior. Therefore, we need to create a custom expectation that checks that the output of `tidypolars` and `tidyverse` is identical, #emph[or] that both functions error (see the `testthat` vignette on #link(\"https://testthat.r-lib.org/articles/custom-expectation.html\")[creating custom expectations]):\r\n\r\n```r\r\nexpect_equal_or_both_error <- function(object, other) {\r\n  polars_error <- FALSE\r\n  polars_res <- tryCatch(\r\n    object,\r\n    error = function(e) polars_error <<- TRUE\r\n  )\r\n\r\n  other_error <- FALSE\r\n  other_res <- suppressWarnings(\r\n    tryCatch(\r\n      other,\r\n      error = function(e) other_error <<- TRUE\r\n    )\r\n  )\r\n\r\n  if (isTRUE(polars_error)) {\r\n    testthat::expect(isTRUE(other_error), \"tidypolars errored but tidyverse didn't.\")\r\n  } else {\r\n    testthat::expect_equal(polars_res, other_res)\r\n  }\r\n\r\n  invisible(NULL)\r\n}\r\n```\r\n\r\n= Conclusion\r\n<conclusion>\r\nProperty-based testing will not replace all kinds of tests, and is not necessarily appropriate in all contexts. Still, it can help uncover bugs, segfaults, and it adds more confidence in our code by randomly checking that it works even with implausible inputs.\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Using property-based testing in R])\r\n#metadata((\r\n  title: \"Using property-based testing in R\",\r\n  kind: \"post\",\r\n  date: \"2024-10-01\",\r\n  summary: \"When you don't want to write dozens of versions of unit tests.\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI had never heard of property-based testing until a few months ago when I started looking at some pull requests in #link(\"https://github.com/pola-rs/polars/\")[polars] (the Python implementation, not the R one) where they use #link(\"https://hypothesis.readthedocs.io/en/latest/\")[hypothesis], for example #link(\"https://github.com/pola-rs/polars/pull/17992/files#diff-728b25c64b205cf575fb186611d9e63eff7cd1ea2c32cf811a6e68d6e3d0f4bc\")[polars\\#17992].\r\n\r\nI have contributed to a fair amount of R packages but I have never seen this type of tests before: unit tests, plenty; snapshot tests, sometimes; but property-based tests? Never. And at first, I didn't really see the point, but I've had a couple of situations recently where I thought it could help, so the aim of this post is to explain (briefly) what property-based testing is and to provide some examples where it can be useful.\r\n\r\n= What is property-based testing?\r\n\u003cwhat-is-property-based-testing\u003e\r\nMost of the time, unit tests check that the function performs well on a few different inputs: does it give correct results? Nice error messages? What about this corner case?\r\n\r\nProperty-based testing is a way of testing where we give random inputs to the function we want to test and we want to ensure that no matter the inputs, the output will respect some properties. For example, suppose we made a function to reverse the input, so if I pass `3, 1, 4`, it should return `4, 1, 3`#calepin.elements.sidenote[Example taken from the Rust crate #link(\"https://github.com/BurntSushi/quickcheck\")[`quickcheck`].]. We can pass several inputs and see if the output is correctly reversed. But a more efficient way would be to check that our function respects a basic property, which is that #emph[reversing the input twice should return the original input]:\r\n\r\n```r\r\nrev(rev(c(3, 1, 4)))\r\n```\r\n\r\n```\r\n[1] 3 1 4\r\n```\r\n\r\nTherefore, property-based testing doesn't use hardcoded values to check the output but ensures that our function respects a list of properties.\r\n\r\n= Property-based testing in R\r\n\u003cproperty-based-testing-in-r\u003e\r\nTo the best of my knowledge, there are two R packages to do property-based testing in R: #link(\"https://cran.r-project.org/web/packages/hedgehog/\")[`hedgehog`] and #link(\"https://cran.r-project.org/web/packages/quickcheck/\")[`quickcheck`] (which is based on `hedgehog`). If you already use `testthat` for testing, then integrating them in the test suite is not hard. Using the example above, we could do:\r\n\r\n```r\r\nlibrary(quickcheck)\r\nlibrary(testthat)\r\n\r\ntest_that(\"reversing twice returns the original input\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    property = function(a) {\r\n      expect_equal(rev(rev(a)), a)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\nTest passed with 1 success 🎉.\r\n```\r\n\r\nThis example generated 100 random inputs and checked that the `expect_equal()` clause was respected for all of them. We can see that by adding a `print()` call (I reduce the number of tests to 5 to avoid too much clutter).\r\n\r\n```r\r\ntest_that(\"reversing twice returns the original input\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      print(a)\r\n      expect_equal(rev(rev(a)), a)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\n[1]  180299485         NA  169233443 -556327963  671813836 -172893223  650735145\r\n[8]          0         NA\r\n[1] -7477 -3579    NA\r\n[1] -750718822  762579998  288089702  305956068          0         NA\r\n[1] -153870964 -603204715 -104236120  855887186         NA         NA -156238835\r\n[8]         NA\r\n[1]  -65501381 -577303308         NA          0         NA         NA  243810326\r\n[8]  921447592\r\nTest passed with 1 success 🎉.\r\n```\r\n\r\nAs we can see, a lot of different examples were generated: some have single values while other have multiple, some only have negative values while others have a mix, etc.\r\n\r\nThe example above checked only on numeric inputs, but we could check on any type of vector using `any_atomic()`:\r\n\r\n```r\r\ntest_that(\"reversing twice returns the original input\", {\r\n  for_all(\r\n    a = any_atomic(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      print(a)\r\n      expect_equal(rev(rev(a)), a)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\n[1] \"Sz4y$L.V\" NA         NA         \"-\"        \"B\"       \r\n07:01:15.942289\r\n09:19:36.781132\r\n09:25:10.975813\r\n22:06:55.508066\r\n             NA\r\n             NA\r\n03:28:01.363436\r\n08:08:18.982272\r\n[1] -945034635  561650411  862721611          0\r\n[1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE    NA\r\n[1] -995090807 -500356911          0 -703492650 -551443511          0         NA\r\nTest passed with 1 success 🥇.\r\n```\r\n\r\nFinally, if a particular input fails, `quickcheck` will first try to reduce the size of this input as much as possible (a process called \"shrinking\"). To illustrate that, let's say we make a function to normalize a numeric vector to a \\[0, 1\\] interval:\r\n\r\n```r\r\nnormalize \u003c- function(x) {\r\n  (x - min(x)) / (max(x) - min(x))\r\n}\r\n\r\nnormalize(c(-1, 2, 0, -4))\r\n```\r\n\r\n```\r\n[1] 0.5000000 1.0000000 0.6666667 0.0000000\r\n```\r\n\r\nOne property of this function is that all output values should be in the interval \\[0, 1\\]. Does this function pass property-based tests?\r\n\r\n```r\r\ntest_that(\"output is in interval [0, 1]\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      res \u003c- normalize(a)\r\n      expect_true(all(res \u003e= 0 \u0026 res \u003c= 1))\r\n    }\r\n  )\r\n})\r\n\r\n── Failure: output is in interval [0, 1] ───────────────────────────────────────\r\nFalsifiable after 1 tests, and 3 shrinks\r\n\u003cexpectation_failure/expectation/error/condition\u003e\r\nall(res \u003e= 0 \u0026 res \u003c= 1) is not TRUE\r\n\r\n`actual`:   \u003cNA\u003e\r\n`expected`: TRUE\r\nBacktrace:\r\n     ▆\r\n  1. └─quickcheck::for_all(...)\r\n      [TRUNCATED...]\r\nCounterexample:\r\n$a\r\n[1] -4037\r\n\r\nBacktrace:\r\n    ▆\r\n 1. └─quickcheck::for_all(...)\r\n 2.   └─hedgehog::forall(...)\r\n```\r\n\r\nHah-ah! Problem: what happens if the input is a single value? Then `max(x) - min(x)` is 0, so the division gives `NaN`. In the error message, we can see:\r\n\r\n#quote(block: true)[\r\nFalsifiable after 1 tests, #strong[and 3 shrinks]\r\n]\r\n\r\nShrinking is the action of reducing as much as possible the size of the input that makes the function fail. Having the smallest example possible is extremely useful when debugging.\r\n\r\nLet's fix the function and try again:\r\n\r\n```r\r\nnormalize \u003c- function(x) {\r\n  if (length(x) == 1) {\r\n    return(0.5) # WARNING: this is for the sake of example, I don't \r\n                # guarantee this is the correct behavior\r\n  }\r\n  (x - min(x)) / (max(x) - min(x))\r\n}\r\n\r\ntest_that(\"output is in interval [0, 1]\", {\r\n  for_all(\r\n    a = numeric_(any_na = TRUE),\r\n    tests = 5,\r\n    property = function(a) {\r\n      res \u003c- normalize(a)\r\n      expect_true(all(res \u003e= 0 \u0026 res \u003c= 1))\r\n    }\r\n  )\r\n})\r\n\r\n── Failure: output is in interval [0, 1] ───────────────────────────────────────\r\nFalsifiable after 1 tests, and 8 shrinks\r\n\u003cexpectation_failure/expectation/error/condition\u003e\r\nall(res \u003e= 0 \u0026 res \u003c= 1) is not TRUE\r\n\r\n`actual`:   \u003cNA\u003e\r\n`expected`: TRUE\r\nBacktrace:\r\n     ▆\r\n  1. └─quickcheck::for_all(...)\r\n     [TRUNCATED...]\r\nCounterexample:\r\n$a\r\n[1] -2413 -2413\r\n\r\nBacktrace:\r\n    ▆\r\n 1. └─quickcheck::for_all(...)\r\n 2.   └─hedgehog::forall(...)\r\n```\r\n\r\nDang it, now it fails when I pass a two identical values! This is for the same reason as above, `max(x) - min(x)` will return 0, but I won't spend more time on this example, you get the idea.\r\n\r\nBesides this basic example, where could this be useful?\r\n\r\n= Ensuring that a package doesn't crash R\r\n\u003censuring-that-a-package-doesnt-crash-r\u003e\r\nWhen working with compiled code (C++, Rust, etc.), it can happen that a bug makes the R session crash (== segfault == \"bomb icon\" in RStudio). This can be extremely annoying as we lose all data and computations that were stored in memory. When we work with compiled code, there's one property that our code should follow:\r\n\r\n#quote(block: true)[\r\nCalling a function should never lead to a segfault.\r\n]\r\n\r\nThis happened to me a few months ago. I investigated some code that used `igraph::cluster_fast_greedy()`. I know almost nothing about `igraph`, I was just playing around with arguments, and suddenly… crash. I reported this situation (#link(\"https://github.com/igraph/igraph/issues/2459\")[igraph\\#2459]), which was promptly fixed (thank you `igraph` devs!), but one sentence in the explanation caught my eye: \"it is a rare use case to only want modularity but not membership, and avoiding membership calculation doesn't have any advantages.\"\r\n\r\nI have no particular problem with this sentence or the rationale behind, it makes sense to prioritize fixes that affect a larger audience. But it got me thinking: could we try all combinations of inputs to see if it makes the session crash? We could use #link(\"https://cran.r-project.org/web/packages/patrick/\")[parametric testing] for this, but then again we need to hardcode at least some possible values for parameters. We could say that we start by testing only `TRUE`/`FALSE` values for all combinations of params, but what if the user passes a string?\r\n\r\nI think this is a situation where property-based testing would be helpful: we know that no matter the input type, its length, and the value of other inputs, #emph[the session shouldn't crash]. Implementing it with `quickcheck` looks fairly simple:\r\n\r\n```r\r\nlibrary(igraph, warn.conflicts = FALSE)\r\n\r\ntest_that(\"cluster_fast_greedy doesn't crash\", {\r\n  # setup a graph, from the examples of ?cluster_fast_greedy\r\n  g \u003c- make_full_graph(5) %du% make_full_graph(5) %du% make_full_graph(5)\r\n  g \u003c- add_edges(g, c(1, 6, 1, 11, 6, 11))\r\n\r\n  for_all(\r\n    merges = any_atomic(any_na = TRUE), \r\n    modularity = any_atomic(any_na = TRUE), \r\n    membership = any_atomic(any_na = TRUE), \r\n    weights = any_atomic(any_na = TRUE),\r\n    property = function(merges, modularity, membership, weights) {\r\n      suppressWarnings(\r\n        try(\r\n          cluster_fast_greedy(g, merges = merges, modularity = modularity, membership = membership, weights = weights),\r\n          silent = TRUE\r\n        )\r\n      )\r\n      expect_true(TRUE)\r\n    }\r\n  )\r\n})\r\n```\r\n\r\n```\r\nTest passed with 1 success 😀.\r\n```\r\n\r\nI didn't really know what expectation to put, I don't care if the function errors or not, I just want it not to segfault. So I put `try(silent = TRUE)` and added a fake expectation.\r\n\r\n= Ensuring that a package and its variants give the same results\r\n\u003censuring-that-a-package-and-its-variants-give-the-same-results\u003e\r\nI have spent some time working on #link(\"https://www.tidypolars.etiennebacher.com/\")[`tidypolars`], a package that provides the same interface as the `tidyverse` but uses `polars` under the hood. This means that there should be the lowest amount of \"surprises\" for the user: the behavior of functions that are available in `tidypolars` should match the behavior of those in `tidyverse`. Once again this can be tedious to check. One example is the function `stringr::str_sub()`. For instance, we can start with basic examples, such as:\r\n\r\n```r\r\nstringr::str_sub(string = \"foo\", start = 1, end = 2)\r\n```\r\n\r\n```\r\n[1] \"fo\"\r\n```\r\n\r\nEasy enough to test. But what happens if `string` is missing? Or if `start \u003e end`? Or if `end` is negative? Or if `start` is negative #emph[and] `end` is `NULL` #emph[and] the length of `start` is greater than the length of `string`? Manually adding tests for all of those is painful and increases the risk of forgetting a corner case.\r\n\r\nIt is better here to use property-based testing: we don't need to check the value of the output of functions implemented in `tidypolars`, #emph[we only need to check that they match the output of functions in `tidyverse`].\r\n\r\nHere, one additional difficulty is that sometimes throwing an error is the correct behavior. Therefore, we need to create a custom expectation that checks that the output of `tidypolars` and `tidyverse` is identical, #emph[or] that both functions error (see the `testthat` vignette on #link(\"https://testthat.r-lib.org/articles/custom-expectation.html\")[creating custom expectations]):\r\n\r\n```r\r\nexpect_equal_or_both_error \u003c- function(object, other) {\r\n  polars_error \u003c- FALSE\r\n  polars_res \u003c- tryCatch(\r\n    object,\r\n    error = function(e) polars_error \u003c\u003c- TRUE\r\n  )\r\n\r\n  other_error \u003c- FALSE\r\n  other_res \u003c- suppressWarnings(\r\n    tryCatch(\r\n      other,\r\n      error = function(e) other_error \u003c\u003c- TRUE\r\n    )\r\n  )\r\n\r\n  if (isTRUE(polars_error)) {\r\n    testthat::expect(isTRUE(other_error), \"tidypolars errored but tidyverse didn't.\")\r\n  } else {\r\n    testthat::expect_equal(polars_res, other_res)\r\n  }\r\n\r\n  invisible(NULL)\r\n}\r\n```\r\n\r\n= Conclusion\r\n\u003cconclusion\u003e\r\nProperty-based testing will not replace all kinds of tests, and is not necessarily appropriate in all contexts. Still, it can help uncover bugs, segfaults, and it adds more confidence in our code by randomly checking that it works even with implausible inputs.\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2055,25 +2282,25 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="using-property-based-testing-in-r">Using property-based testing in R</h1></span></p><p>I had never heard of property-based testing until a few months ago when I started looking at some pull requests in <a href="https://github.com/pola-rs/polars/">polars</a> (the Python implementation, not the R one) where they use <a href="https://hypothesis.readthedocs.io/en/latest/">hypothesis</a>, for example <a href="https://github.com/pola-rs/polars/pull/17992/files#diff-728b25c64b205cf575fb186611d9e63eff7cd1ea2c32cf811a6e68d6e3d0f4bc">polars#17992</a>.</p><p>I have contributed to a fair amount of R packages but I have never seen this type of tests before: unit tests, plenty; snapshot tests, sometimes; but property-based tests? Never. And at first, I didn’t really see the point, but I’ve had a couple of situations recently where I thought it could help, so the aim of this post is to explain (briefly) what property-based testing is and to provide some examples where it can be useful.</p><h2 id="what-is-property-based-testing">What is property-based testing?</h2><p>Most of the time, unit tests check that the function performs well on a few different inputs: does it give correct results? Nice error messages? What about this corner case?</p><p>Property-based testing is a way of testing where we give random inputs to the function we want to test and we want to ensure that no matter the inputs, the output will respect some properties. For example, suppose we made a function to reverse the input, so if I pass <code>3, 1, 4</code>, it should return <code>4, 1, 3</code><a role="doc-noteref" href="#sn-1" id="sn-1ref">1</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-1" data-sidenote-number="1">Example taken from the Rust crate <a href="https://github.com/BurntSushi/quickcheck"><code>quickcheck</code></a>.</span>. We can pass several inputs and see if the output is correctly reversed. But a more efficient way would be to check that our function respects a basic property, which is that <em>reversing the input twice should return the original input</em>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">rev</span>(<span class="calepin-syntax-scope-1">rev</span>(<span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">3</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">4</span>)))
-</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] 3 1 4</code></pre></div><p>Therefore, property-based testing doesn’t use hardcoded values to check the output but ensures that our function respects a list of properties.</p><h2 id="property-based-testing-in-r">Property-based testing in R</h2><p>To the best of my knowledge, there are two R packages to do property-based testing in R: <a href="https://cran.r-project.org/web/packages/hedgehog/"><code>hedgehog</code></a> and <a href="https://cran.r-project.org/web/packages/quickcheck/"><code>quickcheck</code></a> (which is based on <code>hedgehog</code>). If you already use <code>testthat</code> for testing, then integrating them in the test suite is not hard. Using the example above, we could do:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">library</span>(quickcheck)
-<span class="calepin-syntax-scope-1">library</span>(testthat)
+            <p><span style="font-variant-caps: small-caps"><h1 id="using-property-based-testing-in-r">Using property-based testing in R</h1></span></p><p>I had never heard of property-based testing until a few months ago when I started looking at some pull requests in <a href="https://github.com/pola-rs/polars/">polars</a> (the Python implementation, not the R one) where they use <a href="https://hypothesis.readthedocs.io/en/latest/">hypothesis</a>, for example <a href="https://github.com/pola-rs/polars/pull/17992/files#diff-728b25c64b205cf575fb186611d9e63eff7cd1ea2c32cf811a6e68d6e3d0f4bc">polars#17992</a>.</p><p>I have contributed to a fair amount of R packages but I have never seen this type of tests before: unit tests, plenty; snapshot tests, sometimes; but property-based tests? Never. And at first, I didn’t really see the point, but I’ve had a couple of situations recently where I thought it could help, so the aim of this post is to explain (briefly) what property-based testing is and to provide some examples where it can be useful.</p><h2 id="what-is-property-based-testing">What is property-based testing?</h2><p>Most of the time, unit tests check that the function performs well on a few different inputs: does it give correct results? Nice error messages? What about this corner case?</p><p>Property-based testing is a way of testing where we give random inputs to the function we want to test and we want to ensure that no matter the inputs, the output will respect some properties. For example, suppose we made a function to reverse the input, so if I pass <code>3, 1, 4</code>, it should return <code>4, 1, 3</code><a role="doc-noteref" href="#sn-1" id="sn-1ref">1</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-1" data-sidenote-number="1">Example taken from the Rust crate <a href="https://github.com/BurntSushi/quickcheck"><code>quickcheck</code></a>.</span>. We can pass several inputs and see if the output is correctly reversed. But a more efficient way would be to check that our function respects a basic property, which is that <em>reversing the input twice should return the original input</em>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">rev</span>(<span class="calepin-syntax-scope-21">rev</span>(<span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">3</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">4</span>)))
+</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] 3 1 4</code></pre></div><p>Therefore, property-based testing doesn’t use hardcoded values to check the output but ensures that our function respects a list of properties.</p><h2 id="property-based-testing-in-r">Property-based testing in R</h2><p>To the best of my knowledge, there are two R packages to do property-based testing in R: <a href="https://cran.r-project.org/web/packages/hedgehog/"><code>hedgehog</code></a> and <a href="https://cran.r-project.org/web/packages/quickcheck/"><code>quickcheck</code></a> (which is based on <code>hedgehog</code>). If you already use <code>testthat</code> for testing, then integrating them in the test suite is not hard. Using the example above, we could do:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">library</span>(quickcheck)
+<span class="calepin-syntax-scope-21">library</span>(testthat)
 
-<span class="calepin-syntax-scope-1">test_that</span>(<span class="calepin-syntax-scope-3">"</span>reversing twice returns the original input<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> {
-  <span class="calepin-syntax-scope-1">for_all</span>(
-    <span class="calepin-syntax-scope-5">a</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">numeric_</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">property</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">a</span>) {
-      <span class="calepin-syntax-scope-1">expect_equal</span>(<span class="calepin-syntax-scope-1">rev</span>(<span class="calepin-syntax-scope-1">rev</span>(a))<span class="calepin-syntax-scope-3">,</span> a)
+<span class="calepin-syntax-scope-22">test_that</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">reversing twice returns the original input</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> {
+  <span class="calepin-syntax-scope-22">for_all</span>(
+    <span class="calepin-syntax-scope-28">a</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">numeric_</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">property</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">a</span>) {
+      <span class="calepin-syntax-scope-22">expect_equal</span>(<span class="calepin-syntax-scope-21">rev</span>(<span class="calepin-syntax-scope-21">rev</span>(a))<span class="calepin-syntax-scope-26">,</span> a)
     }
   )
 })
-</code></pre></div><div class="sourceCode" data-lang><pre><code>Test passed with 1 success 🎉.</code></pre></div><p>This example generated 100 random inputs and checked that the <code>expect_equal()</code> clause was respected for all of them. We can see that by adding a <code>print()</code> call (I reduce the number of tests to 5 to avoid too much clutter).</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">test_that</span>(<span class="calepin-syntax-scope-3">"</span>reversing twice returns the original input<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> {
-  <span class="calepin-syntax-scope-1">for_all</span>(
-    <span class="calepin-syntax-scope-5">a</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">numeric_</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">tests</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">5</span><span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">property</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">a</span>) {
-      <span class="calepin-syntax-scope-1">print</span>(a)
-      <span class="calepin-syntax-scope-1">expect_equal</span>(<span class="calepin-syntax-scope-1">rev</span>(<span class="calepin-syntax-scope-1">rev</span>(a))<span class="calepin-syntax-scope-3">,</span> a)
+</code></pre></div><div class="sourceCode" data-lang><pre><code>Test passed with 1 success 🎉.</code></pre></div><p>This example generated 100 random inputs and checked that the <code>expect_equal()</code> clause was respected for all of them. We can see that by adding a <code>print()</code> call (I reduce the number of tests to 5 to avoid too much clutter).</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-22">test_that</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">reversing twice returns the original input</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> {
+  <span class="calepin-syntax-scope-22">for_all</span>(
+    <span class="calepin-syntax-scope-28">a</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">numeric_</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">tests</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">5</span><span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">property</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">a</span>) {
+      <span class="calepin-syntax-scope-21">print</span>(a)
+      <span class="calepin-syntax-scope-22">expect_equal</span>(<span class="calepin-syntax-scope-21">rev</span>(<span class="calepin-syntax-scope-21">rev</span>(a))<span class="calepin-syntax-scope-26">,</span> a)
     }
   )
 })
@@ -2085,13 +2312,13 @@ tbody > tr > td {
 [8]         NA
 [1]  -65501381 -577303308         NA          0         NA         NA  243810326
 [8]  921447592
-Test passed with 1 success 🎉.</code></pre></div><p>As we can see, a lot of different examples were generated: some have single values while other have multiple, some only have negative values while others have a mix, etc.</p><p>The example above checked only on numeric inputs, but we could check on any type of vector using <code>any_atomic()</code>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">test_that</span>(<span class="calepin-syntax-scope-3">"</span>reversing twice returns the original input<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> {
-  <span class="calepin-syntax-scope-1">for_all</span>(
-    <span class="calepin-syntax-scope-5">a</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">any_atomic</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">tests</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">5</span><span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">property</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">a</span>) {
-      <span class="calepin-syntax-scope-1">print</span>(a)
-      <span class="calepin-syntax-scope-1">expect_equal</span>(<span class="calepin-syntax-scope-1">rev</span>(<span class="calepin-syntax-scope-1">rev</span>(a))<span class="calepin-syntax-scope-3">,</span> a)
+Test passed with 1 success 🎉.</code></pre></div><p>As we can see, a lot of different examples were generated: some have single values while other have multiple, some only have negative values while others have a mix, etc.</p><p>The example above checked only on numeric inputs, but we could check on any type of vector using <code>any_atomic()</code>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-22">test_that</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">reversing twice returns the original input</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> {
+  <span class="calepin-syntax-scope-22">for_all</span>(
+    <span class="calepin-syntax-scope-28">a</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">any_atomic</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">tests</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">5</span><span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">property</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">a</span>) {
+      <span class="calepin-syntax-scope-21">print</span>(a)
+      <span class="calepin-syntax-scope-22">expect_equal</span>(<span class="calepin-syntax-scope-21">rev</span>(<span class="calepin-syntax-scope-21">rev</span>(a))<span class="calepin-syntax-scope-26">,</span> a)
     }
   )
 })
@@ -2107,125 +2334,125 @@ Test passed with 1 success 🎉.</code></pre></div><p>As we can see, a lot of di
 [1] -945034635  561650411  862721611          0
 [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE    NA
 [1] -995090807 -500356911          0 -703492650 -551443511          0         NA
-Test passed with 1 success 🥇.</code></pre></div><p>Finally, if a particular input fails, <code>quickcheck</code> will first try to reduce the size of this input as much as possible (a process called “shrinking”). To illustrate that, let’s say we make a function to normalize a numeric vector to a [0, 1] interval:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">normalize</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-  (x <span class="calepin-syntax-scope-3">-</span> <span class="calepin-syntax-scope-1">min</span>(x)) <span class="calepin-syntax-scope-3">/</span> (<span class="calepin-syntax-scope-1">max</span>(x) <span class="calepin-syntax-scope-3">-</span> <span class="calepin-syntax-scope-1">min</span>(x))
+Test passed with 1 success 🥇.</code></pre></div><p>Finally, if a particular input fails, <code>quickcheck</code> will first try to reduce the size of this input as much as possible (a process called “shrinking”). To illustrate that, let’s say we make a function to normalize a numeric vector to a [0, 1] interval:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">normalize</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+  (x <span class="calepin-syntax-scope-24">-</span> <span class="calepin-syntax-scope-21">min</span>(x)) <span class="calepin-syntax-scope-24">/</span> (<span class="calepin-syntax-scope-21">max</span>(x) <span class="calepin-syntax-scope-24">-</span> <span class="calepin-syntax-scope-21">min</span>(x))
 }
 
-<span class="calepin-syntax-scope-1">normalize</span>(<span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-2">4</span>))
-</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] 0.5000000 1.0000000 0.6666667 0.0000000</code></pre></div><p>One property of this function is that all output values should be in the interval [0, 1]. Does this function pass property-based tests?</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">test_that</span>(<span class="calepin-syntax-scope-3">"</span>output is in interval [0, 1]<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> {
-  <span class="calepin-syntax-scope-1">for_all</span>(
-    <span class="calepin-syntax-scope-5">a</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">numeric_</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">tests</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">5</span><span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">property</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">a</span>) {
-      res <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">normalize</span>(a)
-      <span class="calepin-syntax-scope-1">expect_true</span>(<span class="calepin-syntax-scope-1">all</span>(res <span class="calepin-syntax-scope-3">>=</span> <span class="calepin-syntax-scope-2">0</span> <span class="calepin-syntax-scope-3">&amp;</span> res <span class="calepin-syntax-scope-3">&lt;=</span> <span class="calepin-syntax-scope-2">1</span>))
+<span class="calepin-syntax-scope-22">normalize</span>(<span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-24">-</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-24">-</span><span class="calepin-syntax-scope-23">4</span>))
+</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] 0.5000000 1.0000000 0.6666667 0.0000000</code></pre></div><p>One property of this function is that all output values should be in the interval [0, 1]. Does this function pass property-based tests?</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-22">test_that</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">output is in interval [0, 1]</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> {
+  <span class="calepin-syntax-scope-22">for_all</span>(
+    <span class="calepin-syntax-scope-28">a</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">numeric_</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">tests</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">5</span><span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">property</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">a</span>) {
+      res <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">normalize</span>(a)
+      <span class="calepin-syntax-scope-22">expect_true</span>(<span class="calepin-syntax-scope-21">all</span>(res <span class="calepin-syntax-scope-24">>=</span> <span class="calepin-syntax-scope-23">0</span> <span class="calepin-syntax-scope-24">&amp;</span> res <span class="calepin-syntax-scope-24">&lt;=</span> <span class="calepin-syntax-scope-23">1</span>))
     }
   )
 })
 
-── Failure: output is <span class="calepin-syntax-scope-3">in</span> interval [<span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span>] ───────────────────────────────────────
-Falsifiable after <span class="calepin-syntax-scope-2">1</span> tests, and <span class="calepin-syntax-scope-2">3</span> shrinks
-<span class="calepin-syntax-scope-3">&lt;</span>expectation_failure<span class="calepin-syntax-scope-3">/</span>expectation<span class="calepin-syntax-scope-3">/</span>error<span class="calepin-syntax-scope-3">/</span>condition<span class="calepin-syntax-scope-3">></span>
-<span class="calepin-syntax-scope-1">all</span>(res <span class="calepin-syntax-scope-3">>=</span> <span class="calepin-syntax-scope-2">0</span> <span class="calepin-syntax-scope-3">&amp;</span> res <span class="calepin-syntax-scope-3">&lt;=</span> <span class="calepin-syntax-scope-2">1</span>) is not TRUE
+── Failure<span class="calepin-syntax-scope-6">:</span> output is <span class="calepin-syntax-scope-24">in</span> interval [<span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span>] ───────────────────────────────────────
+Falsifiable after <span class="calepin-syntax-scope-23">1</span> tests, and <span class="calepin-syntax-scope-23">3</span> shrinks
+<span class="calepin-syntax-scope-24">&lt;</span>expectation_failure<span class="calepin-syntax-scope-24">/</span>expectation<span class="calepin-syntax-scope-24">/</span>error<span class="calepin-syntax-scope-24">/</span>condition<span class="calepin-syntax-scope-24">></span>
+<span class="calepin-syntax-scope-21">all</span>(res <span class="calepin-syntax-scope-24">>=</span> <span class="calepin-syntax-scope-23">0</span> <span class="calepin-syntax-scope-24">&amp;</span> res <span class="calepin-syntax-scope-24">&lt;=</span> <span class="calepin-syntax-scope-23">1</span>) is not <span class="calepin-syntax-scope-11">TRUE</span>
 
-`actual`:   <span class="calepin-syntax-scope-3">&lt;</span>NA<span class="calepin-syntax-scope-3">></span>
-`expected`: TRUE
-Backtrace:
+`actual`<span class="calepin-syntax-scope-6">:</span>   <span class="calepin-syntax-scope-24">&lt;</span><span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-24">></span>
+`expected`<span class="calepin-syntax-scope-6">:</span> <span class="calepin-syntax-scope-11">TRUE</span>
+Backtrace<span class="calepin-syntax-scope-6">:</span>
      ▆
-  <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span> └─quickcheck::<span class="calepin-syntax-scope-1">for_all</span>(...)
+  <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span> └─quickcheck::<span class="calepin-syntax-scope-22">for_all</span>(<span class="calepin-syntax-scope-6">...</span>)
       [TRUNCATED...]
-Counterexample:
-$a
-[<span class="calepin-syntax-scope-2">1</span>] <span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-2">4037</span>
+Counterexample<span class="calepin-syntax-scope-6">:</span>
+<span class="calepin-syntax-scope-6">$</span>a
+[<span class="calepin-syntax-scope-23">1</span>] <span class="calepin-syntax-scope-24">-</span><span class="calepin-syntax-scope-23">4037</span>
 
-Backtrace:
+Backtrace<span class="calepin-syntax-scope-6">:</span>
     ▆
- <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span> └─quickcheck::<span class="calepin-syntax-scope-1">for_all</span>(...)
- <span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">.</span>   └─hedgehog::<span class="calepin-syntax-scope-1">forall</span>(...)
-</code></pre></div><p>Hah-ah! Problem: what happens if the input is a single value? Then <code>max(x) - min(x)</code> is 0, so the division gives <code>NaN</code>. In the error message, we can see:</p><blockquote>Falsifiable after 1 tests, <strong>and 3 shrinks</strong></blockquote><p>Shrinking is the action of reducing as much as possible the size of the input that makes the function fail. Having the smallest example possible is extremely useful when debugging.</p><p>Let’s fix the function and try again:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">normalize</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-  if (<span class="calepin-syntax-scope-1">length</span>(x) <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-2">1</span>) {
-    return(<span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">5</span>) <span class="calepin-syntax-scope-3">#</span> WARNING: this is for the sake of example, I don't 
-                <span class="calepin-syntax-scope-3">#</span> guarantee this is the correct behavior
+ <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span> └─quickcheck::<span class="calepin-syntax-scope-22">for_all</span>(<span class="calepin-syntax-scope-6">...</span>)
+ <span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">.</span>   └─hedgehog::<span class="calepin-syntax-scope-22">forall</span>(<span class="calepin-syntax-scope-6">...</span>)
+</code></pre></div><p>Hah-ah! Problem: what happens if the input is a single value? Then <code>max(x) - min(x)</code> is 0, so the division gives <code>NaN</code>. In the error message, we can see:</p><blockquote>Falsifiable after 1 tests, <strong>and 3 shrinks</strong></blockquote><p>Shrinking is the action of reducing as much as possible the size of the input that makes the function fail. Having the smallest example possible is extremely useful when debugging.</p><p>Let’s fix the function and try again:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">normalize</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">length</span>(x) <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-23">1</span>) {
+    <span class="calepin-syntax-scope-10">return</span>(<span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">5</span>) <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> WARNING: this is for the sake of example, I don't </span>
+                <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> guarantee this is the correct behavior</span>
   }
-  (x <span class="calepin-syntax-scope-3">-</span> <span class="calepin-syntax-scope-1">min</span>(x)) <span class="calepin-syntax-scope-3">/</span> (<span class="calepin-syntax-scope-1">max</span>(x) <span class="calepin-syntax-scope-3">-</span> <span class="calepin-syntax-scope-1">min</span>(x))
+  (x <span class="calepin-syntax-scope-24">-</span> <span class="calepin-syntax-scope-21">min</span>(x)) <span class="calepin-syntax-scope-24">/</span> (<span class="calepin-syntax-scope-21">max</span>(x) <span class="calepin-syntax-scope-24">-</span> <span class="calepin-syntax-scope-21">min</span>(x))
 }
 
-<span class="calepin-syntax-scope-1">test_that</span>(<span class="calepin-syntax-scope-3">"</span>output is in interval [0, 1]<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> {
-  <span class="calepin-syntax-scope-1">for_all</span>(
-    <span class="calepin-syntax-scope-5">a</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">numeric_</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">tests</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">5</span><span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">property</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">a</span>) {
-      res <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">normalize</span>(a)
-      <span class="calepin-syntax-scope-1">expect_true</span>(<span class="calepin-syntax-scope-1">all</span>(res <span class="calepin-syntax-scope-3">>=</span> <span class="calepin-syntax-scope-2">0</span> <span class="calepin-syntax-scope-3">&amp;</span> res <span class="calepin-syntax-scope-3">&lt;=</span> <span class="calepin-syntax-scope-2">1</span>))
+<span class="calepin-syntax-scope-22">test_that</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">output is in interval [0, 1]</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> {
+  <span class="calepin-syntax-scope-22">for_all</span>(
+    <span class="calepin-syntax-scope-28">a</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">numeric_</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">tests</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">5</span><span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">property</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">a</span>) {
+      res <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">normalize</span>(a)
+      <span class="calepin-syntax-scope-22">expect_true</span>(<span class="calepin-syntax-scope-21">all</span>(res <span class="calepin-syntax-scope-24">>=</span> <span class="calepin-syntax-scope-23">0</span> <span class="calepin-syntax-scope-24">&amp;</span> res <span class="calepin-syntax-scope-24">&lt;=</span> <span class="calepin-syntax-scope-23">1</span>))
     }
   )
 })
 
-── Failure: output is <span class="calepin-syntax-scope-3">in</span> interval [<span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span>] ───────────────────────────────────────
-Falsifiable after <span class="calepin-syntax-scope-2">1</span> tests, and <span class="calepin-syntax-scope-2">8</span> shrinks
-<span class="calepin-syntax-scope-3">&lt;</span>expectation_failure<span class="calepin-syntax-scope-3">/</span>expectation<span class="calepin-syntax-scope-3">/</span>error<span class="calepin-syntax-scope-3">/</span>condition<span class="calepin-syntax-scope-3">></span>
-<span class="calepin-syntax-scope-1">all</span>(res <span class="calepin-syntax-scope-3">>=</span> <span class="calepin-syntax-scope-2">0</span> <span class="calepin-syntax-scope-3">&amp;</span> res <span class="calepin-syntax-scope-3">&lt;=</span> <span class="calepin-syntax-scope-2">1</span>) is not TRUE
+── Failure<span class="calepin-syntax-scope-6">:</span> output is <span class="calepin-syntax-scope-24">in</span> interval [<span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span>] ───────────────────────────────────────
+Falsifiable after <span class="calepin-syntax-scope-23">1</span> tests, and <span class="calepin-syntax-scope-23">8</span> shrinks
+<span class="calepin-syntax-scope-24">&lt;</span>expectation_failure<span class="calepin-syntax-scope-24">/</span>expectation<span class="calepin-syntax-scope-24">/</span>error<span class="calepin-syntax-scope-24">/</span>condition<span class="calepin-syntax-scope-24">></span>
+<span class="calepin-syntax-scope-21">all</span>(res <span class="calepin-syntax-scope-24">>=</span> <span class="calepin-syntax-scope-23">0</span> <span class="calepin-syntax-scope-24">&amp;</span> res <span class="calepin-syntax-scope-24">&lt;=</span> <span class="calepin-syntax-scope-23">1</span>) is not <span class="calepin-syntax-scope-11">TRUE</span>
 
-`actual`:   <span class="calepin-syntax-scope-3">&lt;</span>NA<span class="calepin-syntax-scope-3">></span>
-`expected`: TRUE
-Backtrace:
+`actual`<span class="calepin-syntax-scope-6">:</span>   <span class="calepin-syntax-scope-24">&lt;</span><span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-24">></span>
+`expected`<span class="calepin-syntax-scope-6">:</span> <span class="calepin-syntax-scope-11">TRUE</span>
+Backtrace<span class="calepin-syntax-scope-6">:</span>
      ▆
-  <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span> └─quickcheck::<span class="calepin-syntax-scope-1">for_all</span>(...)
+  <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span> └─quickcheck::<span class="calepin-syntax-scope-22">for_all</span>(<span class="calepin-syntax-scope-6">...</span>)
      [TRUNCATED...]
-Counterexample:
-$a
-[<span class="calepin-syntax-scope-2">1</span>] <span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-2">2413</span> <span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-2">2413</span>
+Counterexample<span class="calepin-syntax-scope-6">:</span>
+<span class="calepin-syntax-scope-6">$</span>a
+[<span class="calepin-syntax-scope-23">1</span>] <span class="calepin-syntax-scope-24">-</span><span class="calepin-syntax-scope-23">2413</span> <span class="calepin-syntax-scope-24">-</span><span class="calepin-syntax-scope-23">2413</span>
 
-Backtrace:
+Backtrace<span class="calepin-syntax-scope-6">:</span>
     ▆
- <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span> └─quickcheck::<span class="calepin-syntax-scope-1">for_all</span>(...)
- <span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">.</span>   └─hedgehog::<span class="calepin-syntax-scope-1">forall</span>(...)
-</code></pre></div><p>Dang it, now it fails when I pass a two identical values! This is for the same reason as above, <code>max(x) - min(x)</code> will return 0, but I won’t spend more time on this example, you get the idea.</p><p>Besides this basic example, where could this be useful?</p><h2 id="ensuring-that-a-package-doesnt-crash-r">Ensuring that a package doesn’t crash R</h2><p>When working with compiled code (C++, Rust, etc.), it can happen that a bug makes the R session crash (== segfault == “bomb icon” in RStudio). This can be extremely annoying as we lose all data and computations that were stored in memory. When we work with compiled code, there’s one property that our code should follow:</p><blockquote>Calling a function should never lead to a segfault.</blockquote><p>This happened to me a few months ago. I investigated some code that used <code>igraph::cluster_fast_greedy()</code>. I know almost nothing about <code>igraph</code>, I was just playing around with arguments, and suddenly… crash. I reported this situation (<a href="https://github.com/igraph/igraph/issues/2459">igraph#2459</a>), which was promptly fixed (thank you <code>igraph</code> devs!), but one sentence in the explanation caught my eye: “it is a rare use case to only want modularity but not membership, and avoiding membership calculation doesn’t have any advantages.”</p><p>I have no particular problem with this sentence or the rationale behind, it makes sense to prioritize fixes that affect a larger audience. But it got me thinking: could we try all combinations of inputs to see if it makes the session crash? We could use <a href="https://cran.r-project.org/web/packages/patrick/">parametric testing</a> for this, but then again we need to hardcode at least some possible values for parameters. We could say that we start by testing only <code>TRUE</code>/<code>FALSE</code> values for all combinations of params, but what if the user passes a string?</p><p>I think this is a situation where property-based testing would be helpful: we know that no matter the input type, its length, and the value of other inputs, <em>the session shouldn’t crash</em>. Implementing it with <code>quickcheck</code> looks fairly simple:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">library</span>(igraph<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">warn.conflicts</span> <span class="calepin-syntax-scope-4">=</span> FALSE)
+ <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span> └─quickcheck::<span class="calepin-syntax-scope-22">for_all</span>(<span class="calepin-syntax-scope-6">...</span>)
+ <span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">.</span>   └─hedgehog::<span class="calepin-syntax-scope-22">forall</span>(<span class="calepin-syntax-scope-6">...</span>)
+</code></pre></div><p>Dang it, now it fails when I pass a two identical values! This is for the same reason as above, <code>max(x) - min(x)</code> will return 0, but I won’t spend more time on this example, you get the idea.</p><p>Besides this basic example, where could this be useful?</p><h2 id="ensuring-that-a-package-doesnt-crash-r">Ensuring that a package doesn’t crash R</h2><p>When working with compiled code (C++, Rust, etc.), it can happen that a bug makes the R session crash (== segfault == “bomb icon” in RStudio). This can be extremely annoying as we lose all data and computations that were stored in memory. When we work with compiled code, there’s one property that our code should follow:</p><blockquote>Calling a function should never lead to a segfault.</blockquote><p>This happened to me a few months ago. I investigated some code that used <code>igraph::cluster_fast_greedy()</code>. I know almost nothing about <code>igraph</code>, I was just playing around with arguments, and suddenly… crash. I reported this situation (<a href="https://github.com/igraph/igraph/issues/2459">igraph#2459</a>), which was promptly fixed (thank you <code>igraph</code> devs!), but one sentence in the explanation caught my eye: “it is a rare use case to only want modularity but not membership, and avoiding membership calculation doesn’t have any advantages.”</p><p>I have no particular problem with this sentence or the rationale behind, it makes sense to prioritize fixes that affect a larger audience. But it got me thinking: could we try all combinations of inputs to see if it makes the session crash? We could use <a href="https://cran.r-project.org/web/packages/patrick/">parametric testing</a> for this, but then again we need to hardcode at least some possible values for parameters. We could say that we start by testing only <code>TRUE</code>/<code>FALSE</code> values for all combinations of params, but what if the user passes a string?</p><p>I think this is a situation where property-based testing would be helpful: we know that no matter the input type, its length, and the value of other inputs, <em>the session shouldn’t crash</em>. Implementing it with <code>quickcheck</code> looks fairly simple:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">library</span>(igraph<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">warn.conflicts</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">FALSE</span>)
 
-<span class="calepin-syntax-scope-1">test_that</span>(<span class="calepin-syntax-scope-3">"</span>cluster_fast_greedy doesn't crash<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> {
-  <span class="calepin-syntax-scope-3">#</span> setup a graph, from the examples of ?cluster_fast_greedy
-  g <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">make_full_graph</span>(<span class="calepin-syntax-scope-2">5</span>) %du% <span class="calepin-syntax-scope-1">make_full_graph</span>(<span class="calepin-syntax-scope-2">5</span>) %du% <span class="calepin-syntax-scope-1">make_full_graph</span>(<span class="calepin-syntax-scope-2">5</span>)
-  g <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">add_edges</span>(g<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">6</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">11</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">6</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">11</span>))
+<span class="calepin-syntax-scope-22">test_that</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">cluster_fast_greedy doesn't crash</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> {
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> setup a graph, from the examples of ?cluster_fast_greedy</span>
+  g <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">make_full_graph</span>(<span class="calepin-syntax-scope-23">5</span>) %du% <span class="calepin-syntax-scope-22">make_full_graph</span>(<span class="calepin-syntax-scope-23">5</span>) %du% <span class="calepin-syntax-scope-22">make_full_graph</span>(<span class="calepin-syntax-scope-23">5</span>)
+  g <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">add_edges</span>(g<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">6</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">11</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">6</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">11</span>))
 
-  <span class="calepin-syntax-scope-1">for_all</span>(
-    <span class="calepin-syntax-scope-5">merges</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">any_atomic</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span> 
-    <span class="calepin-syntax-scope-5">modularity</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">any_atomic</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span> 
-    <span class="calepin-syntax-scope-5">membership</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">any_atomic</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span> 
-    <span class="calepin-syntax-scope-5">weights</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">any_atomic</span>(<span class="calepin-syntax-scope-5">any_na</span> <span class="calepin-syntax-scope-4">=</span> TRUE)<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">property</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">merges</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">modularity</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">membership</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">weights</span>) {
-      <span class="calepin-syntax-scope-1">suppressWarnings</span>(
-        <span class="calepin-syntax-scope-1">try</span>(
-          <span class="calepin-syntax-scope-1">cluster_fast_greedy</span>(g<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">merges</span> <span class="calepin-syntax-scope-4">=</span> merges<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">modularity</span> <span class="calepin-syntax-scope-4">=</span> modularity<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">membership</span> <span class="calepin-syntax-scope-4">=</span> membership<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">weights</span> <span class="calepin-syntax-scope-4">=</span> weights)<span class="calepin-syntax-scope-3">,</span>
-          <span class="calepin-syntax-scope-5">silent</span> <span class="calepin-syntax-scope-4">=</span> TRUE
+  <span class="calepin-syntax-scope-22">for_all</span>(
+    <span class="calepin-syntax-scope-28">merges</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">any_atomic</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span> 
+    <span class="calepin-syntax-scope-28">modularity</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">any_atomic</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span> 
+    <span class="calepin-syntax-scope-28">membership</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">any_atomic</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span> 
+    <span class="calepin-syntax-scope-28">weights</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-22">any_atomic</span>(<span class="calepin-syntax-scope-28">any_na</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">property</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">merges</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">modularity</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">membership</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">weights</span>) {
+      <span class="calepin-syntax-scope-21">suppressWarnings</span>(
+        <span class="calepin-syntax-scope-21">try</span>(
+          <span class="calepin-syntax-scope-22">cluster_fast_greedy</span>(g<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">merges</span> <span class="calepin-syntax-scope-27">=</span> merges<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">modularity</span> <span class="calepin-syntax-scope-27">=</span> modularity<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">membership</span> <span class="calepin-syntax-scope-27">=</span> membership<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">weights</span> <span class="calepin-syntax-scope-27">=</span> weights)<span class="calepin-syntax-scope-26">,</span>
+          <span class="calepin-syntax-scope-28">silent</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>
         )
       )
-      <span class="calepin-syntax-scope-1">expect_true</span>(TRUE)
+      <span class="calepin-syntax-scope-22">expect_true</span>(<span class="calepin-syntax-scope-11">TRUE</span>)
     }
   )
 })
-</code></pre></div><div class="sourceCode" data-lang><pre><code>Test passed with 1 success 😀.</code></pre></div><p>I didn’t really know what expectation to put, I don’t care if the function errors or not, I just want it not to segfault. So I put <code>try(silent = TRUE)</code> and added a fake expectation.</p><h2 id="ensuring-that-a-package-and-its-variants-give-the-same-results">Ensuring that a package and its variants give the same results</h2><p>I have spent some time working on <a href="https://www.tidypolars.etiennebacher.com/"><code>tidypolars</code></a>, a package that provides the same interface as the <code>tidyverse</code> but uses <code>polars</code> under the hood. This means that there should be the lowest amount of “surprises” for the user: the behavior of functions that are available in <code>tidypolars</code> should match the behavior of those in <code>tidyverse</code>. Once again this can be tedious to check. One example is the function <code>stringr::str_sub()</code>. For instance, we can start with basic examples, such as:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">stringr::<span class="calepin-syntax-scope-1">str_sub</span>(<span class="calepin-syntax-scope-5">string</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>foo<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">start</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">end</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">2</span>)
-</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] "fo"</code></pre></div><p>Easy enough to test. But what happens if <code>string</code> is missing? Or if <code>start > end</code>? Or if <code>end</code> is negative? Or if <code>start</code> is negative <em>and</em> <code>end</code> is <code>NULL</code> <em>and</em> the length of <code>start</code> is greater than the length of <code>string</code>? Manually adding tests for all of those is painful and increases the risk of forgetting a corner case.</p><p>It is better here to use property-based testing: we don’t need to check the value of the output of functions implemented in <code>tidypolars</code>, <em>we only need to check that they match the output of functions in <code>tidyverse</code></em>.</p><p>Here, one additional difficulty is that sometimes throwing an error is the correct behavior. Therefore, we need to create a custom expectation that checks that the output of <code>tidypolars</code> and <code>tidyverse</code> is identical, <em>or</em> that both functions error (see the <code>testthat</code> vignette on <a href="https://testthat.r-lib.org/articles/custom-expectation.html">creating custom expectations</a>):</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">expect_equal_or_both_error</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">object</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">other</span>) {
-  polars_error <span class="calepin-syntax-scope-4">&lt;-</span> FALSE
-  polars_res <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">tryCatch</span>(
-    object<span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">error</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">e</span>) polars_error <span class="calepin-syntax-scope-4">&lt;&lt;-</span> TRUE
+</code></pre></div><div class="sourceCode" data-lang><pre><code>Test passed with 1 success 😀.</code></pre></div><p>I didn’t really know what expectation to put, I don’t care if the function errors or not, I just want it not to segfault. So I put <code>try(silent = TRUE)</code> and added a fake expectation.</p><h2 id="ensuring-that-a-package-and-its-variants-give-the-same-results">Ensuring that a package and its variants give the same results</h2><p>I have spent some time working on <a href="https://www.tidypolars.etiennebacher.com/"><code>tidypolars</code></a>, a package that provides the same interface as the <code>tidyverse</code> but uses <code>polars</code> under the hood. This means that there should be the lowest amount of “surprises” for the user: the behavior of functions that are available in <code>tidypolars</code> should match the behavior of those in <code>tidyverse</code>. Once again this can be tedious to check. One example is the function <code>stringr::str_sub()</code>. For instance, we can start with basic examples, such as:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">stringr::<span class="calepin-syntax-scope-22">str_sub</span>(<span class="calepin-syntax-scope-28">string</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">foo</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">start</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">end</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">2</span>)
+</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] "fo"</code></pre></div><p>Easy enough to test. But what happens if <code>string</code> is missing? Or if <code>start > end</code>? Or if <code>end</code> is negative? Or if <code>start</code> is negative <em>and</em> <code>end</code> is <code>NULL</code> <em>and</em> the length of <code>start</code> is greater than the length of <code>string</code>? Manually adding tests for all of those is painful and increases the risk of forgetting a corner case.</p><p>It is better here to use property-based testing: we don’t need to check the value of the output of functions implemented in <code>tidypolars</code>, <em>we only need to check that they match the output of functions in <code>tidyverse</code></em>.</p><p>Here, one additional difficulty is that sometimes throwing an error is the correct behavior. Therefore, we need to create a custom expectation that checks that the output of <code>tidypolars</code> and <code>tidyverse</code> is identical, <em>or</em> that both functions error (see the <code>testthat</code> vignette on <a href="https://testthat.r-lib.org/articles/custom-expectation.html">creating custom expectations</a>):</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">expect_equal_or_both_error</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">object</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">other</span>) {
+  polars_error <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-11">FALSE</span>
+  polars_res <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">tryCatch</span>(
+    object<span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">error</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">e</span>) polars_error <span class="calepin-syntax-scope-27">&lt;&lt;-</span> <span class="calepin-syntax-scope-11">TRUE</span>
   )
 
-  other_error <span class="calepin-syntax-scope-4">&lt;-</span> FALSE
-  other_res <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">suppressWarnings</span>(
-    <span class="calepin-syntax-scope-1">tryCatch</span>(
-      other<span class="calepin-syntax-scope-3">,</span>
-      <span class="calepin-syntax-scope-5">error</span> <span class="calepin-syntax-scope-4">=</span> function(<span class="calepin-syntax-scope-5">e</span>) other_error <span class="calepin-syntax-scope-4">&lt;&lt;-</span> TRUE
+  other_error <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-11">FALSE</span>
+  other_res <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">suppressWarnings</span>(
+    <span class="calepin-syntax-scope-21">tryCatch</span>(
+      other<span class="calepin-syntax-scope-26">,</span>
+      <span class="calepin-syntax-scope-28">error</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">e</span>) other_error <span class="calepin-syntax-scope-27">&lt;&lt;-</span> <span class="calepin-syntax-scope-11">TRUE</span>
     )
   )
 
-  if (<span class="calepin-syntax-scope-1">isTRUE</span>(polars_error)) {
-    testthat::<span class="calepin-syntax-scope-1">expect</span>(<span class="calepin-syntax-scope-1">isTRUE</span>(other_error)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>tidypolars errored but tidyverse didn't.<span class="calepin-syntax-scope-3">"</span>)
-  } else {
-    testthat::<span class="calepin-syntax-scope-1">expect_equal</span>(polars_res<span class="calepin-syntax-scope-3">,</span> other_res)
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">isTRUE</span>(polars_error)) {
+    testthat::<span class="calepin-syntax-scope-22">expect</span>(<span class="calepin-syntax-scope-21">isTRUE</span>(other_error)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">tidypolars errored but tidyverse didn't.</span><span class="calepin-syntax-scope-4">"</span>)
+  } <span class="calepin-syntax-scope-10">else</span> {
+    testthat::<span class="calepin-syntax-scope-22">expect_equal</span>(polars_res<span class="calepin-syntax-scope-26">,</span> other_res)
   }
 
-  <span class="calepin-syntax-scope-1">invisible</span>(NULL)
+  <span class="calepin-syntax-scope-21">invisible</span>(<span class="calepin-syntax-scope-11">NULL</span>)
 }
 </code></pre></div><h2 id="conclusion">Conclusion</h2><p>Property-based testing will not replace all kinds of tests, and is not necessarily appropriate in all contexts. Still, it can help uncover bugs, segfaults, and it adds more confidence in our code by randomly checking that it works even with implausible inputs.</p>
         </main>
@@ -2297,7 +2524,11 @@ Backtrace:
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {

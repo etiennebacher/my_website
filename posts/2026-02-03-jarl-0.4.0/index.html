@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jarl 0.4.0</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.">
+    <meta property="og:description" content="Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.">
+    <meta name="twitter:description" content="Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Jarl 0.4.0 | Etienne Bacher">
+    <meta name="twitter:title" content="Jarl 0.4.0 | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2026-02-03-jarl-0.4.0/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Jarl 0.4.0])\r\n#metadata((\r\n  title: \"Jarl 0.4.0\",\r\n  kind: \"post\",\r\n  date: \"2026-02-03\",\r\n  summary: \"Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI'm very happy to announce the release of #link(\"https://jarl.etiennebacher.com/\")[Jarl] 0.4.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.\r\n\r\nAfter a few rapid iterations following the #link(\"https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/\")[initial 0.1.0 announcement], I took a bit more time to add more features and fix more bugs.\r\n\r\n= Unreachable code\r\n<unreachable-code>\r\nJarl is now able to find unreachable code in R files. Code might not be reachable for a few reasons:\r\n\r\n- it comes after a function that stops the execution (`stop()`, `rlang::abort()`, etc.);\r\n- it comes after a keyword that breaks a loop (`break`) or goes to the next iteration (`next`);\r\n- it comes after a `return()` statement in a function;\r\n- it is part of a branch that can never be executed (for instance after `if (FALSE)`).\r\n\r\nUsually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.\r\n\r\nFor example, take this simple function:\r\n\r\n```r\r\nf <- function(x) {\r\n  if (x > 5) {\r\n    return(\"greater than five\")\r\n  } else if (x < 5) {\r\n    return(\"lower than five\")\r\n  } else {\r\n    stop(\"x must be greater or lower than five\")\r\n  }\r\n  print(\"end of function\")\r\n}\r\n```\r\n\r\nThe `print()` statement will never be executed because all branches of the `if` statement return early or error. And indeed, Jarl indicates:\r\n\r\n```\r\nwarning: unreachable_code\r\n --> _posts/2026-02-03-jarl-0.4.0/test.R:9:3\r\n  |\r\n9 |   print(\"end of function\")\r\n  |   ------------------------ This code is unreachable because the preceding if/else\r\n  terminates in all branches.\r\n  |\r\n\r\nFound 1 error.\r\n```\r\n\r\nNote that if we were to remove the `else` statement:\r\n\r\n```r\r\nf <- function(x) {\r\n  if (x > 5) {\r\n    return(\"greater than five\")\r\n  } else if (x < 5) {\r\n    return(\"lower than five\")\r\n  }\r\n  print(\"end of function\")\r\n}\r\n```\r\n\r\nthen Jarl wouldn't report anything because the `print()` statement would run if `x == 5`.\r\n\r\nThis unreachable code detection also works outside of functions, which can be helpful for example if you have introduced a `stop()` for debugging somewhere in a script and forgot to remove it when running the entire script again later.\r\n\r\n= Suppression comments\r\n<suppression-comments>\r\nSuppression comments are special comments that are used to ignore diagnostics reported by the linter. If you have already used `lintr`, you might be familiar with the `# nolint` comments. In the first iterations of Jarl, these `# nolint` comments were partially supported. However, the way they were implemented in Jarl was brittle and prone to errors, especially when automatically inserting them.\r\n\r\nAs of Jarl 0.4.0, suppression comments have been entirely rewritten and now follow a different syntax. This also allows you to safely use Jarl and `lintr` in the same project, knowing that there won't be conflicts between their comments. The new suppression comments are extensively covered in the section #link(\"https://jarl.etiennebacher.com/using-jarl#ignoring-diagnostics\")[\"Ignoring diagnostics\"] on the documentation website, but I present a summary below.\r\n\r\nThere are three types of suppression comments:\r\n\r\n- #strong[standard comments] apply to the next block of code, or #emph[node]. A node correspond to an R expression as well as all expressions that belong to it (aka #emph[children nodes]). Importantly, the detection of which node is affected by a comment doesn't depend on the layout of the code (line breaks, whitespaces, etc.).\r\n\r\n  ```r\r\n  # The comment below only applies to `any(is.na(x1))`.\r\n  # jarl-ignore any_is_na: <reason>\r\n  any(is.na(x1))\r\n  any(is.na(x2))\r\n\r\n  # The comment below applies to the entire function definition, including the\r\n  # two `any(is.na(...))` calls.\r\n  # jarl-ignore any_is_na: <reason>\r\n  f <- function(x1, x2) {\r\n    any(is.na(x1))\r\n    any(is.na(x2))\r\n  }\r\n  ```\r\n\r\n  If you have ever used #link(\"https://posit-dev.github.io/air/formatter.html#disabling-formatting\")[Air's suppression comments], then you should already be familiar about the locations of Jarl's comments since they follow the same rules.\r\n\r\n  #html.elem(\"details\")[\r\n    #html.elem(\"summary\")[\r\n      Click to see more details on how node detection works.\r\n    ]\r\n\r\n  Jarl is entirely based on parsing the abstract syntax tree (AST) of the code.\r\n  In the example above, the `f <- function...` call is represented as follows:\r\n\r\n  ```r\r\n  lobstr::ast(\r\n    f <- function() {\r\n      any(is.na(x1))\r\n      any(is.na(x2))\r\n    }\r\n  )\r\n  #> █─`<-`\r\n  #> ├─f\r\n  #> └─█─`function`\r\n  #>   ├─NULL\r\n  #>   ├─█─`{`\r\n  #>   │ ├─█─any\r\n  #>   │ │ └─█─is.na\r\n  #>   │ │   └─x1\r\n  #>   │ └─█─any\r\n  #>   │   └─█─is.na\r\n  #>   │     └─x2\r\n  #>   └─NULL\r\n  ```\r\n\r\n  The top node is the assignment `<-`. Then come the left-hand side and right-hand side of the assignment. The LHS simply is the identifier `f`, but the RHS has itself multiple children, including the function body (`{`). Finally, inside the function body, we see the two calls to `any(is.na(...))`.\r\n\r\n  When we put a comment above `f <- function...`, we attach the node to `<-` #emph[and to all its children], which explains why code inside the function also uses this comment to ignore diagnostics.\r\n\r\n  ]\r\n\r\n- #strong[range comments] applies to all the code between `start` and `end`:\r\n\r\n  ```r\r\n  # The comment below applies until `jarl-ignore-end` is found (and at the\r\n  # same nesting level).\r\n  # jarl-ignore-start any_is_na: <reason>\r\n  any(is.na(x1))\r\n  any(is.na(x2))\r\n\r\n  f <- function(x1, x2) {\r\n    any(is.na(x1))\r\n    any(is.na(x2))\r\n  }\r\n  # jarl-ignore-end any_is_na\r\n  ```\r\n\r\n- #strong[file comments] applies to all code in the file:\r\n\r\n  ```r\r\n  # The comment below applies to the entire file.\r\n  # jarl-ignore-file any_is_na: <reason>\r\n  any(is.na(x1))\r\n  any(is.na(x2))\r\n\r\n  f <- function(x1, x2) {\r\n    any(is.na(x1))\r\n    any(is.na(x2))\r\n  }\r\n  ```\r\n\r\nThere are two important things to notice in the syntax of the suppression comments.\r\n\r\nFirst, #strong[they must state the precise rule to ignore]. This means that if you wish to ignore multiple rules for the same code block, you must have one comment per rule to ignore (the reason for this is the next point). This also means that comments such as `# jarl-ignore` (aka #emph[blanket suppressions]) are ignored and even reported by Jarl.\r\n\r\nSecond, #strong[they must state a reason why these diagnostics are ignored]. This is the `<reason>` placeholder in the examples above, and it can be any text after the colon.\r\n\r\nIf you are used to `lintr`'s suppression comment system, this may feel quite constraining but there is a good justification for having these two rules. You may have a valid reason to ignore a diagnostic, for instance because Jarl returns a false positive. If this is the case, it is important that only the rule that gives the false positive is ignored and not rules that have nothing to do with the false positive. This is why you have to specify the rule name in the comment. It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.\r\n\r\nNote that if you don't want any diagnostics of a specific rule, you can always ignore the rule in `jarl.toml` or with command-line arguments.\r\n\r\nTo help you write valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).\r\n\r\n= Other goodies\r\n<other-goodies>\r\nThis release brings more features!\r\n\r\n#strong[A new command-line argument `--statistics`] to show a count of diagnostics instead of being flooded in details in the console:\r\n\r\n```\r\n> jarl check . --statistics\r\n\r\n   88 [*] numeric_leading_zero\r\n    3 [*] redundant_equals\r\n    1 [ ] vector_logic\r\n    1 [*] string_boundary\r\n\r\nRules with `[*]` have an automatic fix.\r\n```\r\n\r\n#link(\"https://jarl.etiennebacher.com/config#config-file-detection\")[#strong[A hierarchical search for `jarl.toml`]] to look for configuration files in parent folders if the working directory doesn't have one.\r\n\r\nThis is particularly useful to store a default `jarl.toml` in a config folder so that any projects that doesn't have its own `jarl.toml` will fallback to this one. The location of this config folder varies by OS:\r\n\r\n- on Linux/macOS, you can store the default config at `~/.config/jarl/jarl.toml`\\;\r\n- on Windows, you can store the default config at `~/AppData/Roaming/jarl/jarl.toml`.\r\n\r\nFor instance, suppose I have `test.R` in my working directory, and this working directory doesn't have a `jarl.toml`. Before 0.4.0, Jarl wouldn't look for other configuration files. As of 0.4.0, Jarl looks in parent folders and in the config folder as a fallback.\r\n\r\n```\r\n/home/etienne\r\n    |\r\n    ├── Desktop\r\n    |     ├── test    # ---> this is my working directory\r\n    |     |   ├── data\r\n    |     |   ├── scripts\r\n    |     |   ├── ...\r\n    |     |   └── test.R\r\n    |     |\r\n    |     └── jarl.toml    # ---> config file belongs to \"Desktop\" (parent\r\n    |                      #      directory of my working directory) so it\r\n    |                      #      will be used first\r\n    |\r\n    └── .config\r\n        └── jarl\r\n            └── jarl.toml  # ---> this is the fallback config file that would\r\n                           #      be used if there weren't any jarl.toml found\r\n                           #      in parent directories of my working\r\n                           #      directory.\r\n```\r\n\r\n#strong[Less rules activated by default] as some were considered too noisy relative to their benefit (such as `assignment` and `fixed_regex`). Those rules still exist but need to be selected in `jarl.toml` or with command line arguments.\r\n\r\nAnd a few bug fixes, because what would programming be without bugs.\r\n\r\nI hope you enjoy this release! If you find any issues or want to contribute, please check out the #link(\"https://github.com/etiennebacher/jarl\")[Github repository]. And thanks Maëlle for the suggestions!\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Jarl 0.4.0])\r\n#metadata((\r\n  title: \"Jarl 0.4.0\",\r\n  kind: \"post\",\r\n  date: \"2026-02-03\",\r\n  summary: \"Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI'm very happy to announce the release of #link(\"https://jarl.etiennebacher.com/\")[Jarl] 0.4.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.\r\n\r\nAfter a few rapid iterations following the #link(\"https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/\")[initial 0.1.0 announcement], I took a bit more time to add more features and fix more bugs.\r\n\r\n= Unreachable code\r\n\u003cunreachable-code\u003e\r\nJarl is now able to find unreachable code in R files. Code might not be reachable for a few reasons:\r\n\r\n- it comes after a function that stops the execution (`stop()`, `rlang::abort()`, etc.);\r\n- it comes after a keyword that breaks a loop (`break`) or goes to the next iteration (`next`);\r\n- it comes after a `return()` statement in a function;\r\n- it is part of a branch that can never be executed (for instance after `if (FALSE)`).\r\n\r\nUsually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.\r\n\r\nFor example, take this simple function:\r\n\r\n```r\r\nf \u003c- function(x) {\r\n  if (x \u003e 5) {\r\n    return(\"greater than five\")\r\n  } else if (x \u003c 5) {\r\n    return(\"lower than five\")\r\n  } else {\r\n    stop(\"x must be greater or lower than five\")\r\n  }\r\n  print(\"end of function\")\r\n}\r\n```\r\n\r\nThe `print()` statement will never be executed because all branches of the `if` statement return early or error. And indeed, Jarl indicates:\r\n\r\n```\r\nwarning: unreachable_code\r\n --\u003e _posts/2026-02-03-jarl-0.4.0/test.R:9:3\r\n  |\r\n9 |   print(\"end of function\")\r\n  |   ------------------------ This code is unreachable because the preceding if/else\r\n  terminates in all branches.\r\n  |\r\n\r\nFound 1 error.\r\n```\r\n\r\nNote that if we were to remove the `else` statement:\r\n\r\n```r\r\nf \u003c- function(x) {\r\n  if (x \u003e 5) {\r\n    return(\"greater than five\")\r\n  } else if (x \u003c 5) {\r\n    return(\"lower than five\")\r\n  }\r\n  print(\"end of function\")\r\n}\r\n```\r\n\r\nthen Jarl wouldn't report anything because the `print()` statement would run if `x == 5`.\r\n\r\nThis unreachable code detection also works outside of functions, which can be helpful for example if you have introduced a `stop()` for debugging somewhere in a script and forgot to remove it when running the entire script again later.\r\n\r\n= Suppression comments\r\n\u003csuppression-comments\u003e\r\nSuppression comments are special comments that are used to ignore diagnostics reported by the linter. If you have already used `lintr`, you might be familiar with the `# nolint` comments. In the first iterations of Jarl, these `# nolint` comments were partially supported. However, the way they were implemented in Jarl was brittle and prone to errors, especially when automatically inserting them.\r\n\r\nAs of Jarl 0.4.0, suppression comments have been entirely rewritten and now follow a different syntax. This also allows you to safely use Jarl and `lintr` in the same project, knowing that there won't be conflicts between their comments. The new suppression comments are extensively covered in the section #link(\"https://jarl.etiennebacher.com/using-jarl#ignoring-diagnostics\")[\"Ignoring diagnostics\"] on the documentation website, but I present a summary below.\r\n\r\nThere are three types of suppression comments:\r\n\r\n- #strong[standard comments] apply to the next block of code, or #emph[node]. A node correspond to an R expression as well as all expressions that belong to it (aka #emph[children nodes]). Importantly, the detection of which node is affected by a comment doesn't depend on the layout of the code (line breaks, whitespaces, etc.).\r\n\r\n  ```r\r\n  # The comment below only applies to `any(is.na(x1))`.\r\n  # jarl-ignore any_is_na: \u003creason\u003e\r\n  any(is.na(x1))\r\n  any(is.na(x2))\r\n\r\n  # The comment below applies to the entire function definition, including the\r\n  # two `any(is.na(...))` calls.\r\n  # jarl-ignore any_is_na: \u003creason\u003e\r\n  f \u003c- function(x1, x2) {\r\n    any(is.na(x1))\r\n    any(is.na(x2))\r\n  }\r\n  ```\r\n\r\n  If you have ever used #link(\"https://posit-dev.github.io/air/formatter.html#disabling-formatting\")[Air's suppression comments], then you should already be familiar about the locations of Jarl's comments since they follow the same rules.\r\n\r\n  #html.elem(\"details\")[\r\n    #html.elem(\"summary\")[\r\n      Click to see more details on how node detection works.\r\n    ]\r\n\r\n  Jarl is entirely based on parsing the abstract syntax tree (AST) of the code.\r\n  In the example above, the `f \u003c- function...` call is represented as follows:\r\n\r\n  ```r\r\n  lobstr::ast(\r\n    f \u003c- function() {\r\n      any(is.na(x1))\r\n      any(is.na(x2))\r\n    }\r\n  )\r\n  #\u003e █─`\u003c-`\r\n  #\u003e ├─f\r\n  #\u003e └─█─`function`\r\n  #\u003e   ├─NULL\r\n  #\u003e   ├─█─`{`\r\n  #\u003e   │ ├─█─any\r\n  #\u003e   │ │ └─█─is.na\r\n  #\u003e   │ │   └─x1\r\n  #\u003e   │ └─█─any\r\n  #\u003e   │   └─█─is.na\r\n  #\u003e   │     └─x2\r\n  #\u003e   └─NULL\r\n  ```\r\n\r\n  The top node is the assignment `\u003c-`. Then come the left-hand side and right-hand side of the assignment. The LHS simply is the identifier `f`, but the RHS has itself multiple children, including the function body (`{`). Finally, inside the function body, we see the two calls to `any(is.na(...))`.\r\n\r\n  When we put a comment above `f \u003c- function...`, we attach the node to `\u003c-` #emph[and to all its children], which explains why code inside the function also uses this comment to ignore diagnostics.\r\n\r\n  ]\r\n\r\n- #strong[range comments] applies to all the code between `start` and `end`:\r\n\r\n  ```r\r\n  # The comment below applies until `jarl-ignore-end` is found (and at the\r\n  # same nesting level).\r\n  # jarl-ignore-start any_is_na: \u003creason\u003e\r\n  any(is.na(x1))\r\n  any(is.na(x2))\r\n\r\n  f \u003c- function(x1, x2) {\r\n    any(is.na(x1))\r\n    any(is.na(x2))\r\n  }\r\n  # jarl-ignore-end any_is_na\r\n  ```\r\n\r\n- #strong[file comments] applies to all code in the file:\r\n\r\n  ```r\r\n  # The comment below applies to the entire file.\r\n  # jarl-ignore-file any_is_na: \u003creason\u003e\r\n  any(is.na(x1))\r\n  any(is.na(x2))\r\n\r\n  f \u003c- function(x1, x2) {\r\n    any(is.na(x1))\r\n    any(is.na(x2))\r\n  }\r\n  ```\r\n\r\nThere are two important things to notice in the syntax of the suppression comments.\r\n\r\nFirst, #strong[they must state the precise rule to ignore]. This means that if you wish to ignore multiple rules for the same code block, you must have one comment per rule to ignore (the reason for this is the next point). This also means that comments such as `# jarl-ignore` (aka #emph[blanket suppressions]) are ignored and even reported by Jarl.\r\n\r\nSecond, #strong[they must state a reason why these diagnostics are ignored]. This is the `\u003creason\u003e` placeholder in the examples above, and it can be any text after the colon.\r\n\r\nIf you are used to `lintr`'s suppression comment system, this may feel quite constraining but there is a good justification for having these two rules. You may have a valid reason to ignore a diagnostic, for instance because Jarl returns a false positive. If this is the case, it is important that only the rule that gives the false positive is ignored and not rules that have nothing to do with the false positive. This is why you have to specify the rule name in the comment. It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.\r\n\r\nNote that if you don't want any diagnostics of a specific rule, you can always ignore the rule in `jarl.toml` or with command-line arguments.\r\n\r\nTo help you write valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).\r\n\r\n= Other goodies\r\n\u003cother-goodies\u003e\r\nThis release brings more features!\r\n\r\n#strong[A new command-line argument `--statistics`] to show a count of diagnostics instead of being flooded in details in the console:\r\n\r\n```\r\n\u003e jarl check . --statistics\r\n\r\n   88 [*] numeric_leading_zero\r\n    3 [*] redundant_equals\r\n    1 [ ] vector_logic\r\n    1 [*] string_boundary\r\n\r\nRules with `[*]` have an automatic fix.\r\n```\r\n\r\n#link(\"https://jarl.etiennebacher.com/config#config-file-detection\")[#strong[A hierarchical search for `jarl.toml`]] to look for configuration files in parent folders if the working directory doesn't have one.\r\n\r\nThis is particularly useful to store a default `jarl.toml` in a config folder so that any projects that doesn't have its own `jarl.toml` will fallback to this one. The location of this config folder varies by OS:\r\n\r\n- on Linux/macOS, you can store the default config at `~/.config/jarl/jarl.toml`\\;\r\n- on Windows, you can store the default config at `~/AppData/Roaming/jarl/jarl.toml`.\r\n\r\nFor instance, suppose I have `test.R` in my working directory, and this working directory doesn't have a `jarl.toml`. Before 0.4.0, Jarl wouldn't look for other configuration files. As of 0.4.0, Jarl looks in parent folders and in the config folder as a fallback.\r\n\r\n```\r\n/home/etienne\r\n    |\r\n    ├── Desktop\r\n    |     ├── test    # ---\u003e this is my working directory\r\n    |     |   ├── data\r\n    |     |   ├── scripts\r\n    |     |   ├── ...\r\n    |     |   └── test.R\r\n    |     |\r\n    |     └── jarl.toml    # ---\u003e config file belongs to \"Desktop\" (parent\r\n    |                      #      directory of my working directory) so it\r\n    |                      #      will be used first\r\n    |\r\n    └── .config\r\n        └── jarl\r\n            └── jarl.toml  # ---\u003e this is the fallback config file that would\r\n                           #      be used if there weren't any jarl.toml found\r\n                           #      in parent directories of my working\r\n                           #      directory.\r\n```\r\n\r\n#strong[Less rules activated by default] as some were considered too noisy relative to their benefit (such as `assignment` and `fixed_regex`). Those rules still exist but need to be selected in `jarl.toml` or with command line arguments.\r\n\r\nAnd a few bug fixes, because what would programming be without bugs.\r\n\r\nI hope you enjoy this release! If you find any issues or want to contribute, please check out the #link(\"https://github.com/etiennebacher/jarl\")[Github repository]. And thanks Maëlle for the suggestions!\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2051,15 +2278,15 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="jarl-0-4-0">Jarl 0.4.0</h1></span></p><p>I’m very happy to announce the release of <a href="https://jarl.etiennebacher.com/">Jarl</a> 0.4.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.</p><p>After a few rapid iterations following the <a href="https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/">initial 0.1.0 announcement</a>, I took a bit more time to add more features and fix more bugs.</p><h2 id="unreachable-code">Unreachable code</h2><p>Jarl is now able to find unreachable code in R files. Code might not be reachable for a few reasons:</p><ul><li>it comes after a function that stops the execution (<code>stop()</code>, <code>rlang::abort()</code>, etc.);</li><li>it comes after a keyword that breaks a loop (<code>break</code>) or goes to the next iteration (<code>next</code>);</li><li>it comes after a <code>return()</code> statement in a function;</li><li>it is part of a branch that can never be executed (for instance after <code>if (FALSE)</code>).</li></ul><p>Usually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.</p><p>For example, take this simple function:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-  if (x <span class="calepin-syntax-scope-3">></span> <span class="calepin-syntax-scope-2">5</span>) {
-    return(<span class="calepin-syntax-scope-3">"</span>greater than five<span class="calepin-syntax-scope-3">"</span>)
-  } else if (x <span class="calepin-syntax-scope-3">&lt;</span> <span class="calepin-syntax-scope-2">5</span>) {
-    return(<span class="calepin-syntax-scope-3">"</span>lower than five<span class="calepin-syntax-scope-3">"</span>)
-  } else {
-    <span class="calepin-syntax-scope-1">stop</span>(<span class="calepin-syntax-scope-3">"</span>x must be greater or lower than five<span class="calepin-syntax-scope-3">"</span>)
+            <p><span style="font-variant-caps: small-caps"><h1 id="jarl-0-4-0">Jarl 0.4.0</h1></span></p><p>I’m very happy to announce the release of <a href="https://jarl.etiennebacher.com/">Jarl</a> 0.4.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.</p><p>After a few rapid iterations following the <a href="https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/">initial 0.1.0 announcement</a>, I took a bit more time to add more features and fix more bugs.</p><h2 id="unreachable-code">Unreachable code</h2><p>Jarl is now able to find unreachable code in R files. Code might not be reachable for a few reasons:</p><ul><li>it comes after a function that stops the execution (<code>stop()</code>, <code>rlang::abort()</code>, etc.);</li><li>it comes after a keyword that breaks a loop (<code>break</code>) or goes to the next iteration (<code>next</code>);</li><li>it comes after a <code>return()</code> statement in a function;</li><li>it is part of a branch that can never be executed (for instance after <code>if (FALSE)</code>).</li></ul><p>Usually, unreachable code means that there is a logic error somewhere before, or that the code is now useless and should be removed.</p><p>For example, take this simple function:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+  <span class="calepin-syntax-scope-10">if</span> (x <span class="calepin-syntax-scope-24">></span> <span class="calepin-syntax-scope-23">5</span>) {
+    <span class="calepin-syntax-scope-10">return</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">greater than five</span><span class="calepin-syntax-scope-4">"</span>)
+  } <span class="calepin-syntax-scope-10">else</span> <span class="calepin-syntax-scope-10">if</span> (x <span class="calepin-syntax-scope-24">&lt;</span> <span class="calepin-syntax-scope-23">5</span>) {
+    <span class="calepin-syntax-scope-10">return</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">lower than five</span><span class="calepin-syntax-scope-4">"</span>)
+  } <span class="calepin-syntax-scope-10">else</span> {
+    <span class="calepin-syntax-scope-21">stop</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">x must be greater or lower than five</span><span class="calepin-syntax-scope-4">"</span>)
   }
-  <span class="calepin-syntax-scope-1">print</span>(<span class="calepin-syntax-scope-3">"</span>end of function<span class="calepin-syntax-scope-3">"</span>)
+  <span class="calepin-syntax-scope-21">print</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">end of function</span><span class="calepin-syntax-scope-4">"</span>)
 }
 </code></pre></div><p>The <code>print()</code> statement will never be executed because all branches of the <code>if</code> statement return early or error. And indeed, Jarl indicates:</p><div class="sourceCode" data-lang><pre><code>warning: unreachable_code
  --> _posts/2026-02-03-jarl-0.4.0/test.R:9:3
@@ -2069,63 +2296,63 @@ tbody > tr > td {
   terminates in all branches.
   |
 
-Found 1 error.</code></pre></div><p>Note that if we were to remove the <code>else</code> statement:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-  if (x <span class="calepin-syntax-scope-3">></span> <span class="calepin-syntax-scope-2">5</span>) {
-    return(<span class="calepin-syntax-scope-3">"</span>greater than five<span class="calepin-syntax-scope-3">"</span>)
-  } else if (x <span class="calepin-syntax-scope-3">&lt;</span> <span class="calepin-syntax-scope-2">5</span>) {
-    return(<span class="calepin-syntax-scope-3">"</span>lower than five<span class="calepin-syntax-scope-3">"</span>)
+Found 1 error.</code></pre></div><p>Note that if we were to remove the <code>else</code> statement:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+  <span class="calepin-syntax-scope-10">if</span> (x <span class="calepin-syntax-scope-24">></span> <span class="calepin-syntax-scope-23">5</span>) {
+    <span class="calepin-syntax-scope-10">return</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">greater than five</span><span class="calepin-syntax-scope-4">"</span>)
+  } <span class="calepin-syntax-scope-10">else</span> <span class="calepin-syntax-scope-10">if</span> (x <span class="calepin-syntax-scope-24">&lt;</span> <span class="calepin-syntax-scope-23">5</span>) {
+    <span class="calepin-syntax-scope-10">return</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">lower than five</span><span class="calepin-syntax-scope-4">"</span>)
   }
-  <span class="calepin-syntax-scope-1">print</span>(<span class="calepin-syntax-scope-3">"</span>end of function<span class="calepin-syntax-scope-3">"</span>)
+  <span class="calepin-syntax-scope-21">print</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">end of function</span><span class="calepin-syntax-scope-4">"</span>)
 }
-</code></pre></div><p>then Jarl wouldn’t report anything because the <code>print()</code> statement would run if <code>x == 5</code>.</p><p>This unreachable code detection also works outside of functions, which can be helpful for example if you have introduced a <code>stop()</code> for debugging somewhere in a script and forgot to remove it when running the entire script again later.</p><h2 id="suppression-comments">Suppression comments</h2><p>Suppression comments are special comments that are used to ignore diagnostics reported by the linter. If you have already used <code>lintr</code>, you might be familiar with the <code># nolint</code> comments. In the first iterations of Jarl, these <code># nolint</code> comments were partially supported. However, the way they were implemented in Jarl was brittle and prone to errors, especially when automatically inserting them.</p><p>As of Jarl 0.4.0, suppression comments have been entirely rewritten and now follow a different syntax. This also allows you to safely use Jarl and <code>lintr</code> in the same project, knowing that there won’t be conflicts between their comments. The new suppression comments are extensively covered in the section <a href="https://jarl.etiennebacher.com/using-jarl#ignoring-diagnostics">“Ignoring diagnostics”</a> on the documentation website, but I present a summary below.</p><p>There are three types of suppression comments:</p><ul><li><strong>standard comments</strong> apply to the next block of code, or <em>node</em>. A node correspond to an R expression as well as all expressions that belong to it (aka <em>children nodes</em>). Importantly, the detection of which node is affected by a comment doesn’t depend on the layout of the code (line breaks, whitespaces, etc.).</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  <span class="calepin-syntax-scope-3">#</span> The comment below only applies to `any(is.na(x1))`.
-  <span class="calepin-syntax-scope-3">#</span> jarl-ignore any_is_na: &lt;reason>
-  <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-  <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+</code></pre></div><p>then Jarl wouldn’t report anything because the <code>print()</code> statement would run if <code>x == 5</code>.</p><p>This unreachable code detection also works outside of functions, which can be helpful for example if you have introduced a <code>stop()</code> for debugging somewhere in a script and forgot to remove it when running the entire script again later.</p><h2 id="suppression-comments">Suppression comments</h2><p>Suppression comments are special comments that are used to ignore diagnostics reported by the linter. If you have already used <code>lintr</code>, you might be familiar with the <code># nolint</code> comments. In the first iterations of Jarl, these <code># nolint</code> comments were partially supported. However, the way they were implemented in Jarl was brittle and prone to errors, especially when automatically inserting them.</p><p>As of Jarl 0.4.0, suppression comments have been entirely rewritten and now follow a different syntax. This also allows you to safely use Jarl and <code>lintr</code> in the same project, knowing that there won’t be conflicts between their comments. The new suppression comments are extensively covered in the section <a href="https://jarl.etiennebacher.com/using-jarl#ignoring-diagnostics">“Ignoring diagnostics”</a> on the documentation website, but I present a summary below.</p><p>There are three types of suppression comments:</p><ul><li><strong>standard comments</strong> apply to the next block of code, or <em>node</em>. A node correspond to an R expression as well as all expressions that belong to it (aka <em>children nodes</em>). Importantly, the detection of which node is affected by a comment doesn’t depend on the layout of the code (line breaks, whitespaces, etc.).</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> The comment below only applies to `any(is.na(x1))`.</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> jarl-ignore any_is_na: &lt;reason></span>
+  <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+  <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
 
-  <span class="calepin-syntax-scope-3">#</span> The comment below applies to the entire function definition, including the
-  <span class="calepin-syntax-scope-3">#</span> two `any(is.na(...))` calls.
-  <span class="calepin-syntax-scope-3">#</span> jarl-ignore any_is_na: &lt;reason>
-  <span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">x2</span>) {
-    <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-    <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> The comment below applies to the entire function definition, including the</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> two `any(is.na(...))` calls.</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> jarl-ignore any_is_na: &lt;reason></span>
+  <span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">x2</span>) {
+    <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+    <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
   }
-</code></pre></div><p>If you have ever used <a href="https://posit-dev.github.io/air/formatter.html#disabling-formatting">Air’s suppression comments</a>, then you should already be familiar about the locations of Jarl’s comments since they follow the same rules.</p><details><summary>Click to see more details on how node detection works.</summary><p>Jarl is entirely based on parsing the abstract syntax tree (AST) of the code. In the example above, the <code>f &lt;- function...</code> call is represented as follows:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  lobstr::<span class="calepin-syntax-scope-1">ast</span>(
-    <span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function() {
-      <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-      <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+</code></pre></div><p>If you have ever used <a href="https://posit-dev.github.io/air/formatter.html#disabling-formatting">Air’s suppression comments</a>, then you should already be familiar about the locations of Jarl’s comments since they follow the same rules.</p><details><summary>Click to see more details on how node detection works.</summary><p>Jarl is entirely based on parsing the abstract syntax tree (AST) of the code. In the example above, the <code>f &lt;- function...</code> call is represented as follows:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  lobstr::<span class="calepin-syntax-scope-22">ast</span>(
+    <span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>() {
+      <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+      <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
     }
   )
-  <span class="calepin-syntax-scope-3">#</span>> █─`&lt;-`
-  <span class="calepin-syntax-scope-3">#</span>> ├─f
-  <span class="calepin-syntax-scope-3">#</span>> └─█─`function`
-  <span class="calepin-syntax-scope-3">#</span>>   ├─NULL
-  <span class="calepin-syntax-scope-3">#</span>>   ├─█─`{`
-  <span class="calepin-syntax-scope-3">#</span>>   │ ├─█─any
-  <span class="calepin-syntax-scope-3">#</span>>   │ │ └─█─is.na
-  <span class="calepin-syntax-scope-3">#</span>>   │ │   └─x1
-  <span class="calepin-syntax-scope-3">#</span>>   │ └─█─any
-  <span class="calepin-syntax-scope-3">#</span>>   │   └─█─is.na
-  <span class="calepin-syntax-scope-3">#</span>>   │     └─x2
-  <span class="calepin-syntax-scope-3">#</span>>   └─NULL
-</code></pre></div><p>The top node is the assignment <code>&lt;-</code>. Then come the left-hand side and right-hand side of the assignment. The LHS simply is the identifier <code>f</code>, but the RHS has itself multiple children, including the function body (<code>{</code>). Finally, inside the function body, we see the two calls to <code>any(is.na(...))</code>.</p><p>When we put a comment above <code>f &lt;- function...</code>, we attach the node to <code>&lt;-</code> <em>and to all its children</em>, which explains why code inside the function also uses this comment to ignore diagnostics.</p></details><ul><li><strong>range comments</strong> applies to all the code between <code>start</code> and <code>end</code>:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  <span class="calepin-syntax-scope-3">#</span> The comment below applies until `jarl-ignore-end` is found (and at the
-  <span class="calepin-syntax-scope-3">#</span> same nesting level).
-  <span class="calepin-syntax-scope-3">#</span> jarl-ignore-start any_is_na: &lt;reason>
-  <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-  <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">> █─`&lt;-`</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">> ├─f</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">> └─█─`function`</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   ├─NULL</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   ├─█─`{`</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   │ ├─█─any</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   │ │ └─█─is.na</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   │ │   └─x1</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   │ └─█─any</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   │   └─█─is.na</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   │     └─x2</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1">>   └─NULL</span>
+</code></pre></div><p>The top node is the assignment <code>&lt;-</code>. Then come the left-hand side and right-hand side of the assignment. The LHS simply is the identifier <code>f</code>, but the RHS has itself multiple children, including the function body (<code>{</code>). Finally, inside the function body, we see the two calls to <code>any(is.na(...))</code>.</p><p>When we put a comment above <code>f &lt;- function...</code>, we attach the node to <code>&lt;-</code> <em>and to all its children</em>, which explains why code inside the function also uses this comment to ignore diagnostics.</p></details><ul><li><strong>range comments</strong> applies to all the code between <code>start</code> and <code>end</code>:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> The comment below applies until `jarl-ignore-end` is found (and at the</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> same nesting level).</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> jarl-ignore-start any_is_na: &lt;reason></span>
+  <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+  <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
 
-  <span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">x2</span>) {
-    <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-    <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+  <span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">x2</span>) {
+    <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+    <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
   }
-  <span class="calepin-syntax-scope-3">#</span> jarl-ignore-end any_is_na
-</code></pre></div><ul><li><strong>file comments</strong> applies to all code in the file:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  <span class="calepin-syntax-scope-3">#</span> The comment below applies to the entire file.
-  <span class="calepin-syntax-scope-3">#</span> jarl-ignore-file any_is_na: &lt;reason>
-  <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-  <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> jarl-ignore-end any_is_na</span>
+</code></pre></div><ul><li><strong>file comments</strong> applies to all code in the file:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> The comment below applies to the entire file.</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> jarl-ignore-file any_is_na: &lt;reason></span>
+  <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+  <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
 
-  <span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">x2</span>) {
-    <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x1))
-    <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(x2))
+  <span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">x2</span>) {
+    <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x1))
+    <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(x2))
   }
 </code></pre></div><p>There are two important things to notice in the syntax of the suppression comments.</p><p>First, <strong>they must state the precise rule to ignore</strong>. This means that if you wish to ignore multiple rules for the same code block, you must have one comment per rule to ignore (the reason for this is the next point). This also means that comments such as <code># jarl-ignore</code> (aka <em>blanket suppressions</em>) are ignored and even reported by Jarl.</p><p>Second, <strong>they must state a reason why these diagnostics are ignored</strong>. This is the <code>&lt;reason></code> placeholder in the examples above, and it can be any text after the colon.</p><p>If you are used to <code>lintr</code>’s suppression comment system, this may feel quite constraining but there is a good justification for having these two rules. You may have a valid reason to ignore a diagnostic, for instance because Jarl returns a false positive. If this is the case, it is important that only the rule that gives the false positive is ignored and not rules that have nothing to do with the false positive. This is why you have to specify the rule name in the comment. It is also important that you explain why this case must be ignored, so that future people who work on the code (and maybe future you) are aware of that.</p><p>Note that if you don’t want any diagnostics of a specific rule, you can always ignore the rule in <code>jarl.toml</code> or with command-line arguments.</p><p>To help you write valid suppression comments, Jarl will report comments that are invalid for any reason (misplaced comment, misnamed rule, unused comment, etc.).</p><h2 id="other-goodies">Other goodies</h2><p>This release brings more features!</p><p><strong>A new command-line argument <code>--statistics</code></strong> to show a count of diagnostics instead of being flooded in details in the console:</p><div class="sourceCode" data-lang><pre><code>> jarl check . --statistics
 
@@ -2222,7 +2449,11 @@ Rules with `[*]` have an automatic fix.</code></pre></div><p><a href="https://ja
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {

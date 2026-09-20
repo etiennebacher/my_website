@@ -1,0 +1,31 @@
+# Etienne Bacher
+
+> Personal website of Etienne Bacher: blog posts about R, research, and software.
+
+## Pages
+
+- [Gallery](https://etiennebacher.com/gallery/): Data visualization gallery
+- [Etienne Bacher](https://etiennebacher.com/): Hi there! I'm Etienne Bacher.
+- [Why you should move from Stata to R](https://etiennebacher.com/posts/2019-12-01-why-moving/): Some reasons that explain why I prefer R to Stata.
+- [First contact with the data on R](https://etiennebacher.com/posts/2020-01-22-first-contact/): A blog post describing the first steps of data cleaning and analysis using R.
+- [My favorite shortcuts in RStudio](https://etiennebacher.com/posts/2020-04-06-my-favorite-shortcuts/): Did you know that RStudio contains a lot of shortcuts to write code faster? Here are my favorites.
+- [My application for the Shiny Contest (2020)](https://etiennebacher.com/posts/2020-04-08-my-shiny-app/): A presentation of the application I submitted to the Shiny Contest 2nd edition.
+- [What to do when your code doesn't work?](https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/): This is the list of actions I make when I have an error in R.
+- [Visualize data on Nobel laureates per country](https://etiennebacher.com/posts/2020-10-18-nobel-laureates/): A post where I make animated graphs and maps to visualize the repartition of Nobel laureates per country.
+- [Use GitHub actions with R Markdown and Distill](https://etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/): How can you automatically render README, Distill website...
+- [How to create a gallery in Distill](https://etiennebacher.com/posts/2021-04-11-how-to-create-a-gallery-in-distill/): Use lightgallery.js to create a gallery for your plots or images.
+- [Reproduce some maps about 3G and 4G access](https://etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/): I try to reproduce some maps made by Dominic Royé.
+- [Mapping French rivers network](https://etiennebacher.com/posts/2021-12-27-mapping-french-rivers-network/): Once again inspired by Dominic Royé's maps, I decided to map rivers in France. The dataset I use comes from HydroSHEDS. The code below is quite similar to the code in my previous post so I don't spend a lot of time on it.
+- [Some notes about improving base R code](https://etiennebacher.com/posts/2022-11-28-some-notes-about-improving-base-r-code/): A small collection of tips to make base R code faster.
+- [Where should my family meet?](https://etiennebacher.com/posts/2023-01-14-where-should-my-family-meet/): Or a mathematical way to evade the debate on the location of the next holidays.
+- [Do bonus points lead to more tries in 6 Nations matches?](https://etiennebacher.com/posts/2023-03-01-do-bonus-points-lead-to-more-tries-in-6-nations-matches/): A small post where rugby is an excuse to do some webscraping and some ggplot-ing.
+- [Making POST requests with R](https://etiennebacher.com/posts/2023-05-09-making-post-requests-with-r/): An alternative to RSelenium to get data from dynamic webpages.
+- [Using property-based testing in R](https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/): When you don't want to write dozens of versions of unit tests.
+- [Refactoring code with flir](https://etiennebacher.com/posts/2025-05-23-refactoring-code-with-flir/): How to efficiently rewrite many code patterns.
+- [Jarl: just another R linter](https://etiennebacher.com/posts/2025-11-20-introducing-jarl/): Remove bad patterns in your R code in the blink of an eye.
+- [Jarl 0.4.0](https://etiennebacher.com/posts/2026-02-03-jarl-0.4.0/): Find unreachable code, ignore diagnostics, show summary statistics of diagnostics, and more.
+- [Jarl 0.5.0](https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/): I'm glad to announce the release of Jarl 0.5.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl via the command line…
+- [Jarl 0.6.0](https://etiennebacher.com/posts/2026-08-24-jarl-0.6.0/): I'm glad to announce the release of Jarl 0.6.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl via the command line…
+- [Blog](https://etiennebacher.com/posts/)
+- [Research](https://etiennebacher.com/research/): Nature, 652
+- [Software](https://etiennebacher.com/software/): a tutorial on webscraping static pages with rvest.

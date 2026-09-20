@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jarl: just another R linter</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="Remove bad patterns in your R code in the blink of an eye.">
+    <meta property="og:description" content="Remove bad patterns in your R code in the blink of an eye.">
+    <meta name="twitter:description" content="Remove bad patterns in your R code in the blink of an eye.">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Jarl: just another R linter | Etienne Bacher">
+    <meta name="twitter:title" content="Jarl: just another R linter | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2025-11-20-introducing-jarl/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Jarl: just another R linter])\r\n#metadata((\r\n  title: \"Jarl: just another R linter\",\r\n  kind: \"post\",\r\n  date: \"2025-11-20\",\r\n  summary: \"Remove bad patterns in your R code in the blink of an eye.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI'm very excited to introduce #link(\"https://jarl.etiennebacher.com/\")[Jarl]#calepin.elements.sidenote[Jarl stands for \"Just Another R Linter\".], a new R linter. A linter is a tool that statically parses code (meaning that it doesn't run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.\r\n\r\nJarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on #link(\"https://github.com/wch/r-source/\")[r-source] (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/lint-r-source.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nOn top of that, Jarl can apply automatic fixes#calepin.elements.sidenote[This is not always possible, it depends on the rule.]. Suppose that we have the following file `foo.R`:\r\n\r\n```r\r\nx <- any(is.na(mtcars))\r\n\r\nf <- function(x) {\r\n  apply(x, 1, mean)\r\n}\r\n```\r\n\r\nThere are two rule violations in this file:\r\n\r\n+ `any(is.na(mtcars))` should be replaced by `anyNA(mtcars)`#calepin.elements.sidenote[`anyNA(x)` is more efficient than `any(is.na(x))`.]\\;\r\n+ `apply(x, 1, mean)` should be replaced by `rowMeans(x)`#calepin.elements.sidenote[`rowMeans(x)` is more efficient than `apply(x, 1, mean)`.].\r\n\r\nInstead of fixing those cases by hand, we can run the following command in the terminal (not in the R console):\r\n\r\n```sh\r\njarl check foo.R --fix\r\n```\r\n\r\nAfter running this, `foo.R` now contains the following code:\r\n\r\n```r\r\nx <- anyNA(mtcars)\r\n\r\nf <- function(x) {\r\n  rowMeans(x)\r\n}\r\n```\r\n\r\n\\(Note that `f` is now useless since it is equivalent to `rowMeans()`.)\r\n\r\nJarl stands on the shoulders of giants, in particular:\r\n\r\n- #link(\"https://lintr.r-lib.org/\")[lintr]: this R package provides dozens of rules from various sources to lint R code, and Jarl wouldn't exist without this package. Jarl currently supports 25 `lintr` rules.\r\n- #link(\"https://posit-dev.github.io/air/\")[Air]: this is a fast R formatter written in Rust, developed by Lionel Henry and Davis Vaughan, and released earlier this year. It is also a command-line tool that runs in the terminal. It is the technical foundation on which Jarl is built since Air provides the infrastructure to parse and manipulate R code.\r\n\r\nJarl is a single binary, meaning that it doesn't need an R installation to work. This makes it a very attractive option for continuous integration for instance, since it takes less than 10 seconds to download the binary and run it on the repository.\r\n\r\n== Using Jarl\r\n<using-jarl>\r\nThere are two ways to use Jarl:\r\n\r\n+ via the terminal, using `jarl check [OPTIONS]`\\;\r\n+ using the integration in your coding editor (at the time of writing, a Jarl extension is available in VS Code, Positron, and Zed).\r\n\r\nThe Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/hover.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nThe latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/quick-fixes.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nIn the future, those extensions could have a \"Fix on save\" feature similar to the \"Format on save\" functionality provided by Air.\r\n\r\n== Configuring Jarl\r\n<configuring-jarl>\r\nBy default, Jarl will report violations for almost of its rules. It is possible to configure its behavior using a configuration file named `jarl.toml`. In particular, in this file, you can specify:\r\n\r\n- the rules you want to apply,\r\n- the files to include or exclude,\r\n- the rules for which you want to apply automatic fixes,\r\n\r\nand more.\r\n\r\n== Conclusion\r\n<conclusion>\r\nJarl is in its early days, there are more rules and options to add. Still, it can already be used in interactive use or in continuous integration (check out the #link(\"https://github.com/etiennebacher/setup-jarl\")[`setup-jarl` workflow]!). Eventually, many `lintr` rules should be supported in Jarl, but the end goal is not to have perfect compatibility. `lintr` provides many rules related to code formatting (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/spaces_inside_linter.html\")[spaces\\_inside\\_linter]). Those will not be integrated in Jarl since they are already covered by Air. Additionally (for now), Jarl cannot perform semantic analysis#calepin.elements.sidenote[Semantic analysis refers to using the context surrounding an expression to explore rule violations.], meaning that some `lintr` rules are out of scope (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/unreachable_code_linter.html\")[unreachable\\_code\\_linter]).\r\n\r\nThis was a very light introduction, go to the #link(\"https://jarl.etiennebacher.com/\")[Jarl website] for more information.\r\n\r\nIf you want to help developing Jarl, check out the #link(\"https://jarl.etiennebacher.com/contributing\")[\"Contributing\" page]. Jarl is written in Rust, which may be a barrier to contributing but is also a very powerful language which is a real pleasure to use. I will add a more detailed tutorial soon so that this can also be a nice introduction to this language. You can also contribute to the documentation!\r\n\r\n= Acknowledgements\r\n<acknowledgements>\r\nAs I said above, Jarl depends enormously on the work of #link(\"https://lintr.r-lib.org/authors.html\")[`lintr`] and Air developers, so thank you!\r\n\r\nJarl is also very inspired by similar tools in other languages, in particular #link(\"https://docs.astral.sh/ruff/\")[Ruff] in Python and #link(\"https://github.com/rust-lang/rust-clippy\")[Cargo clippy] in Rust.\r\n\r\nFinally, thanks to the #link(\"https://r-consortium.org/\")[R Consortium] for funding part of the development of Jarl via the ISC Grant Program.\r\n\r\nAnd thank you, Maëlle, for improving the draft!\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Jarl: just another R linter])\r\n#metadata((\r\n  title: \"Jarl: just another R linter\",\r\n  kind: \"post\",\r\n  date: \"2025-11-20\",\r\n  summary: \"Remove bad patterns in your R code in the blink of an eye.\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nI'm very excited to introduce #link(\"https://jarl.etiennebacher.com/\")[Jarl]#calepin.elements.sidenote[Jarl stands for \"Just Another R Linter\".], a new R linter. A linter is a tool that statically parses code (meaning that it doesn't run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.\r\n\r\nJarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on #link(\"https://github.com/wch/r-source/\")[r-source] (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/lint-r-source.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nOn top of that, Jarl can apply automatic fixes#calepin.elements.sidenote[This is not always possible, it depends on the rule.]. Suppose that we have the following file `foo.R`:\r\n\r\n```r\r\nx \u003c- any(is.na(mtcars))\r\n\r\nf \u003c- function(x) {\r\n  apply(x, 1, mean)\r\n}\r\n```\r\n\r\nThere are two rule violations in this file:\r\n\r\n+ `any(is.na(mtcars))` should be replaced by `anyNA(mtcars)`#calepin.elements.sidenote[`anyNA(x)` is more efficient than `any(is.na(x))`.]\\;\r\n+ `apply(x, 1, mean)` should be replaced by `rowMeans(x)`#calepin.elements.sidenote[`rowMeans(x)` is more efficient than `apply(x, 1, mean)`.].\r\n\r\nInstead of fixing those cases by hand, we can run the following command in the terminal (not in the R console):\r\n\r\n```sh\r\njarl check foo.R --fix\r\n```\r\n\r\nAfter running this, `foo.R` now contains the following code:\r\n\r\n```r\r\nx \u003c- anyNA(mtcars)\r\n\r\nf \u003c- function(x) {\r\n  rowMeans(x)\r\n}\r\n```\r\n\r\n\\(Note that `f` is now useless since it is equivalent to `rowMeans()`.)\r\n\r\nJarl stands on the shoulders of giants, in particular:\r\n\r\n- #link(\"https://lintr.r-lib.org/\")[lintr]: this R package provides dozens of rules from various sources to lint R code, and Jarl wouldn't exist without this package. Jarl currently supports 25 `lintr` rules.\r\n- #link(\"https://posit-dev.github.io/air/\")[Air]: this is a fast R formatter written in Rust, developed by Lionel Henry and Davis Vaughan, and released earlier this year. It is also a command-line tool that runs in the terminal. It is the technical foundation on which Jarl is built since Air provides the infrastructure to parse and manipulate R code.\r\n\r\nJarl is a single binary, meaning that it doesn't need an R installation to work. This makes it a very attractive option for continuous integration for instance, since it takes less than 10 seconds to download the binary and run it on the repository.\r\n\r\n== Using Jarl\r\n\u003cusing-jarl\u003e\r\nThere are two ways to use Jarl:\r\n\r\n+ via the terminal, using `jarl check [OPTIONS]`\\;\r\n+ using the integration in your coding editor (at the time of writing, a Jarl extension is available in VS Code, Positron, and Zed).\r\n\r\nThe Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/hover.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nThe latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.\r\n\r\n#html.elem(\"video\", attrs: (width: \"60%\", height: \"60%\", alt: \"This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked.\", controls: \"\"))[\r\n  #html.elem(\"source\", attrs: (src: \"demos/quick-fixes.webm\", type: \"video/mp4\"))\r\n]\r\n\r\nIn the future, those extensions could have a \"Fix on save\" feature similar to the \"Format on save\" functionality provided by Air.\r\n\r\n== Configuring Jarl\r\n\u003cconfiguring-jarl\u003e\r\nBy default, Jarl will report violations for almost of its rules. It is possible to configure its behavior using a configuration file named `jarl.toml`. In particular, in this file, you can specify:\r\n\r\n- the rules you want to apply,\r\n- the files to include or exclude,\r\n- the rules for which you want to apply automatic fixes,\r\n\r\nand more.\r\n\r\n== Conclusion\r\n\u003cconclusion\u003e\r\nJarl is in its early days, there are more rules and options to add. Still, it can already be used in interactive use or in continuous integration (check out the #link(\"https://github.com/etiennebacher/setup-jarl\")[`setup-jarl` workflow]!). Eventually, many `lintr` rules should be supported in Jarl, but the end goal is not to have perfect compatibility. `lintr` provides many rules related to code formatting (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/spaces_inside_linter.html\")[spaces\\_inside\\_linter]). Those will not be integrated in Jarl since they are already covered by Air. Additionally (for now), Jarl cannot perform semantic analysis#calepin.elements.sidenote[Semantic analysis refers to using the context surrounding an expression to explore rule violations.], meaning that some `lintr` rules are out of scope (e.g.~#link(\"https://lintr.r-lib.org/dev/reference/unreachable_code_linter.html\")[unreachable\\_code\\_linter]).\r\n\r\nThis was a very light introduction, go to the #link(\"https://jarl.etiennebacher.com/\")[Jarl website] for more information.\r\n\r\nIf you want to help developing Jarl, check out the #link(\"https://jarl.etiennebacher.com/contributing\")[\"Contributing\" page]. Jarl is written in Rust, which may be a barrier to contributing but is also a very powerful language which is a real pleasure to use. I will add a more detailed tutorial soon so that this can also be a nice introduction to this language. You can also contribute to the documentation!\r\n\r\n= Acknowledgements\r\n\u003cacknowledgements\u003e\r\nAs I said above, Jarl depends enormously on the work of #link(\"https://lintr.r-lib.org/authors.html\")[`lintr`] and Air developers, so thank you!\r\n\r\nJarl is also very inspired by similar tools in other languages, in particular #link(\"https://docs.astral.sh/ruff/\")[Ruff] in Python and #link(\"https://github.com/rust-lang/rust-clippy\")[Cargo clippy] in Rust.\r\n\r\nFinally, thanks to the #link(\"https://r-consortium.org/\")[R Consortium] for funding part of the development of Jarl via the ISC Grant Program.\r\n\r\nAnd thank you, Maëlle, for improving the draft!\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2053,16 +2280,16 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="jarl-just-another-r-linter">Jarl: just another R linter</h1></span></p><p>I’m very excited to introduce <a href="https://jarl.etiennebacher.com/">Jarl</a><a role="doc-noteref" href="#sn-1" id="sn-1ref">1</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-1" data-sidenote-number="1">Jarl stands for “Just Another R Linter”.</span>, a new R linter. A linter is a tool that statically parses code (meaning that it doesn’t run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.</p><p>Jarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on <a href="https://github.com/wch/r-source/">r-source</a> (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:</p><p><video width="60%" height="60%" alt="Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it." controls><source src="demos/lint-r-source.webm" type="video/mp4"></video></p><p>On top of that, Jarl can apply automatic fixes<a role="doc-noteref" href="#sn-2" id="sn-2ref">2</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-2" data-sidenote-number="2">This is not always possible, it depends on the rule.</span>. Suppose that we have the following file <code>foo.R</code>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">x <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">is.na</span>(mtcars))
+            <p><span style="font-variant-caps: small-caps"><h1 id="jarl-just-another-r-linter">Jarl: just another R linter</h1></span></p><p>I’m very excited to introduce <a href="https://jarl.etiennebacher.com/">Jarl</a><a role="doc-noteref" href="#sn-1" id="sn-1ref">1</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-1" data-sidenote-number="1">Jarl stands for “Just Another R Linter”.</span>, a new R linter. A linter is a tool that statically parses code (meaning that it doesn’t run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.</p><p>Jarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on <a href="https://github.com/wch/r-source/">r-source</a> (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:</p><p><video width="60%" height="60%" alt="Running `jarl check . --with-timing` on the 'r-source' repository. This runs in about 700ms and returns hundreds of rule violations detailing the diagnostic and how to fix it." controls><source src="demos/lint-r-source.webm" type="video/mp4"></video></p><p>On top of that, Jarl can apply automatic fixes<a role="doc-noteref" href="#sn-2" id="sn-2ref">2</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-2" data-sidenote-number="2">This is not always possible, it depends on the rule.</span>. Suppose that we have the following file <code>foo.R</code>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">x <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">is.na</span>(mtcars))
 
-<span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-  <span class="calepin-syntax-scope-1">apply</span>(x<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> mean)
+<span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+  <span class="calepin-syntax-scope-21">apply</span>(x<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> mean)
 }
-</code></pre></div><p>There are two rule violations in this file:</p><ol><li><code>any(is.na(mtcars))</code> should be replaced by <code>anyNA(mtcars)</code><a role="doc-noteref" href="#sn-3" id="sn-3ref">3</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-3" data-sidenote-number="3"><code>anyNA(x)</code> is more efficient than <code>any(is.na(x))</code>.</span>;</li><li><code>apply(x, 1, mean)</code> should be replaced by <code>rowMeans(x)</code><a role="doc-noteref" href="#sn-4" id="sn-4ref">4</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-4" data-sidenote-number="4"><code>rowMeans(x)</code> is more efficient than <code>apply(x, 1, mean)</code>.</span>.</li></ol><p>Instead of fixing those cases by hand, we can run the following command in the terminal (not in the R console):</p><div class="sourceCode" data-lang="sh"><pre><code data-lang="sh"><span class="calepin-syntax-scope-1">jarl</span> check foo.R<span class="calepin-syntax-scope-3"> --</span><span class="calepin-syntax-scope-5">fix</span>
-</code></pre></div><p>After running this, <code>foo.R</code> now contains the following code:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">x <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">anyNA</span>(mtcars)
+</code></pre></div><p>There are two rule violations in this file:</p><ol><li><code>any(is.na(mtcars))</code> should be replaced by <code>anyNA(mtcars)</code><a role="doc-noteref" href="#sn-3" id="sn-3ref">3</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-3" data-sidenote-number="3"><code>anyNA(x)</code> is more efficient than <code>any(is.na(x))</code>.</span>;</li><li><code>apply(x, 1, mean)</code> should be replaced by <code>rowMeans(x)</code><a role="doc-noteref" href="#sn-4" id="sn-4ref">4</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-4" data-sidenote-number="4"><code>rowMeans(x)</code> is more efficient than <code>apply(x, 1, mean)</code>.</span>.</li></ol><p>Instead of fixing those cases by hand, we can run the following command in the terminal (not in the R console):</p><div class="sourceCode" data-lang="sh"><pre><code data-lang="sh"><span class="calepin-syntax-scope-22">jarl</span> check foo.R<span class="calepin-syntax-scope-25"> --</span><span class="calepin-syntax-scope-28">fix</span>
+</code></pre></div><p>After running this, <code>foo.R</code> now contains the following code:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">x <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">anyNA</span>(mtcars)
 
-<span class="calepin-syntax-scope-1">f</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-  <span class="calepin-syntax-scope-1">rowMeans</span>(x)
+<span class="calepin-syntax-scope-20">f</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+  <span class="calepin-syntax-scope-21">rowMeans</span>(x)
 }
 </code></pre></div><p>(Note that <code>f</code> is now useless since it is equivalent to <code>rowMeans()</code>.)</p><p>Jarl stands on the shoulders of giants, in particular:</p><ul><li><a href="https://lintr.r-lib.org/">lintr</a>: this R package provides dozens of rules from various sources to lint R code, and Jarl wouldn’t exist without this package. Jarl currently supports 25 <code>lintr</code> rules.</li><li><a href="https://posit-dev.github.io/air/">Air</a>: this is a fast R formatter written in Rust, developed by Lionel Henry and Davis Vaughan, and released earlier this year. It is also a command-line tool that runs in the terminal. It is the technical foundation on which Jarl is built since Air provides the infrastructure to parse and manipulate R code.</li></ul><p>Jarl is a single binary, meaning that it doesn’t need an R installation to work. This makes it a very attractive option for continuous integration for instance, since it takes less than 10 seconds to download the binary and run it on the repository.</p><h3 id="using-jarl">Using Jarl</h3><p>There are two ways to use Jarl:</p><ol><li>via the terminal, using <code>jarl check [OPTIONS]</code>;</li><li>using the integration in your coding editor (at the time of writing, a Jarl extension is available in VS Code, Positron, and Zed).</li></ol><p>The Jarl extension enables code highlighting and quick fixes. The former means that code that violates any of the rules in your setup (more on this below) will be underlined and will show the exact violation when hovered.</p><p><video width="60%" height="60%" alt="This shows the same file 'foo.R', but this time the two pieces of code that violate the rules are underlined in yellow. Hovering these two pieces of code show a popup detailing the diagnostic." controls><source src="demos/hover.webm" type="video/mp4"></video></p><p>The latter adds a lightbulb button next to rule violations, allowing you to selectively apply fixes or ignore violations.</p><p><video width="60%" height="60%" alt="This shows the same file 'foo.R'. This time, clicking on the code that violate the rules displays a small lightbulb icon that applies the automatic fix when clicked." controls><source src="demos/quick-fixes.webm" type="video/mp4"></video></p><p>In the future, those extensions could have a “Fix on save” feature similar to the “Format on save” functionality provided by Air.</p><h3 id="configuring-jarl">Configuring Jarl</h3><p>By default, Jarl will report violations for almost of its rules. It is possible to configure its behavior using a configuration file named <code>jarl.toml</code>. In particular, in this file, you can specify:</p><ul><li>the rules you want to apply,</li><li>the files to include or exclude,</li><li>the rules for which you want to apply automatic fixes,</li></ul><p>and more.</p><h3 id="conclusion">Conclusion</h3><p>Jarl is in its early days, there are more rules and options to add. Still, it can already be used in interactive use or in continuous integration (check out the <a href="https://github.com/etiennebacher/setup-jarl"><code>setup-jarl</code> workflow</a>!). Eventually, many <code>lintr</code> rules should be supported in Jarl, but the end goal is not to have perfect compatibility. <code>lintr</code> provides many rules related to code formatting (e.g. <a href="https://lintr.r-lib.org/dev/reference/spaces_inside_linter.html">spaces_inside_linter</a>). Those will not be integrated in Jarl since they are already covered by Air. Additionally (for now), Jarl cannot perform semantic analysis<a role="doc-noteref" href="#sn-5" id="sn-5ref">5</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-5" data-sidenote-number="5">Semantic analysis refers to using the context surrounding an expression to explore rule violations.</span>, meaning that some <code>lintr</code> rules are out of scope (e.g. <a href="https://lintr.r-lib.org/dev/reference/unreachable_code_linter.html">unreachable_code_linter</a>).</p><p>This was a very light introduction, go to the <a href="https://jarl.etiennebacher.com/">Jarl website</a> for more information.</p><p>If you want to help developing Jarl, check out the <a href="https://jarl.etiennebacher.com/contributing">“Contributing” page</a>. Jarl is written in Rust, which may be a barrier to contributing but is also a very powerful language which is a real pleasure to use. I will add a more detailed tutorial soon so that this can also be a nice introduction to this language. You can also contribute to the documentation!</p><h2 id="acknowledgements">Acknowledgements</h2><p>As I said above, Jarl depends enormously on the work of <a href="https://lintr.r-lib.org/authors.html"><code>lintr</code></a> and Air developers, so thank you!</p><p>Jarl is also very inspired by similar tools in other languages, in particular <a href="https://docs.astral.sh/ruff/">Ruff</a> in Python and <a href="https://github.com/rust-lang/rust-clippy">Cargo clippy</a> in Rust.</p><p>Finally, thanks to the <a href="https://r-consortium.org/">R Consortium</a> for funding part of the development of Jarl via the ISC Grant Program.</p><p>And thank you, Maëlle, for improving the draft!</p>
         </main>
@@ -2134,7 +2361,11 @@ tbody > tr > td {
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {

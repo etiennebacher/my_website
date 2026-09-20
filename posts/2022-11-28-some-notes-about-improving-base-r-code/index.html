@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Some notes about improving base R code</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="A small collection of tips to make base R code faster.">
+    <meta property="og:description" content="A small collection of tips to make base R code faster.">
+    <meta name="twitter:description" content="A small collection of tips to make base R code faster.">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Some notes about improving base R code | Etienne Bacher">
+    <meta name="twitter:title" content="Some notes about improving base R code | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2022-11-28-some-notes-about-improving-base-r-code/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Some notes about improving base R code])\r\n#metadata((\r\n  title: \"Some notes about improving base R code\",\r\n  kind: \"post\",\r\n  date: \"2022-11-28\",\r\n  summary: \"A small collection of tips to make base R code faster.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nPreview image coming from: https:\\/\\/trainingindustry.com/magazine/nov-dec-2018/life-in-the-fast-lane-accelerated-continuous-development-for-fast-paced-organizations/\r\n\r\nLately I've spent quite some time on packages that require (almost) only base R:\r\n\r\n- `datawizard`, a package belonging to the `easystats` ecosystem, whose goal is to provide tools for data wrangling and statistical transformations;\r\n- `poorman`, whose goal is to reproduce `tidyverse` functions (with a strong focus on `dplyr`) using base R only.\r\n\r\nI've used `bench::mark()` and `profvis::profvis()` a lot to improve code performance and here are a few things I learnt. By default, `bench::mark()` checks that all expressions return the same output, so we can be confident that the alternatives I show in this post are truly equivalent.\r\n\r\nBefore we start, I want to precise a few things.\r\n\r\nFirst, these performance improvements are targeted to package developers. A random user shouldn't really care if a function takes 200 milliseconds less to run. However, I think a package developer might find these tips interesting.\r\n\r\nSecond, if you find some ways to speed up my alternatives, feel free to comment. I know that there are a bunch of packages whose reputation is built on being very fast (for example `data.table` and `collapse`). I'm only showing some base R code alternatives here.\r\n\r\nFinally, here's a small function that I use to make a classic dataset (like `iris` or `mtcars`) much bigger.\r\n\r\n```r\r\nmake_big <- function(data, nrep = 500000) {\r\n  tmp <- vector(\"list\", length = nrep)\r\n  for (i in 1:nrep) {\r\n    tmp[[i]] <- data\r\n  }\r\n  \r\n  data.table::rbindlist(tmp) |> \r\n    as.data.frame()\r\n}\r\n```\r\n\r\n= Check if a vector has a single value\r\n<check-if-a-vector-has-a-single-value>\r\nOne easy way to do this is to run `length(unique(x)) == 1`, which basically means that first we have to collect all unique values and then count them. This can be quite inefficient: it would be enough to stop as soon as we find two different values.\r\n\r\nWhat we can do is to compare all values to the first value of the vector. Below is an example with a vector containing 10 million values. In the first case, it only contains `1`, and in the second case it contains `1` and `2`.\r\n\r\n```r\r\n# Should be TRUE\r\ntest <- rep(1, 1e7)\r\n\r\nbench::mark(\r\n  length(unique(test)) == 1,\r\n  all(test == test[1]),\r\n  iterations = 10\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression                     min   median `itr/sec` mem_alloc `gc/sec`\r\n  <bch:expr>                <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>\r\n1 length(unique(test)) == 1  132.8ms  136.5ms      7.21   166.1MB     7.21\r\n2 all(test == test[1])        30.2ms   30.6ms     30.5     38.1MB     9.16\r\n```\r\n\r\n```r\r\n# Should be FALSE\r\ntest2 <- rep(c(1, 2), 1e7)\r\n\r\nbench::mark(\r\n  length(unique(test2)) == 1,\r\n  all(test2 == test2[1]),\r\n  iterations = 10\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression                      min   median `itr/sec` mem_alloc `gc/sec`\r\n  <bch:expr>                 <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>\r\n1 length(unique(test2)) == 1  256.8ms  265.6ms      3.72   332.3MB     3.72\r\n2 all(test2 == test2[1])       44.7ms   46.1ms     19.6     76.3MB     3.91\r\n```\r\n\r\nThis is also faster for character vectors:\r\n\r\n```r\r\n# Should be FALSE\r\ntest3 <- rep(c(\"a\", \"b\"), 1e7)\r\n\r\nbench::mark(\r\n  length(unique(test3)) == 1,\r\n  all(test3 == test3[1]),\r\n  iterations = 10\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression                      min   median `itr/sec` mem_alloc `gc/sec`\r\n  <bch:expr>                 <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>\r\n1 length(unique(test3)) == 1  247.4ms  256.3ms      3.71   332.3MB     3.71\r\n2 all(test3 == test3[1])       56.8ms   58.8ms     15.6     76.3MB     3.13\r\n```\r\n\r\n= Concatenate columns\r\n<concatenate-columns>\r\nSometimes we need to concatenate columns, for example if we want to create a unique id from several grouping columns.\r\n\r\n```r\r\ntest <- data.frame(\r\n  origin = c(\"A\", \"B\", \"C\"),\r\n  destination = c(\"Z\", \"Y\", \"X\"),\r\n  value = 1:3\r\n)\r\n\r\ntest <- make_big(test)\r\n```\r\n\r\nOne option to do this is to combine `paste()` and `apply()` using `MARGIN = 1` to apply `paste()` to each row. However, a faster way to do this is to use `do.call()` instead of `apply()`:\r\n\r\n```r\r\nbench::mark(\r\n  apply = apply(test[, c(\"origin\", \"destination\")], 1, paste, collapse = \"_\"),\r\n  do.call = do.call(paste, c(test[, c(\"origin\", \"destination\")], sep = \"_\"))\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression      min   median `itr/sec` mem_alloc `gc/sec`\r\n  <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>\r\n1 apply         4.04s    4.04s     0.248    80.1MB     9.41\r\n2 do.call    126.96ms 127.58ms     7.83     11.4MB     0   \r\n```\r\n\r\n= Giving attributes to large dataframes\r\n<giving-attributes-to-large-dataframes>\r\nThis one comes from these #link(\"https://stackoverflow.com/questions/74029805/why-does-adding-attributes-to-a-dataframe-take-longer-with-large-dataframes\")[StackOverflow question and answer]. Manipulating a dataframe can remove some attributes. For example, if I give an attribute `foo` to a large dataframe:\r\n\r\n```r\r\norig <- data.frame(x1 = rep(1, 1e7), x2 = rep(2, 1e7))\r\nattr(orig, \"foo\") <- TRUE\r\nattr(orig, \"foo\")\r\n```\r\n\r\n```\r\n[1] TRUE\r\n```\r\n\r\nIf I reorder the columns, this attribute disappears:\r\n\r\n```r\r\nnew <- orig[, c(2, 1)]\r\nattr(new, \"foo\")\r\n```\r\n\r\n```\r\nNULL\r\n```\r\n\r\nWe can put it back with:\r\n\r\n```r\r\nattributes(new) <- utils::modifyList(attributes(orig), attributes(new))\r\nattr(new, \"foo\")\r\n```\r\n\r\n```\r\n[1] TRUE\r\n```\r\n\r\nBut this takes some time because we also copy the 10M row names of the dataset. Therefore, one option is to create a custom function that only copies the attributes that were in `orig` but are not in `new` (in this case, only attribute `foo` is concerned):\r\n\r\n```r\r\nreplace_attrs <- function(obj, new_attrs) {\r\n  for(nm in setdiff(names(new_attrs), names(attributes(data.frame())))) {\r\n    attr(obj, which = nm) <- new_attrs[[nm]]\r\n  }\r\n  return(obj)\r\n}\r\n\r\nbench::mark(\r\n  old = {\r\n    attributes(new) <- utils::modifyList(attributes(orig), attributes(new))\r\n    head(new)\r\n  },\r\n  new = {\r\n    new <- replace_attrs(new, attributes(orig))\r\n    head(new)\r\n  }\r\n)\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression      min   median `itr/sec` mem_alloc `gc/sec`\r\n  <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>\r\n1 old          32.8ms   41.8ms      24.9    38.2MB     3.12\r\n2 new          43.5µs     47µs   19415.     23.5KB    14.7 \r\n```\r\n\r\n= Find empty rows\r\n<find-empty-rows>\r\nIt can be useful to remove empty rows, meaning rows containing only `NA` or `\"\"`. We could once again use `apply()` with `MARGIN = 1`, but a faster way is to use `rowSums()`. First, we create a data frame full of `TRUE`/`FALSE` with `is.na(test) | test == \"\"`, and then we count by row the number of `TRUE`. If this number is equal to the number of columns, then it means that the row only has `NA` or `\"\"`.\r\n\r\n```r\r\ntest <- data.frame(\r\n  a = c(1, 2, 3, NA, 5),\r\n  b = c(\"\", NA, \"\", NA, \"\"),\r\n  c = c(NA, NA, NA, NA, NA),\r\n  d = c(1, NA, 3, NA, 5),\r\n  e = c(\"\", \"\", \"\", \"\", \"\"),\r\n  f = factor(c(\"\", \"\", \"\", \"\", \"\")),\r\n  g = factor(c(\"\", NA, \"\", NA, \"\")),\r\n  stringsAsFactors = FALSE\r\n)\r\n\r\ntest <- make_big(test, 100000)\r\n\r\nbench::mark(\r\n  apply = which(apply(test, 1, function(i) all(is.na(i) | i == \"\"))),\r\n  rowSums = which(rowSums((is.na(test) | test == \"\")) == ncol(test))\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression      min   median `itr/sec` mem_alloc `gc/sec`\r\n  <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>\r\n1 apply         1.27s    1.27s     0.785   112.9MB     6.28\r\n2 rowSums    282.67ms 287.59ms     3.48     99.7MB     0   \r\n```\r\n\r\n= Conclusion\r\n<conclusion>\r\nThese were just a few tips I discovered. Maybe there are ways to make them even faster in base R? Or maybe you know some weird/hidden tips? If so, feel free to comment below!\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Some notes about improving base R code])\r\n#metadata((\r\n  title: \"Some notes about improving base R code\",\r\n  kind: \"post\",\r\n  date: \"2022-11-28\",\r\n  summary: \"A small collection of tips to make base R code faster.\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nPreview image coming from: https:\\/\\/trainingindustry.com/magazine/nov-dec-2018/life-in-the-fast-lane-accelerated-continuous-development-for-fast-paced-organizations/\r\n\r\nLately I've spent quite some time on packages that require (almost) only base R:\r\n\r\n- `datawizard`, a package belonging to the `easystats` ecosystem, whose goal is to provide tools for data wrangling and statistical transformations;\r\n- `poorman`, whose goal is to reproduce `tidyverse` functions (with a strong focus on `dplyr`) using base R only.\r\n\r\nI've used `bench::mark()` and `profvis::profvis()` a lot to improve code performance and here are a few things I learnt. By default, `bench::mark()` checks that all expressions return the same output, so we can be confident that the alternatives I show in this post are truly equivalent.\r\n\r\nBefore we start, I want to precise a few things.\r\n\r\nFirst, these performance improvements are targeted to package developers. A random user shouldn't really care if a function takes 200 milliseconds less to run. However, I think a package developer might find these tips interesting.\r\n\r\nSecond, if you find some ways to speed up my alternatives, feel free to comment. I know that there are a bunch of packages whose reputation is built on being very fast (for example `data.table` and `collapse`). I'm only showing some base R code alternatives here.\r\n\r\nFinally, here's a small function that I use to make a classic dataset (like `iris` or `mtcars`) much bigger.\r\n\r\n```r\r\nmake_big \u003c- function(data, nrep = 500000) {\r\n  tmp \u003c- vector(\"list\", length = nrep)\r\n  for (i in 1:nrep) {\r\n    tmp[[i]] \u003c- data\r\n  }\r\n  \r\n  data.table::rbindlist(tmp) |\u003e \r\n    as.data.frame()\r\n}\r\n```\r\n\r\n= Check if a vector has a single value\r\n\u003ccheck-if-a-vector-has-a-single-value\u003e\r\nOne easy way to do this is to run `length(unique(x)) == 1`, which basically means that first we have to collect all unique values and then count them. This can be quite inefficient: it would be enough to stop as soon as we find two different values.\r\n\r\nWhat we can do is to compare all values to the first value of the vector. Below is an example with a vector containing 10 million values. In the first case, it only contains `1`, and in the second case it contains `1` and `2`.\r\n\r\n```r\r\n# Should be TRUE\r\ntest \u003c- rep(1, 1e7)\r\n\r\nbench::mark(\r\n  length(unique(test)) == 1,\r\n  all(test == test[1]),\r\n  iterations = 10\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression                     min   median `itr/sec` mem_alloc `gc/sec`\r\n  \u003cbch:expr\u003e                \u003cbch:tm\u003e \u003cbch:tm\u003e     \u003cdbl\u003e \u003cbch:byt\u003e    \u003cdbl\u003e\r\n1 length(unique(test)) == 1  132.8ms  136.5ms      7.21   166.1MB     7.21\r\n2 all(test == test[1])        30.2ms   30.6ms     30.5     38.1MB     9.16\r\n```\r\n\r\n```r\r\n# Should be FALSE\r\ntest2 \u003c- rep(c(1, 2), 1e7)\r\n\r\nbench::mark(\r\n  length(unique(test2)) == 1,\r\n  all(test2 == test2[1]),\r\n  iterations = 10\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression                      min   median `itr/sec` mem_alloc `gc/sec`\r\n  \u003cbch:expr\u003e                 \u003cbch:tm\u003e \u003cbch:tm\u003e     \u003cdbl\u003e \u003cbch:byt\u003e    \u003cdbl\u003e\r\n1 length(unique(test2)) == 1  256.8ms  265.6ms      3.72   332.3MB     3.72\r\n2 all(test2 == test2[1])       44.7ms   46.1ms     19.6     76.3MB     3.91\r\n```\r\n\r\nThis is also faster for character vectors:\r\n\r\n```r\r\n# Should be FALSE\r\ntest3 \u003c- rep(c(\"a\", \"b\"), 1e7)\r\n\r\nbench::mark(\r\n  length(unique(test3)) == 1,\r\n  all(test3 == test3[1]),\r\n  iterations = 10\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression                      min   median `itr/sec` mem_alloc `gc/sec`\r\n  \u003cbch:expr\u003e                 \u003cbch:tm\u003e \u003cbch:tm\u003e     \u003cdbl\u003e \u003cbch:byt\u003e    \u003cdbl\u003e\r\n1 length(unique(test3)) == 1  247.4ms  256.3ms      3.71   332.3MB     3.71\r\n2 all(test3 == test3[1])       56.8ms   58.8ms     15.6     76.3MB     3.13\r\n```\r\n\r\n= Concatenate columns\r\n\u003cconcatenate-columns\u003e\r\nSometimes we need to concatenate columns, for example if we want to create a unique id from several grouping columns.\r\n\r\n```r\r\ntest \u003c- data.frame(\r\n  origin = c(\"A\", \"B\", \"C\"),\r\n  destination = c(\"Z\", \"Y\", \"X\"),\r\n  value = 1:3\r\n)\r\n\r\ntest \u003c- make_big(test)\r\n```\r\n\r\nOne option to do this is to combine `paste()` and `apply()` using `MARGIN = 1` to apply `paste()` to each row. However, a faster way to do this is to use `do.call()` instead of `apply()`:\r\n\r\n```r\r\nbench::mark(\r\n  apply = apply(test[, c(\"origin\", \"destination\")], 1, paste, collapse = \"_\"),\r\n  do.call = do.call(paste, c(test[, c(\"origin\", \"destination\")], sep = \"_\"))\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression      min   median `itr/sec` mem_alloc `gc/sec`\r\n  \u003cbch:expr\u003e \u003cbch:tm\u003e \u003cbch:tm\u003e     \u003cdbl\u003e \u003cbch:byt\u003e    \u003cdbl\u003e\r\n1 apply         4.04s    4.04s     0.248    80.1MB     9.41\r\n2 do.call    126.96ms 127.58ms     7.83     11.4MB     0   \r\n```\r\n\r\n= Giving attributes to large dataframes\r\n\u003cgiving-attributes-to-large-dataframes\u003e\r\nThis one comes from these #link(\"https://stackoverflow.com/questions/74029805/why-does-adding-attributes-to-a-dataframe-take-longer-with-large-dataframes\")[StackOverflow question and answer]. Manipulating a dataframe can remove some attributes. For example, if I give an attribute `foo` to a large dataframe:\r\n\r\n```r\r\norig \u003c- data.frame(x1 = rep(1, 1e7), x2 = rep(2, 1e7))\r\nattr(orig, \"foo\") \u003c- TRUE\r\nattr(orig, \"foo\")\r\n```\r\n\r\n```\r\n[1] TRUE\r\n```\r\n\r\nIf I reorder the columns, this attribute disappears:\r\n\r\n```r\r\nnew \u003c- orig[, c(2, 1)]\r\nattr(new, \"foo\")\r\n```\r\n\r\n```\r\nNULL\r\n```\r\n\r\nWe can put it back with:\r\n\r\n```r\r\nattributes(new) \u003c- utils::modifyList(attributes(orig), attributes(new))\r\nattr(new, \"foo\")\r\n```\r\n\r\n```\r\n[1] TRUE\r\n```\r\n\r\nBut this takes some time because we also copy the 10M row names of the dataset. Therefore, one option is to create a custom function that only copies the attributes that were in `orig` but are not in `new` (in this case, only attribute `foo` is concerned):\r\n\r\n```r\r\nreplace_attrs \u003c- function(obj, new_attrs) {\r\n  for(nm in setdiff(names(new_attrs), names(attributes(data.frame())))) {\r\n    attr(obj, which = nm) \u003c- new_attrs[[nm]]\r\n  }\r\n  return(obj)\r\n}\r\n\r\nbench::mark(\r\n  old = {\r\n    attributes(new) \u003c- utils::modifyList(attributes(orig), attributes(new))\r\n    head(new)\r\n  },\r\n  new = {\r\n    new \u003c- replace_attrs(new, attributes(orig))\r\n    head(new)\r\n  }\r\n)\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression      min   median `itr/sec` mem_alloc `gc/sec`\r\n  \u003cbch:expr\u003e \u003cbch:tm\u003e \u003cbch:tm\u003e     \u003cdbl\u003e \u003cbch:byt\u003e    \u003cdbl\u003e\r\n1 old          32.8ms   41.8ms      24.9    38.2MB     3.12\r\n2 new          43.5µs     47µs   19415.     23.5KB    14.7 \r\n```\r\n\r\n= Find empty rows\r\n\u003cfind-empty-rows\u003e\r\nIt can be useful to remove empty rows, meaning rows containing only `NA` or `\"\"`. We could once again use `apply()` with `MARGIN = 1`, but a faster way is to use `rowSums()`. First, we create a data frame full of `TRUE`/`FALSE` with `is.na(test) | test == \"\"`, and then we count by row the number of `TRUE`. If this number is equal to the number of columns, then it means that the row only has `NA` or `\"\"`.\r\n\r\n```r\r\ntest \u003c- data.frame(\r\n  a = c(1, 2, 3, NA, 5),\r\n  b = c(\"\", NA, \"\", NA, \"\"),\r\n  c = c(NA, NA, NA, NA, NA),\r\n  d = c(1, NA, 3, NA, 5),\r\n  e = c(\"\", \"\", \"\", \"\", \"\"),\r\n  f = factor(c(\"\", \"\", \"\", \"\", \"\")),\r\n  g = factor(c(\"\", NA, \"\", NA, \"\")),\r\n  stringsAsFactors = FALSE\r\n)\r\n\r\ntest \u003c- make_big(test, 100000)\r\n\r\nbench::mark(\r\n  apply = which(apply(test, 1, function(i) all(is.na(i) | i == \"\"))),\r\n  rowSums = which(rowSums((is.na(test) | test == \"\")) == ncol(test))\r\n)\r\n```\r\n\r\n```\r\nWarning: Some expressions had a GC in every iteration; so filtering is\r\ndisabled.\r\n```\r\n\r\n```\r\n# A tibble: 2 × 6\r\n  expression      min   median `itr/sec` mem_alloc `gc/sec`\r\n  \u003cbch:expr\u003e \u003cbch:tm\u003e \u003cbch:tm\u003e     \u003cdbl\u003e \u003cbch:byt\u003e    \u003cdbl\u003e\r\n1 apply         1.27s    1.27s     0.785   112.9MB     6.28\r\n2 rowSums    282.67ms 287.59ms     3.48     99.7MB     0   \r\n```\r\n\r\n= Conclusion\r\n\u003cconclusion\u003e\r\nThese were just a few tips I discovered. Maybe there are ways to make them even faster in base R? Or maybe you know some weird/hidden tips? If so, feel free to comment below!\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2055,114 +2282,114 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="some-notes-about-improving-base-r-code">Some notes about improving base R code</h1></span></p><p>Preview image coming from: https://trainingindustry.com/magazine/nov-dec-2018/life-in-the-fast-lane-accelerated-continuous-development-for-fast-paced-organizations/</p><p>Lately I’ve spent quite some time on packages that require (almost) only base R:</p><ul><li><code>datawizard</code>, a package belonging to the <code>easystats</code> ecosystem, whose goal is to provide tools for data wrangling and statistical transformations;</li><li><code>poorman</code>, whose goal is to reproduce <code>tidyverse</code> functions (with a strong focus on <code>dplyr</code>) using base R only.</li></ul><p>I’ve used <code>bench::mark()</code> and <code>profvis::profvis()</code> a lot to improve code performance and here are a few things I learnt. By default, <code>bench::mark()</code> checks that all expressions return the same output, so we can be confident that the alternatives I show in this post are truly equivalent.</p><p>Before we start, I want to precise a few things.</p><p>First, these performance improvements are targeted to package developers. A random user shouldn’t really care if a function takes 200 milliseconds less to run. However, I think a package developer might find these tips interesting.</p><p>Second, if you find some ways to speed up my alternatives, feel free to comment. I know that there are a bunch of packages whose reputation is built on being very fast (for example <code>data.table</code> and <code>collapse</code>). I’m only showing some base R code alternatives here.</p><p>Finally, here’s a small function that I use to make a classic dataset (like <code>iris</code> or <code>mtcars</code>) much bigger.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">make_big</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">data</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">nrep</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">500000</span>) {
-  tmp <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">vector</span>(<span class="calepin-syntax-scope-3">"</span>list<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">length</span> <span class="calepin-syntax-scope-4">=</span> nrep)
-  for (i <span class="calepin-syntax-scope-3">in</span> <span class="calepin-syntax-scope-2">1</span>:nrep) {
-    tmp[[i]] <span class="calepin-syntax-scope-4">&lt;-</span> data
+            <p><span style="font-variant-caps: small-caps"><h1 id="some-notes-about-improving-base-r-code">Some notes about improving base R code</h1></span></p><p>Preview image coming from: https://trainingindustry.com/magazine/nov-dec-2018/life-in-the-fast-lane-accelerated-continuous-development-for-fast-paced-organizations/</p><p>Lately I’ve spent quite some time on packages that require (almost) only base R:</p><ul><li><code>datawizard</code>, a package belonging to the <code>easystats</code> ecosystem, whose goal is to provide tools for data wrangling and statistical transformations;</li><li><code>poorman</code>, whose goal is to reproduce <code>tidyverse</code> functions (with a strong focus on <code>dplyr</code>) using base R only.</li></ul><p>I’ve used <code>bench::mark()</code> and <code>profvis::profvis()</code> a lot to improve code performance and here are a few things I learnt. By default, <code>bench::mark()</code> checks that all expressions return the same output, so we can be confident that the alternatives I show in this post are truly equivalent.</p><p>Before we start, I want to precise a few things.</p><p>First, these performance improvements are targeted to package developers. A random user shouldn’t really care if a function takes 200 milliseconds less to run. However, I think a package developer might find these tips interesting.</p><p>Second, if you find some ways to speed up my alternatives, feel free to comment. I know that there are a bunch of packages whose reputation is built on being very fast (for example <code>data.table</code> and <code>collapse</code>). I’m only showing some base R code alternatives here.</p><p>Finally, here’s a small function that I use to make a classic dataset (like <code>iris</code> or <code>mtcars</code>) much bigger.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">make_big</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">data</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">nrep</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">500000</span>) {
+  tmp <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">vector</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">list</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">length</span> <span class="calepin-syntax-scope-27">=</span> nrep)
+  <span class="calepin-syntax-scope-10">for</span> (i <span class="calepin-syntax-scope-24">in</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-6">:</span>nrep) {
+    tmp[[i]] <span class="calepin-syntax-scope-27">&lt;-</span> data
   }
   
-  data.table::<span class="calepin-syntax-scope-1">rbindlist</span>(tmp) <span class="calepin-syntax-scope-3">|</span><span class="calepin-syntax-scope-3">></span> 
-    <span class="calepin-syntax-scope-1">as.data.frame</span>()
+  data.table::<span class="calepin-syntax-scope-22">rbindlist</span>(tmp) <span class="calepin-syntax-scope-24">|</span><span class="calepin-syntax-scope-24">></span> 
+    <span class="calepin-syntax-scope-21">as.data.frame</span>()
 }
-</code></pre></div><h2 id="check-if-a-vector-has-a-single-value">Check if a vector has a single value</h2><p>One easy way to do this is to run <code>length(unique(x)) == 1</code>, which basically means that first we have to collect all unique values and then count them. This can be quite inefficient: it would be enough to stop as soon as we find two different values.</p><p>What we can do is to compare all values to the first value of the vector. Below is an example with a vector containing 10 million values. In the first case, it only contains <code>1</code>, and in the second case it contains <code>1</code> and <code>2</code>.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-3">#</span> Should be TRUE
-test <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">rep</span>(<span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1e7</span>)
+</code></pre></div><h2 id="check-if-a-vector-has-a-single-value">Check if a vector has a single value</h2><p>One easy way to do this is to run <code>length(unique(x)) == 1</code>, which basically means that first we have to collect all unique values and then count them. This can be quite inefficient: it would be enough to stop as soon as we find two different values.</p><p>What we can do is to compare all values to the first value of the vector. Below is an example with a vector containing 10 million values. In the first case, it only contains <code>1</code>, and in the second case it contains <code>1</code> and <code>2</code>.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Should be TRUE</span>
+test <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">rep</span>(<span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1e7</span>)
 
-bench::<span class="calepin-syntax-scope-1">mark</span>(
-  <span class="calepin-syntax-scope-1">length</span>(<span class="calepin-syntax-scope-1">unique</span>(test)) <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-1">all</span>(test <span class="calepin-syntax-scope-3">==</span> test[<span class="calepin-syntax-scope-2">1</span>])<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">iterations</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">10</span>
+bench::<span class="calepin-syntax-scope-22">mark</span>(
+  <span class="calepin-syntax-scope-21">length</span>(<span class="calepin-syntax-scope-21">unique</span>(test)) <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-21">all</span>(test <span class="calepin-syntax-scope-24">==</span> test[<span class="calepin-syntax-scope-23">1</span>])<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">iterations</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">10</span>
 )
 </code></pre></div><div class="sourceCode" data-lang><pre><code>Warning: Some expressions had a GC in every iteration; so filtering is
 disabled.</code></pre></div><div class="sourceCode" data-lang><pre><code># A tibble: 2 × 6
   expression                     min   median `itr/sec` mem_alloc `gc/sec`
   &lt;bch:expr>                &lt;bch:tm> &lt;bch:tm>     &lt;dbl> &lt;bch:byt>    &lt;dbl>
 1 length(unique(test)) == 1  132.8ms  136.5ms      7.21   166.1MB     7.21
-2 all(test == test[1])        30.2ms   30.6ms     30.5     38.1MB     9.16</code></pre></div><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-3">#</span> Should be FALSE
-test2 <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">rep</span>(<span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span>)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1e7</span>)
+2 all(test == test[1])        30.2ms   30.6ms     30.5     38.1MB     9.16</code></pre></div><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Should be FALSE</span>
+test2 <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">rep</span>(<span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span>)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1e7</span>)
 
-bench::<span class="calepin-syntax-scope-1">mark</span>(
-  <span class="calepin-syntax-scope-1">length</span>(<span class="calepin-syntax-scope-1">unique</span>(test2)) <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-1">all</span>(test2 <span class="calepin-syntax-scope-3">==</span> test2[<span class="calepin-syntax-scope-2">1</span>])<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">iterations</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">10</span>
+bench::<span class="calepin-syntax-scope-22">mark</span>(
+  <span class="calepin-syntax-scope-21">length</span>(<span class="calepin-syntax-scope-21">unique</span>(test2)) <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-21">all</span>(test2 <span class="calepin-syntax-scope-24">==</span> test2[<span class="calepin-syntax-scope-23">1</span>])<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">iterations</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">10</span>
 )
 </code></pre></div><div class="sourceCode" data-lang><pre><code>Warning: Some expressions had a GC in every iteration; so filtering is
 disabled.</code></pre></div><div class="sourceCode" data-lang><pre><code># A tibble: 2 × 6
   expression                      min   median `itr/sec` mem_alloc `gc/sec`
   &lt;bch:expr>                 &lt;bch:tm> &lt;bch:tm>     &lt;dbl> &lt;bch:byt>    &lt;dbl>
 1 length(unique(test2)) == 1  256.8ms  265.6ms      3.72   332.3MB     3.72
-2 all(test2 == test2[1])       44.7ms   46.1ms     19.6     76.3MB     3.91</code></pre></div><p>This is also faster for character vectors:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-3">#</span> Should be FALSE
-test3 <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">rep</span>(<span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span>a<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>b<span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1e7</span>)
+2 all(test2 == test2[1])       44.7ms   46.1ms     19.6     76.3MB     3.91</code></pre></div><p>This is also faster for character vectors:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Should be FALSE</span>
+test3 <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">rep</span>(<span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">a</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">b</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1e7</span>)
 
-bench::<span class="calepin-syntax-scope-1">mark</span>(
-  <span class="calepin-syntax-scope-1">length</span>(<span class="calepin-syntax-scope-1">unique</span>(test3)) <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-1">all</span>(test3 <span class="calepin-syntax-scope-3">==</span> test3[<span class="calepin-syntax-scope-2">1</span>])<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">iterations</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">10</span>
+bench::<span class="calepin-syntax-scope-22">mark</span>(
+  <span class="calepin-syntax-scope-21">length</span>(<span class="calepin-syntax-scope-21">unique</span>(test3)) <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-21">all</span>(test3 <span class="calepin-syntax-scope-24">==</span> test3[<span class="calepin-syntax-scope-23">1</span>])<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">iterations</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">10</span>
 )
 </code></pre></div><div class="sourceCode" data-lang><pre><code>Warning: Some expressions had a GC in every iteration; so filtering is
 disabled.</code></pre></div><div class="sourceCode" data-lang><pre><code># A tibble: 2 × 6
   expression                      min   median `itr/sec` mem_alloc `gc/sec`
   &lt;bch:expr>                 &lt;bch:tm> &lt;bch:tm>     &lt;dbl> &lt;bch:byt>    &lt;dbl>
 1 length(unique(test3)) == 1  247.4ms  256.3ms      3.71   332.3MB     3.71
-2 all(test3 == test3[1])       56.8ms   58.8ms     15.6     76.3MB     3.13</code></pre></div><h2 id="concatenate-columns">Concatenate columns</h2><p>Sometimes we need to concatenate columns, for example if we want to create a unique id from several grouping columns.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">test <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">data.frame</span>(
-  <span class="calepin-syntax-scope-5">origin</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span>A<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>B<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>C<span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">destination</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span>Z<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>Y<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>X<span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">value</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">1</span>:<span class="calepin-syntax-scope-2">3</span>
+2 all(test3 == test3[1])       56.8ms   58.8ms     15.6     76.3MB     3.13</code></pre></div><h2 id="concatenate-columns">Concatenate columns</h2><p>Sometimes we need to concatenate columns, for example if we want to create a unique id from several grouping columns.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">test <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">data.frame</span>(
+  <span class="calepin-syntax-scope-28">origin</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">A</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">B</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">C</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">destination</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">Z</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">Y</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">X</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">value</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-6">:</span><span class="calepin-syntax-scope-23">3</span>
 )
 
-test <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">make_big</span>(test)
-</code></pre></div><p>One option to do this is to combine <code>paste()</code> and <code>apply()</code> using <code>MARGIN = 1</code> to apply <code>paste()</code> to each row. However, a faster way to do this is to use <code>do.call()</code> instead of <code>apply()</code>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">bench::<span class="calepin-syntax-scope-1">mark</span>(
-  <span class="calepin-syntax-scope-5">apply</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">apply</span>(test[<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span>origin<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>destination<span class="calepin-syntax-scope-3">"</span>)]<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> paste<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">collapse</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>_<span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">do.call</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">do.call</span>(paste<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">c</span>(test[<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span>origin<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>destination<span class="calepin-syntax-scope-3">"</span>)]<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">sep</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>_<span class="calepin-syntax-scope-3">"</span>))
+test <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">make_big</span>(test)
+</code></pre></div><p>One option to do this is to combine <code>paste()</code> and <code>apply()</code> using <code>MARGIN = 1</code> to apply <code>paste()</code> to each row. However, a faster way to do this is to use <code>do.call()</code> instead of <code>apply()</code>:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">bench::<span class="calepin-syntax-scope-22">mark</span>(
+  <span class="calepin-syntax-scope-28">apply</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">apply</span>(test[<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">origin</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">destination</span><span class="calepin-syntax-scope-4">"</span>)]<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> paste<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">collapse</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">do.call</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">do.call</span>(paste<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">c</span>(test[<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">origin</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">destination</span><span class="calepin-syntax-scope-4">"</span>)]<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">sep</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_</span><span class="calepin-syntax-scope-4">"</span>))
 )
 </code></pre></div><div class="sourceCode" data-lang><pre><code>Warning: Some expressions had a GC in every iteration; so filtering is
 disabled.</code></pre></div><div class="sourceCode" data-lang><pre><code># A tibble: 2 × 6
   expression      min   median `itr/sec` mem_alloc `gc/sec`
   &lt;bch:expr> &lt;bch:tm> &lt;bch:tm>     &lt;dbl> &lt;bch:byt>    &lt;dbl>
 1 apply         4.04s    4.04s     0.248    80.1MB     9.41
-2 do.call    126.96ms 127.58ms     7.83     11.4MB     0   </code></pre></div><h2 id="giving-attributes-to-large-dataframes">Giving attributes to large dataframes</h2><p>This one comes from these <a href="https://stackoverflow.com/questions/74029805/why-does-adding-attributes-to-a-dataframe-take-longer-with-large-dataframes">StackOverflow question and answer</a>. Manipulating a dataframe can remove some attributes. For example, if I give an attribute <code>foo</code> to a large dataframe:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">orig <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">data.frame</span>(<span class="calepin-syntax-scope-5">x1</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">rep</span>(<span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1e7</span>)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">x2</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">rep</span>(<span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1e7</span>))
-<span class="calepin-syntax-scope-1">attr</span>(orig<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>foo<span class="calepin-syntax-scope-3">"</span>) <span class="calepin-syntax-scope-4">&lt;-</span> TRUE
-<span class="calepin-syntax-scope-1">attr</span>(orig<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>foo<span class="calepin-syntax-scope-3">"</span>)
-</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] TRUE</code></pre></div><p>If I reorder the columns, this attribute disappears:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">new <span class="calepin-syntax-scope-4">&lt;-</span> orig[<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span>)]
-<span class="calepin-syntax-scope-1">attr</span>(new<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>foo<span class="calepin-syntax-scope-3">"</span>)
-</code></pre></div><div class="sourceCode" data-lang><pre><code>NULL</code></pre></div><p>We can put it back with:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">attributes</span>(new) <span class="calepin-syntax-scope-4">&lt;-</span> utils::<span class="calepin-syntax-scope-1">modifyList</span>(<span class="calepin-syntax-scope-1">attributes</span>(orig)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">attributes</span>(new))
-<span class="calepin-syntax-scope-1">attr</span>(new<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>foo<span class="calepin-syntax-scope-3">"</span>)
-</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] TRUE</code></pre></div><p>But this takes some time because we also copy the 10M row names of the dataset. Therefore, one option is to create a custom function that only copies the attributes that were in <code>orig</code> but are not in <code>new</code> (in this case, only attribute <code>foo</code> is concerned):</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">replace_attrs</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">obj</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">new_attrs</span>) {
-  for(nm <span class="calepin-syntax-scope-3">in</span> <span class="calepin-syntax-scope-1">setdiff</span>(<span class="calepin-syntax-scope-1">names</span>(new_attrs)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">names</span>(<span class="calepin-syntax-scope-1">attributes</span>(<span class="calepin-syntax-scope-1">data.frame</span>())))) {
-    <span class="calepin-syntax-scope-1">attr</span>(obj<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">which</span> <span class="calepin-syntax-scope-4">=</span> nm) <span class="calepin-syntax-scope-4">&lt;-</span> new_attrs[[nm]]
+2 do.call    126.96ms 127.58ms     7.83     11.4MB     0   </code></pre></div><h2 id="giving-attributes-to-large-dataframes">Giving attributes to large dataframes</h2><p>This one comes from these <a href="https://stackoverflow.com/questions/74029805/why-does-adding-attributes-to-a-dataframe-take-longer-with-large-dataframes">StackOverflow question and answer</a>. Manipulating a dataframe can remove some attributes. For example, if I give an attribute <code>foo</code> to a large dataframe:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">orig <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">data.frame</span>(<span class="calepin-syntax-scope-28">x1</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">rep</span>(<span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1e7</span>)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">x2</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">rep</span>(<span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1e7</span>))
+<span class="calepin-syntax-scope-21">attr</span>(orig<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">foo</span><span class="calepin-syntax-scope-4">"</span>) <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-11">TRUE</span>
+<span class="calepin-syntax-scope-21">attr</span>(orig<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">foo</span><span class="calepin-syntax-scope-4">"</span>)
+</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] TRUE</code></pre></div><p>If I reorder the columns, this attribute disappears:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">new <span class="calepin-syntax-scope-27">&lt;-</span> orig[<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span>)]
+<span class="calepin-syntax-scope-21">attr</span>(new<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">foo</span><span class="calepin-syntax-scope-4">"</span>)
+</code></pre></div><div class="sourceCode" data-lang><pre><code>NULL</code></pre></div><p>We can put it back with:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">attributes</span>(new) <span class="calepin-syntax-scope-27">&lt;-</span> utils::<span class="calepin-syntax-scope-21">modifyList</span>(<span class="calepin-syntax-scope-21">attributes</span>(orig)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">attributes</span>(new))
+<span class="calepin-syntax-scope-21">attr</span>(new<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">foo</span><span class="calepin-syntax-scope-4">"</span>)
+</code></pre></div><div class="sourceCode" data-lang><pre><code>[1] TRUE</code></pre></div><p>But this takes some time because we also copy the 10M row names of the dataset. Therefore, one option is to create a custom function that only copies the attributes that were in <code>orig</code> but are not in <code>new</code> (in this case, only attribute <code>foo</code> is concerned):</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">replace_attrs</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">obj</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">new_attrs</span>) {
+  <span class="calepin-syntax-scope-10">for</span>(nm <span class="calepin-syntax-scope-24">in</span> <span class="calepin-syntax-scope-21">setdiff</span>(<span class="calepin-syntax-scope-21">names</span>(new_attrs)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">names</span>(<span class="calepin-syntax-scope-21">attributes</span>(<span class="calepin-syntax-scope-21">data.frame</span>())))) {
+    <span class="calepin-syntax-scope-21">attr</span>(obj<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">which</span> <span class="calepin-syntax-scope-27">=</span> nm) <span class="calepin-syntax-scope-27">&lt;-</span> new_attrs[[nm]]
   }
-  return(obj)
+  <span class="calepin-syntax-scope-10">return</span>(obj)
 }
 
-bench::<span class="calepin-syntax-scope-1">mark</span>(
-  <span class="calepin-syntax-scope-5">old</span> <span class="calepin-syntax-scope-4">=</span> {
-    <span class="calepin-syntax-scope-1">attributes</span>(new) <span class="calepin-syntax-scope-4">&lt;-</span> utils::<span class="calepin-syntax-scope-1">modifyList</span>(<span class="calepin-syntax-scope-1">attributes</span>(orig)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">attributes</span>(new))
-    <span class="calepin-syntax-scope-1">head</span>(new)
-  }<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">new</span> <span class="calepin-syntax-scope-4">=</span> {
-    new <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">replace_attrs</span>(new<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">attributes</span>(orig))
-    <span class="calepin-syntax-scope-1">head</span>(new)
+bench::<span class="calepin-syntax-scope-22">mark</span>(
+  <span class="calepin-syntax-scope-28">old</span> <span class="calepin-syntax-scope-27">=</span> {
+    <span class="calepin-syntax-scope-21">attributes</span>(new) <span class="calepin-syntax-scope-27">&lt;-</span> utils::<span class="calepin-syntax-scope-21">modifyList</span>(<span class="calepin-syntax-scope-21">attributes</span>(orig)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">attributes</span>(new))
+    <span class="calepin-syntax-scope-21">head</span>(new)
+  }<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">new</span> <span class="calepin-syntax-scope-27">=</span> {
+    new <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">replace_attrs</span>(new<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">attributes</span>(orig))
+    <span class="calepin-syntax-scope-21">head</span>(new)
   }
 )
 </code></pre></div><div class="sourceCode" data-lang><pre><code># A tibble: 2 × 6
   expression      min   median `itr/sec` mem_alloc `gc/sec`
   &lt;bch:expr> &lt;bch:tm> &lt;bch:tm>     &lt;dbl> &lt;bch:byt>    &lt;dbl>
 1 old          32.8ms   41.8ms      24.9    38.2MB     3.12
-2 new          43.5µs     47µs   19415.     23.5KB    14.7 </code></pre></div><h2 id="find-empty-rows">Find empty rows</h2><p>It can be useful to remove empty rows, meaning rows containing only <code>NA</code> or <code>""</code>. We could once again use <code>apply()</code> with <code>MARGIN = 1</code>, but a faster way is to use <code>rowSums()</code>. First, we create a data frame full of <code>TRUE</code>/<code>FALSE</code> with <code>is.na(test) | test == ""</code>, and then we count by row the number of <code>TRUE</code>. If this number is equal to the number of columns, then it means that the row only has <code>NA</code> or <code>""</code>.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">test <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">data.frame</span>(
-  <span class="calepin-syntax-scope-5">a</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">3</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">5</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">b</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">c</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(NA<span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> NA)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">d</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">3</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">5</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">e</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">f</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">factor</span>(<span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span>))<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">g</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">factor</span>(<span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> NA<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span>))<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">stringsAsFactors</span> <span class="calepin-syntax-scope-4">=</span> FALSE
+2 new          43.5µs     47µs   19415.     23.5KB    14.7 </code></pre></div><h2 id="find-empty-rows">Find empty rows</h2><p>It can be useful to remove empty rows, meaning rows containing only <code>NA</code> or <code>""</code>. We could once again use <code>apply()</code> with <code>MARGIN = 1</code>, but a faster way is to use <code>rowSums()</code>. First, we create a data frame full of <code>TRUE</code>/<code>FALSE</code> with <code>is.na(test) | test == ""</code>, and then we count by row the number of <code>TRUE</code>. If this number is equal to the number of columns, then it means that the row only has <code>NA</code> or <code>""</code>.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">test <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">data.frame</span>(
+  <span class="calepin-syntax-scope-28">a</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">3</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">5</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">b</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">c</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">d</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">3</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">5</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">e</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">f</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">factor</span>(<span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span>))<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">g</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">factor</span>(<span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-11">NA</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span>))<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">stringsAsFactors</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">FALSE</span>
 )
 
-test <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">make_big</span>(test<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">100000</span>)
+test <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">make_big</span>(test<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">100000</span>)
 
-bench::<span class="calepin-syntax-scope-1">mark</span>(
-  <span class="calepin-syntax-scope-5">apply</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">which</span>(<span class="calepin-syntax-scope-1">apply</span>(test<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> function(<span class="calepin-syntax-scope-5">i</span>) <span class="calepin-syntax-scope-1">all</span>(<span class="calepin-syntax-scope-1">is.na</span>(i) <span class="calepin-syntax-scope-3">|</span> i <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span>)))<span class="calepin-syntax-scope-3">,</span>
-  <span class="calepin-syntax-scope-5">rowSums</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">which</span>(<span class="calepin-syntax-scope-1">rowSums</span>((<span class="calepin-syntax-scope-1">is.na</span>(test) <span class="calepin-syntax-scope-3">|</span> test <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">"</span>)) <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-1">ncol</span>(test))
+bench::<span class="calepin-syntax-scope-22">mark</span>(
+  <span class="calepin-syntax-scope-28">apply</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">which</span>(<span class="calepin-syntax-scope-21">apply</span>(test<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">i</span>) <span class="calepin-syntax-scope-21">all</span>(<span class="calepin-syntax-scope-21">is.na</span>(i) <span class="calepin-syntax-scope-24">|</span> i <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span>)))<span class="calepin-syntax-scope-26">,</span>
+  <span class="calepin-syntax-scope-28">rowSums</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">which</span>(<span class="calepin-syntax-scope-21">rowSums</span>((<span class="calepin-syntax-scope-21">is.na</span>(test) <span class="calepin-syntax-scope-24">|</span> test <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-4">"</span>)) <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-21">ncol</span>(test))
 )
 </code></pre></div><div class="sourceCode" data-lang><pre><code>Warning: Some expressions had a GC in every iteration; so filtering is
 disabled.</code></pre></div><div class="sourceCode" data-lang><pre><code># A tibble: 2 × 6
@@ -2239,7 +2466,11 @@ disabled.</code></pre></div><div class="sourceCode" data-lang><pre><code># A tib
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {

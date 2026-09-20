@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Refactoring code with flir</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="How to efficiently rewrite many code patterns.">
+    <meta property="og:description" content="How to efficiently rewrite many code patterns.">
+    <meta name="twitter:description" content="How to efficiently rewrite many code patterns.">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Refactoring code with flir | Etienne Bacher">
+    <meta name="twitter:title" content="Refactoring code with flir | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2025-05-23-refactoring-code-with-flir/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Refactoring code with flir])\r\n#metadata((\r\n  title: \"Refactoring code with flir\",\r\n  kind: \"post\",\r\n  date: \"2025-05-23\",\r\n  summary: \"How to efficiently rewrite many code patterns.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nSlightly less than a year ago, I created #link(\"https://flir.etiennebacher.com/\")[`flir`] (named `flint` at the time). The objective was to have a tool to detect and automatically correct a set of \"bad practices\" in R code. Those \"bad practices\" do not necessarily mean the code is wrong, simply that it is possible to improve its readability, robustness, and performance. If you are already familiar with #link(\"https://lintr.r-lib.org/\")[`lintr`], you could think of `flir` as an extension that is faster and applies automatic fixes (at the expense of not covering the entire set of `lintr`'s rules).\r\n\r\n= Detecting and fixing bad practices\r\n<detecting-and-fixing-bad-practices>\r\n`flir` provides 3 types of functions: linter functions, fixer functions, and helper functions:\r\n\r\n- linter functions give the same capability as `lintr`: they detect bad practices in the code and report them with messages indicating what's wrong.\r\n- fixer functions go one step further and automatically fix those bad practices in code. Note that not all rules can be automatically fixed.\r\n- helper functions make it easier to use `flir` on a regular basis. They can create a dedicated folder where you can specify which rules you want to use and define your own, and they can create a Github Actions workflow to check the existence of bad practices on each commit.\r\n\r\nYou might be worried about this \"automatic fixing\" feature. After all, what if the fix is wrong? What if I want to go back to the previous situation? In this case, you should read this #link(\"https://flir.etiennebacher.com/articles/automatic_fixes\")[vignette on the website] that details a couple of actions you can take to be more confident about this.\r\n\r\nI won't repeat the package documentation and examples here. Rather, I'd like to explain how `flir` allows one to go further fixing \"bad practices\" and can be helpful when refactoring projects.\r\n\r\n= `flir` can rewrite (almost) anything\r\n<flir-can-rewrite-almost-anything>\r\nOriginally, `flir` was created to be an extension of `lintr`, but it can do more than that. `flir` works by detecting specific code patterns and rewriting them using the Rust crate #link(\"https://ast-grep.github.io/\")[`ast-grep`]. This isn't limited to linter rules, it can be applied to any R code.\r\n\r\nLet's take an example.\r\n\r\n== Rewriting superseded functions\r\n<rewriting-superseded-functions>\r\n#link(\"https://dplyr.tidyverse.org/index.html\")[`dplyr`] contains several functions marked as \"deprecated\" or \"superseded\". Deprecated means that those functions will be removed in a later version of the package because they have some weaknesses that cannot be easily fixed or because there are alternative functions that are always better to use. Those functions are not supported anymore, meaning that bugs won't be fixed, so you should update your code if you use them. Superseded means that the function still works and is still supported in terms of fixing bugs, but there are better alternatives that are more efficient or readable for instance.\r\n\r\nLet's say we have several occurrences of #link(\"https://dplyr.tidyverse.org/reference/sample_n.html\")[`dplyr::sample_n()`] in our project. This function is superseded and we should use `slice_sample()` instead. First, after installing `flir`, we can create a `flir` folder with `flir::setup_flir()`. Then we add a new rule with `flir::add_new_rule(\"superseded-sample-n\")`.\r\n\r\nThis creates the file below (`flir/rules/custom/superseded-sample-n.yml`):\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  pattern: ...\r\nfix: ...\r\nmessage: ...\r\n```\r\n\r\n== Creating the rule\r\n<creating-the-rule>\r\nNow we must define the patterns we want to detect in the code. For now, let's say we want to catch usages of `sample_n(my_data, 10)` and `sample_n(my_data, size = 10)` and replace them with `slice_sample(my_data, n = 10)`#calepin.elements.sidenote[`my_data` and `10` are just placeholders here, they could be anything.]. We want to detect two patterns and replace them with the same code, so we can use `any` in this situation:\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  any:\r\n    - pattern: sample_n($DATA, size = $N)\r\n    - pattern: sample_n($DATA, $N)\r\nfix: ...\r\nmessage: ...\r\n```\r\n\r\nNote that we have used #emph[metavariables] here: `$DATA` and `$N`. Those will capture any code that fits in the `pattern`. We can then reuse those metavariables when we define the `fix` and `message`, but we'll need to use a double tilde instead of `$` to use them:\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  any:\r\n    - pattern: sample_n($DATA, size = $N)\r\n    - pattern: sample_n($DATA, $N)\r\nfix: slice_sample(~~DATA~~, n = ~~N~~)\r\nmessage: Use `slice_sample()` instead of `sample_n()`.\r\n```\r\n\r\nWe now have our rule. The only thing left to do is to list in the `flir/config.yml` file so that it is taken into account by `flir::lint_*()` and `flir::fix_*()` functions:\r\n\r\n```yaml\r\nkeep:\r\n  - any_duplicated\r\n  [...]\r\n  - which_grepl\r\n  - superseded-sample-n\r\n```\r\n\r\nAlternatively, we can leave it out of the config file and specify it by hand, such as `flir::lint(\"my_file.R\", linters = \"superseded-sample-n\")`.\r\n\r\n== Applying the rule\r\n<applying-the-rule>\r\nNow the only thing left to do is to run `flir` on the files we want.\r\n\r\nFor this example, I have created two files in a project:\r\n\r\n- `foo1.R`:\r\n\r\n```r\r\ndf <- tibble(x = 1:5, w = c(0.1, 0.1, 0.1, 2, 2))\r\n\r\nsample_n(df, 3)\r\nsample_n(df, 10, replace = TRUE)\r\nsample_n(df, 3, weight = w)\r\n\r\nn_rows <- 3\r\n\r\nfoo(sample_n(df, n_rows))\r\n```\r\n\r\n- `script/foo2.R`:\r\n\r\n```r\r\nif (nrow(sample_n(df, size = 3)) > 0) {\r\n  print(\"hi\")\r\n}\r\n```\r\n\r\nFirst, let's see how many times we find those patterns in our code. We can run `flir::lint()` and it will open a \"Markers\" window in RStudio (if you don't use RStudio, it will print the messages in the R console):\r\n\r\n#box(image(\"lints.png\", width: 75.0%))\r\n\r\nWe have three occurrences that can be fixed. I can now run `flir::fix()` (note that I don't use Git for this demo project, so I will have to manually confirm I want to run this).\r\n\r\n`foo1.R` now looks like this (I manually added the comments):\r\n\r\n```r\r\ndf <- tibble(x = 1:5, w = c(0.1, 0.1, 0.1, 2, 2))\r\n\r\nslice_sample(df, n = 3)          # fixed\r\nsample_n(df, 10, replace = TRUE) # not fixed\r\nsample_n(df, 3, weight = w)      # not fixed\r\n\r\nn_rows <- 3\r\n\r\nfoo(slice_sample(df, n = n_rows)) # fixed\r\n```\r\n\r\nSeveral occurrences of `sample_n()` weren't modified. This is because they don't match any of the `pattern`s we defined in the rule: they include additional arguments such as `weight` and `replace`. We would need to include those additional patterns in the rule to fix them. Since they would need different replacements to account for the additional arguments, we can create an extra rule in the same file using `---` to separate them (and don't forget to change the `id`!):\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  any:\r\n    - pattern: sample_n($DATA, size = $N)\r\n    - pattern: sample_n($DATA, $N)\r\nfix: slice_sample(~~DATA~~, n = ~~N~~)\r\nmessage: Use `slice_sample()` instead of `sample_n()`.\r\n\r\n---\r\n\r\nid: superseded-sample-n-2\r\nlanguage: r\r\nseverity: warning\r\nrule: ...\r\nfix: ...\r\nmessage: ...\r\n```\r\n\r\nSimilarly, `script/foo2.R` is now:\r\n\r\n```r\r\nif (nrow(slice_sample(df, n = 3)) > 0) { # fixed\r\n  print(\"hi\")\r\n}\r\n```\r\n\r\n== Going further\r\n<going-further>\r\nIn this example, I have shown very simple patterns to detect, but it is possible to use much more advanced rules, using nested patterns and regular expressions for instance.\r\n\r\nTake a look at those rules in `flir` to see what it can do: #link(\"https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/redundant_ifelse.yml\")[`redundant_ifelse`], #link(\"https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/stopifnot_all.yml\")[`stopifnot_all`], #link(\"https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/literal_coercion.yml\")[`literal_coercion`].\r\n\r\n= Conclusion\r\n<conclusion>\r\n`flir` is useful to detect bad practices in R code, but its usage doesn't stop here. It can be used to rewrite any R code you want using flexible patterns, which can be very valuable in projects involving many R files.\r\n\r\nIn the future, I would like to add a feature enabling package developers to provide a set of rules, for instance to replace deprecated and superseded functions in their package, that users would be able to use directly.\r\n\r\nIf you find bugs, would like more features, or simply have further questions, head to the #link(\"https://github.com/etiennebacher/flir/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen\")[Issues page]!\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Refactoring code with flir])\r\n#metadata((\r\n  title: \"Refactoring code with flir\",\r\n  kind: \"post\",\r\n  date: \"2025-05-23\",\r\n  summary: \"How to efficiently rewrite many code patterns.\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nSlightly less than a year ago, I created #link(\"https://flir.etiennebacher.com/\")[`flir`] (named `flint` at the time). The objective was to have a tool to detect and automatically correct a set of \"bad practices\" in R code. Those \"bad practices\" do not necessarily mean the code is wrong, simply that it is possible to improve its readability, robustness, and performance. If you are already familiar with #link(\"https://lintr.r-lib.org/\")[`lintr`], you could think of `flir` as an extension that is faster and applies automatic fixes (at the expense of not covering the entire set of `lintr`'s rules).\r\n\r\n= Detecting and fixing bad practices\r\n\u003cdetecting-and-fixing-bad-practices\u003e\r\n`flir` provides 3 types of functions: linter functions, fixer functions, and helper functions:\r\n\r\n- linter functions give the same capability as `lintr`: they detect bad practices in the code and report them with messages indicating what's wrong.\r\n- fixer functions go one step further and automatically fix those bad practices in code. Note that not all rules can be automatically fixed.\r\n- helper functions make it easier to use `flir` on a regular basis. They can create a dedicated folder where you can specify which rules you want to use and define your own, and they can create a Github Actions workflow to check the existence of bad practices on each commit.\r\n\r\nYou might be worried about this \"automatic fixing\" feature. After all, what if the fix is wrong? What if I want to go back to the previous situation? In this case, you should read this #link(\"https://flir.etiennebacher.com/articles/automatic_fixes\")[vignette on the website] that details a couple of actions you can take to be more confident about this.\r\n\r\nI won't repeat the package documentation and examples here. Rather, I'd like to explain how `flir` allows one to go further fixing \"bad practices\" and can be helpful when refactoring projects.\r\n\r\n= `flir` can rewrite (almost) anything\r\n\u003cflir-can-rewrite-almost-anything\u003e\r\nOriginally, `flir` was created to be an extension of `lintr`, but it can do more than that. `flir` works by detecting specific code patterns and rewriting them using the Rust crate #link(\"https://ast-grep.github.io/\")[`ast-grep`]. This isn't limited to linter rules, it can be applied to any R code.\r\n\r\nLet's take an example.\r\n\r\n== Rewriting superseded functions\r\n\u003crewriting-superseded-functions\u003e\r\n#link(\"https://dplyr.tidyverse.org/index.html\")[`dplyr`] contains several functions marked as \"deprecated\" or \"superseded\". Deprecated means that those functions will be removed in a later version of the package because they have some weaknesses that cannot be easily fixed or because there are alternative functions that are always better to use. Those functions are not supported anymore, meaning that bugs won't be fixed, so you should update your code if you use them. Superseded means that the function still works and is still supported in terms of fixing bugs, but there are better alternatives that are more efficient or readable for instance.\r\n\r\nLet's say we have several occurrences of #link(\"https://dplyr.tidyverse.org/reference/sample_n.html\")[`dplyr::sample_n()`] in our project. This function is superseded and we should use `slice_sample()` instead. First, after installing `flir`, we can create a `flir` folder with `flir::setup_flir()`. Then we add a new rule with `flir::add_new_rule(\"superseded-sample-n\")`.\r\n\r\nThis creates the file below (`flir/rules/custom/superseded-sample-n.yml`):\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  pattern: ...\r\nfix: ...\r\nmessage: ...\r\n```\r\n\r\n== Creating the rule\r\n\u003ccreating-the-rule\u003e\r\nNow we must define the patterns we want to detect in the code. For now, let's say we want to catch usages of `sample_n(my_data, 10)` and `sample_n(my_data, size = 10)` and replace them with `slice_sample(my_data, n = 10)`#calepin.elements.sidenote[`my_data` and `10` are just placeholders here, they could be anything.]. We want to detect two patterns and replace them with the same code, so we can use `any` in this situation:\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  any:\r\n    - pattern: sample_n($DATA, size = $N)\r\n    - pattern: sample_n($DATA, $N)\r\nfix: ...\r\nmessage: ...\r\n```\r\n\r\nNote that we have used #emph[metavariables] here: `$DATA` and `$N`. Those will capture any code that fits in the `pattern`. We can then reuse those metavariables when we define the `fix` and `message`, but we'll need to use a double tilde instead of `$` to use them:\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  any:\r\n    - pattern: sample_n($DATA, size = $N)\r\n    - pattern: sample_n($DATA, $N)\r\nfix: slice_sample(~~DATA~~, n = ~~N~~)\r\nmessage: Use `slice_sample()` instead of `sample_n()`.\r\n```\r\n\r\nWe now have our rule. The only thing left to do is to list in the `flir/config.yml` file so that it is taken into account by `flir::lint_*()` and `flir::fix_*()` functions:\r\n\r\n```yaml\r\nkeep:\r\n  - any_duplicated\r\n  [...]\r\n  - which_grepl\r\n  - superseded-sample-n\r\n```\r\n\r\nAlternatively, we can leave it out of the config file and specify it by hand, such as `flir::lint(\"my_file.R\", linters = \"superseded-sample-n\")`.\r\n\r\n== Applying the rule\r\n\u003capplying-the-rule\u003e\r\nNow the only thing left to do is to run `flir` on the files we want.\r\n\r\nFor this example, I have created two files in a project:\r\n\r\n- `foo1.R`:\r\n\r\n```r\r\ndf \u003c- tibble(x = 1:5, w = c(0.1, 0.1, 0.1, 2, 2))\r\n\r\nsample_n(df, 3)\r\nsample_n(df, 10, replace = TRUE)\r\nsample_n(df, 3, weight = w)\r\n\r\nn_rows \u003c- 3\r\n\r\nfoo(sample_n(df, n_rows))\r\n```\r\n\r\n- `script/foo2.R`:\r\n\r\n```r\r\nif (nrow(sample_n(df, size = 3)) \u003e 0) {\r\n  print(\"hi\")\r\n}\r\n```\r\n\r\nFirst, let's see how many times we find those patterns in our code. We can run `flir::lint()` and it will open a \"Markers\" window in RStudio (if you don't use RStudio, it will print the messages in the R console):\r\n\r\n#box(image(\"lints.png\", width: 75.0%))\r\n\r\nWe have three occurrences that can be fixed. I can now run `flir::fix()` (note that I don't use Git for this demo project, so I will have to manually confirm I want to run this).\r\n\r\n`foo1.R` now looks like this (I manually added the comments):\r\n\r\n```r\r\ndf \u003c- tibble(x = 1:5, w = c(0.1, 0.1, 0.1, 2, 2))\r\n\r\nslice_sample(df, n = 3)          # fixed\r\nsample_n(df, 10, replace = TRUE) # not fixed\r\nsample_n(df, 3, weight = w)      # not fixed\r\n\r\nn_rows \u003c- 3\r\n\r\nfoo(slice_sample(df, n = n_rows)) # fixed\r\n```\r\n\r\nSeveral occurrences of `sample_n()` weren't modified. This is because they don't match any of the `pattern`s we defined in the rule: they include additional arguments such as `weight` and `replace`. We would need to include those additional patterns in the rule to fix them. Since they would need different replacements to account for the additional arguments, we can create an extra rule in the same file using `---` to separate them (and don't forget to change the `id`!):\r\n\r\n```yaml\r\nid: superseded-sample-n\r\nlanguage: r\r\nseverity: warning\r\nrule:\r\n  any:\r\n    - pattern: sample_n($DATA, size = $N)\r\n    - pattern: sample_n($DATA, $N)\r\nfix: slice_sample(~~DATA~~, n = ~~N~~)\r\nmessage: Use `slice_sample()` instead of `sample_n()`.\r\n\r\n---\r\n\r\nid: superseded-sample-n-2\r\nlanguage: r\r\nseverity: warning\r\nrule: ...\r\nfix: ...\r\nmessage: ...\r\n```\r\n\r\nSimilarly, `script/foo2.R` is now:\r\n\r\n```r\r\nif (nrow(slice_sample(df, n = 3)) \u003e 0) { # fixed\r\n  print(\"hi\")\r\n}\r\n```\r\n\r\n== Going further\r\n\u003cgoing-further\u003e\r\nIn this example, I have shown very simple patterns to detect, but it is possible to use much more advanced rules, using nested patterns and regular expressions for instance.\r\n\r\nTake a look at those rules in `flir` to see what it can do: #link(\"https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/redundant_ifelse.yml\")[`redundant_ifelse`], #link(\"https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/stopifnot_all.yml\")[`stopifnot_all`], #link(\"https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/literal_coercion.yml\")[`literal_coercion`].\r\n\r\n= Conclusion\r\n\u003cconclusion\u003e\r\n`flir` is useful to detect bad practices in R code, but its usage doesn't stop here. It can be used to rewrite any R code you want using flexible patterns, which can be very valuable in projects involving many R files.\r\n\r\nIn the future, I would like to add a feature enabling package developers to provide a set of rules, for instance to replace deprecated and superseded functions in their package, that users would be able to use directly.\r\n\r\nIf you find bugs, would like more features, or simply have further questions, head to the #link(\"https://github.com/etiennebacher/flir/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen\")[Issues page]!\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2059,72 +2286,77 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="refactoring-code-with-flir">Refactoring code with flir</h1></span></p><p>Slightly less than a year ago, I created <a href="https://flir.etiennebacher.com/"><code>flir</code></a> (named <code>flint</code> at the time). The objective was to have a tool to detect and automatically correct a set of “bad practices” in R code. Those “bad practices” do not necessarily mean the code is wrong, simply that it is possible to improve its readability, robustness, and performance. If you are already familiar with <a href="https://lintr.r-lib.org/"><code>lintr</code></a>, you could think of <code>flir</code> as an extension that is faster and applies automatic fixes (at the expense of not covering the entire set of <code>lintr</code>’s rules).</p><h2 id="detecting-and-fixing-bad-practices">Detecting and fixing bad practices</h2><p><code>flir</code> provides 3 types of functions: linter functions, fixer functions, and helper functions:</p><ul><li>linter functions give the same capability as <code>lintr</code>: they detect bad practices in the code and report them with messages indicating what’s wrong.</li><li>fixer functions go one step further and automatically fix those bad practices in code. Note that not all rules can be automatically fixed.</li><li>helper functions make it easier to use <code>flir</code> on a regular basis. They can create a dedicated folder where you can specify which rules you want to use and define your own, and they can create a Github Actions workflow to check the existence of bad practices on each commit.</li></ul><p>You might be worried about this “automatic fixing” feature. After all, what if the fix is wrong? What if I want to go back to the previous situation? In this case, you should read this <a href="https://flir.etiennebacher.com/articles/automatic_fixes">vignette on the website</a> that details a couple of actions you can take to be more confident about this.</p><p>I won’t repeat the package documentation and examples here. Rather, I’d like to explain how <code>flir</code> allows one to go further fixing “bad practices” and can be helpful when refactoring projects.</p><h2 id="flir-can-rewrite-almost-anything"><code>flir</code> can rewrite (almost) anything</h2><p>Originally, <code>flir</code> was created to be an extension of <code>lintr</code>, but it can do more than that. <code>flir</code> works by detecting specific code patterns and rewriting them using the Rust crate <a href="https://ast-grep.github.io/"><code>ast-grep</code></a>. This isn’t limited to linter rules, it can be applied to any R code.</p><p>Let’s take an example.</p><h3 id="rewriting-superseded-functions">Rewriting superseded functions</h3><p><a href="https://dplyr.tidyverse.org/index.html"><code>dplyr</code></a> contains several functions marked as “deprecated” or “superseded”. Deprecated means that those functions will be removed in a later version of the package because they have some weaknesses that cannot be easily fixed or because there are alternative functions that are always better to use. Those functions are not supported anymore, meaning that bugs won’t be fixed, so you should update your code if you use them. Superseded means that the function still works and is still supported in terms of fixing bugs, but there are better alternatives that are more efficient or readable for instance.</p><p>Let’s say we have several occurrences of <a href="https://dplyr.tidyverse.org/reference/sample_n.html"><code>dplyr::sample_n()</code></a> in our project. This function is superseded and we should use <code>slice_sample()</code> instead. First, after installing <code>flir</code>, we can create a <code>flir</code> folder with <code>flir::setup_flir()</code>. Then we add a new rule with <code>flir::add_new_rule("superseded-sample-n")</code>.</p><p>This creates the file below (<code>flir/rules/custom/superseded-sample-n.yml</code>):</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml">id<span class="calepin-syntax-scope-3">:</span> superseded-sample-n
-language<span class="calepin-syntax-scope-3">:</span> r
-severity<span class="calepin-syntax-scope-3">:</span> warning
-rule<span class="calepin-syntax-scope-3">:</span>
-  pattern<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span>
-fix<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span>
-message<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span></code></pre></div><h3 id="creating-the-rule">Creating the rule</h3><p>Now we must define the patterns we want to detect in the code. For now, let’s say we want to catch usages of <code>sample_n(my_data, 10)</code> and <code>sample_n(my_data, size = 10)</code> and replace them with <code>slice_sample(my_data, n = 10)</code><a role="doc-noteref" href="#sn-1" id="sn-1ref">1</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-1" data-sidenote-number="1"><code>my_data</code> and <code>10</code> are just placeholders here, they could be anything.</span>. We want to detect two patterns and replace them with the same code, so we can use <code>any</code> in this situation:</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml">id<span class="calepin-syntax-scope-3">:</span> superseded-sample-n
-language<span class="calepin-syntax-scope-3">:</span> r
-severity<span class="calepin-syntax-scope-3">:</span> warning
-rule<span class="calepin-syntax-scope-3">:</span>
-  any<span class="calepin-syntax-scope-3">:</span>
-    <span class="calepin-syntax-scope-3">-</span> pattern<span class="calepin-syntax-scope-3">:</span> sample_n($DATA, size = $N)
-    <span class="calepin-syntax-scope-3">-</span> pattern<span class="calepin-syntax-scope-3">:</span> sample_n($DATA, $N)
-fix<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span>
-message<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span></code></pre></div><p>Note that we have used <em>metavariables</em> here: <code>$DATA</code> and <code>$N</code>. Those will capture any code that fits in the <code>pattern</code>. We can then reuse those metavariables when we define the <code>fix</code> and <code>message</code>, but we’ll need to use a double tilde instead of <code>$</code> to use them:</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml">id<span class="calepin-syntax-scope-3">:</span> superseded-sample-n
-language<span class="calepin-syntax-scope-3">:</span> r
-severity<span class="calepin-syntax-scope-3">:</span> warning
-rule<span class="calepin-syntax-scope-3">:</span>
-  any<span class="calepin-syntax-scope-3">:</span>
-    <span class="calepin-syntax-scope-3">-</span> pattern<span class="calepin-syntax-scope-3">:</span> sample_n($DATA, size = $N)
-    <span class="calepin-syntax-scope-3">-</span> pattern<span class="calepin-syntax-scope-3">:</span> sample_n($DATA, $N)
-fix<span class="calepin-syntax-scope-3">:</span> slice_sample(~~DATA~~, n = ~~N~~)
-message<span class="calepin-syntax-scope-3">:</span> Use `slice_sample()` instead of `sample_n()`.</code></pre></div><p>We now have our rule. The only thing left to do is to list in the <code>flir/config.yml</code> file so that it is taken into account by <code>flir::lint_*()</code> and <code>flir::fix_*()</code> functions:</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml">keep<span class="calepin-syntax-scope-3">:</span>
-  <span class="calepin-syntax-scope-3">-</span> any_duplicated
-  <span class="calepin-syntax-scope-3">[</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span><span class="calepin-syntax-scope-3">]</span>
-  <span class="calepin-syntax-scope-3">-</span> which_grepl
-  <span class="calepin-syntax-scope-3">-</span> superseded-sample-n</code></pre></div><p>Alternatively, we can leave it out of the config file and specify it by hand, such as <code>flir::lint("my_file.R", linters = "superseded-sample-n")</code>.</p><h3 id="applying-the-rule">Applying the rule</h3><p>Now the only thing left to do is to run <code>flir</code> on the files we want.</p><p>For this example, I have created two files in a project:</p><ul><li><code>foo1.R</code>:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">df <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">tibble</span>(<span class="calepin-syntax-scope-5">x</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">1</span>:<span class="calepin-syntax-scope-2">5</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">w</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span>))
+            <p><span style="font-variant-caps: small-caps"><h1 id="refactoring-code-with-flir">Refactoring code with flir</h1></span></p><p>Slightly less than a year ago, I created <a href="https://flir.etiennebacher.com/"><code>flir</code></a> (named <code>flint</code> at the time). The objective was to have a tool to detect and automatically correct a set of “bad practices” in R code. Those “bad practices” do not necessarily mean the code is wrong, simply that it is possible to improve its readability, robustness, and performance. If you are already familiar with <a href="https://lintr.r-lib.org/"><code>lintr</code></a>, you could think of <code>flir</code> as an extension that is faster and applies automatic fixes (at the expense of not covering the entire set of <code>lintr</code>’s rules).</p><h2 id="detecting-and-fixing-bad-practices">Detecting and fixing bad practices</h2><p><code>flir</code> provides 3 types of functions: linter functions, fixer functions, and helper functions:</p><ul><li>linter functions give the same capability as <code>lintr</code>: they detect bad practices in the code and report them with messages indicating what’s wrong.</li><li>fixer functions go one step further and automatically fix those bad practices in code. Note that not all rules can be automatically fixed.</li><li>helper functions make it easier to use <code>flir</code> on a regular basis. They can create a dedicated folder where you can specify which rules you want to use and define your own, and they can create a Github Actions workflow to check the existence of bad practices on each commit.</li></ul><p>You might be worried about this “automatic fixing” feature. After all, what if the fix is wrong? What if I want to go back to the previous situation? In this case, you should read this <a href="https://flir.etiennebacher.com/articles/automatic_fixes">vignette on the website</a> that details a couple of actions you can take to be more confident about this.</p><p>I won’t repeat the package documentation and examples here. Rather, I’d like to explain how <code>flir</code> allows one to go further fixing “bad practices” and can be helpful when refactoring projects.</p><h2 id="flir-can-rewrite-almost-anything"><code>flir</code> can rewrite (almost) anything</h2><p>Originally, <code>flir</code> was created to be an extension of <code>lintr</code>, but it can do more than that. <code>flir</code> works by detecting specific code patterns and rewriting them using the Rust crate <a href="https://ast-grep.github.io/"><code>ast-grep</code></a>. This isn’t limited to linter rules, it can be applied to any R code.</p><p>Let’s take an example.</p><h3 id="rewriting-superseded-functions">Rewriting superseded functions</h3><p><a href="https://dplyr.tidyverse.org/index.html"><code>dplyr</code></a> contains several functions marked as “deprecated” or “superseded”. Deprecated means that those functions will be removed in a later version of the package because they have some weaknesses that cannot be easily fixed or because there are alternative functions that are always better to use. Those functions are not supported anymore, meaning that bugs won’t be fixed, so you should update your code if you use them. Superseded means that the function still works and is still supported in terms of fixing bugs, but there are better alternatives that are more efficient or readable for instance.</p><p>Let’s say we have several occurrences of <a href="https://dplyr.tidyverse.org/reference/sample_n.html"><code>dplyr::sample_n()</code></a> in our project. This function is superseded and we should use <code>slice_sample()</code> instead. First, after installing <code>flir</code>, we can create a <code>flir</code> folder with <code>flir::setup_flir()</code>. Then we add a new rule with <code>flir::add_new_rule("superseded-sample-n")</code>.</p><p>This creates the file below (<code>flir/rules/custom/superseded-sample-n.yml</code>):</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml"><span class="calepin-syntax-scope-19">id</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">superseded-sample-n</span>
+<span class="calepin-syntax-scope-19">language</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">r</span>
+<span class="calepin-syntax-scope-19">severity</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">warning</span>
+<span class="calepin-syntax-scope-19">rule</span><span class="calepin-syntax-scope-26">:</span>
+  <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+<span class="calepin-syntax-scope-19">fix</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+<span class="calepin-syntax-scope-19">message</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+</code></pre></div><h3 id="creating-the-rule">Creating the rule</h3><p>Now we must define the patterns we want to detect in the code. For now, let’s say we want to catch usages of <code>sample_n(my_data, 10)</code> and <code>sample_n(my_data, size = 10)</code> and replace them with <code>slice_sample(my_data, n = 10)</code><a role="doc-noteref" href="#sn-1" id="sn-1ref">1</a><span class="calepin-sidenote calepin-sidenote-numbered" id="sn-1" data-sidenote-number="1"><code>my_data</code> and <code>10</code> are just placeholders here, they could be anything.</span>. We want to detect two patterns and replace them with the same code, so we can use <code>any</code> in this situation:</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml"><span class="calepin-syntax-scope-19">id</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">superseded-sample-n</span>
+<span class="calepin-syntax-scope-19">language</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">r</span>
+<span class="calepin-syntax-scope-19">severity</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">warning</span>
+<span class="calepin-syntax-scope-19">rule</span><span class="calepin-syntax-scope-26">:</span>
+  <span class="calepin-syntax-scope-19">any</span><span class="calepin-syntax-scope-26">:</span>
+    <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">sample_n($DATA, size = $N)</span>
+    <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">sample_n($DATA, $N)</span>
+<span class="calepin-syntax-scope-19">fix</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+<span class="calepin-syntax-scope-19">message</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+</code></pre></div><p>Note that we have used <em>metavariables</em> here: <code>$DATA</code> and <code>$N</code>. Those will capture any code that fits in the <code>pattern</code>. We can then reuse those metavariables when we define the <code>fix</code> and <code>message</code>, but we’ll need to use a double tilde instead of <code>$</code> to use them:</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml"><span class="calepin-syntax-scope-19">id</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">superseded-sample-n</span>
+<span class="calepin-syntax-scope-19">language</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">r</span>
+<span class="calepin-syntax-scope-19">severity</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">warning</span>
+<span class="calepin-syntax-scope-19">rule</span><span class="calepin-syntax-scope-26">:</span>
+  <span class="calepin-syntax-scope-19">any</span><span class="calepin-syntax-scope-26">:</span>
+    <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">sample_n($DATA, size = $N)</span>
+    <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">sample_n($DATA, $N)</span>
+<span class="calepin-syntax-scope-19">fix</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">slice_sample(~~DATA~~, n = ~~N~~)</span>
+<span class="calepin-syntax-scope-19">message</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">Use `slice_sample()` instead of `sample_n()`.</span>
+</code></pre></div><p>We now have our rule. The only thing left to do is to list in the <code>flir/config.yml</code> file so that it is taken into account by <code>flir::lint_*()</code> and <code>flir::fix_*()</code> functions:</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml"><span class="calepin-syntax-scope-19">keep</span><span class="calepin-syntax-scope-26">:</span>
+  <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-3">any_duplicated</span>
+  <span class="calepin-syntax-scope-25">[</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span><span class="calepin-syntax-scope-25">]</span>
+  <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-3">which_grepl</span>
+  <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-3">superseded-sample-n</span>
+</code></pre></div><p>Alternatively, we can leave it out of the config file and specify it by hand, such as <code>flir::lint("my_file.R", linters = "superseded-sample-n")</code>.</p><h3 id="applying-the-rule">Applying the rule</h3><p>Now the only thing left to do is to run <code>flir</code> on the files we want.</p><p>For this example, I have created two files in a project:</p><ul><li><code>foo1.R</code>:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">df <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">tibble</span>(<span class="calepin-syntax-scope-28">x</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-6">:</span><span class="calepin-syntax-scope-23">5</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">w</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span>))
 
-<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">3</span>)
-<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">10</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">replace</span> <span class="calepin-syntax-scope-4">=</span> TRUE)
-<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">3</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">weight</span> <span class="calepin-syntax-scope-4">=</span> w)
+<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">3</span>)
+<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">10</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">replace</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)
+<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">3</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">weight</span> <span class="calepin-syntax-scope-27">=</span> w)
 
-n_rows <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-2">3</span>
+n_rows <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-23">3</span>
 
-<span class="calepin-syntax-scope-1">foo</span>(<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> n_rows))
-</code></pre></div><ul><li><code>script/foo2.R</code>:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r">if (<span class="calepin-syntax-scope-1">nrow</span>(<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">size</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">3</span>)) <span class="calepin-syntax-scope-3">></span> <span class="calepin-syntax-scope-2">0</span>) {
-  <span class="calepin-syntax-scope-1">print</span>(<span class="calepin-syntax-scope-3">"</span>hi<span class="calepin-syntax-scope-3">"</span>)
+<span class="calepin-syntax-scope-22">foo</span>(<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> n_rows))
+</code></pre></div><ul><li><code>script/foo2.R</code>:</li></ul><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">nrow</span>(<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">size</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">3</span>)) <span class="calepin-syntax-scope-24">></span> <span class="calepin-syntax-scope-23">0</span>) {
+  <span class="calepin-syntax-scope-21">print</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">hi</span><span class="calepin-syntax-scope-4">"</span>)
 }
-</code></pre></div><p>First, let’s see how many times we find those patterns in our code. We can run <code>flir::lint()</code> and it will open a “Markers” window in RStudio (if you don’t use RStudio, it will print the messages in the R console):</p><p><img src="data:image/png;base64,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" width="428" height="83" style="width: 75%"></p><p>We have three occurrences that can be fixed. I can now run <code>flir::fix()</code> (note that I don’t use Git for this demo project, so I will have to manually confirm I want to run this).</p><p><code>foo1.R</code> now looks like this (I manually added the comments):</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">df <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">tibble</span>(<span class="calepin-syntax-scope-5">x</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">1</span>:<span class="calepin-syntax-scope-2">5</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">w</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">c</span>(<span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">2</span>))
+</code></pre></div><p>First, let’s see how many times we find those patterns in our code. We can run <code>flir::lint()</code> and it will open a “Markers” window in RStudio (if you don’t use RStudio, it will print the messages in the R console):</p><p><img src="data:image/png;base64,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" width="428" height="83" style="width: 75%"></p><p>We have three occurrences that can be fixed. I can now run <code>flir::fix()</code> (note that I don’t use Git for this demo project, so I will have to manually confirm I want to run this).</p><p><code>foo1.R</code> now looks like this (I manually added the comments):</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">df <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">tibble</span>(<span class="calepin-syntax-scope-28">x</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-6">:</span><span class="calepin-syntax-scope-23">5</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">w</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">c</span>(<span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">2</span>))
 
-<span class="calepin-syntax-scope-1">slice_sample</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">n</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">3</span>)          <span class="calepin-syntax-scope-3">#</span> fixed
-<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">10</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">replace</span> <span class="calepin-syntax-scope-4">=</span> TRUE) <span class="calepin-syntax-scope-3">#</span> not fixed
-<span class="calepin-syntax-scope-1">sample_n</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">3</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">weight</span> <span class="calepin-syntax-scope-4">=</span> w)      <span class="calepin-syntax-scope-3">#</span> not fixed
+<span class="calepin-syntax-scope-22">slice_sample</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">n</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">3</span>)          <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> fixed</span>
+<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">10</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">replace</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>) <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> not fixed</span>
+<span class="calepin-syntax-scope-22">sample_n</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">3</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">weight</span> <span class="calepin-syntax-scope-27">=</span> w)      <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> not fixed</span>
 
-n_rows <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-2">3</span>
+n_rows <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-23">3</span>
 
-<span class="calepin-syntax-scope-1">foo</span>(<span class="calepin-syntax-scope-1">slice_sample</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">n</span> <span class="calepin-syntax-scope-4">=</span> n_rows)) <span class="calepin-syntax-scope-3">#</span> fixed
-</code></pre></div><p>Several occurrences of <code>sample_n()</code> weren’t modified. This is because they don’t match any of the <code>pattern</code>s we defined in the rule: they include additional arguments such as <code>weight</code> and <code>replace</code>. We would need to include those additional patterns in the rule to fix them. Since they would need different replacements to account for the additional arguments, we can create an extra rule in the same file using <code>---</code> to separate them (and don’t forget to change the <code>id</code>!):</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml">id<span class="calepin-syntax-scope-3">:</span> superseded-sample-n
-language<span class="calepin-syntax-scope-3">:</span> r
-severity<span class="calepin-syntax-scope-3">:</span> warning
-rule<span class="calepin-syntax-scope-3">:</span>
-  any<span class="calepin-syntax-scope-3">:</span>
-    <span class="calepin-syntax-scope-3">-</span> pattern<span class="calepin-syntax-scope-3">:</span> sample_n($DATA, size = $N)
-    <span class="calepin-syntax-scope-3">-</span> pattern<span class="calepin-syntax-scope-3">:</span> sample_n($DATA, $N)
-fix<span class="calepin-syntax-scope-3">:</span> slice_sample(~~DATA~~, n = ~~N~~)
-message<span class="calepin-syntax-scope-3">:</span> Use `slice_sample()` instead of `sample_n()`.
+<span class="calepin-syntax-scope-22">foo</span>(<span class="calepin-syntax-scope-22">slice_sample</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">n</span> <span class="calepin-syntax-scope-27">=</span> n_rows)) <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> fixed</span>
+</code></pre></div><p>Several occurrences of <code>sample_n()</code> weren’t modified. This is because they don’t match any of the <code>pattern</code>s we defined in the rule: they include additional arguments such as <code>weight</code> and <code>replace</code>. We would need to include those additional patterns in the rule to fix them. Since they would need different replacements to account for the additional arguments, we can create an extra rule in the same file using <code>---</code> to separate them (and don’t forget to change the <code>id</code>!):</p><div class="sourceCode" data-lang="yaml"><pre><code data-lang="yaml"><span class="calepin-syntax-scope-19">id</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">superseded-sample-n</span>
+<span class="calepin-syntax-scope-19">language</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">r</span>
+<span class="calepin-syntax-scope-19">severity</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">warning</span>
+<span class="calepin-syntax-scope-19">rule</span><span class="calepin-syntax-scope-26">:</span>
+  <span class="calepin-syntax-scope-19">any</span><span class="calepin-syntax-scope-26">:</span>
+    <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">sample_n($DATA, size = $N)</span>
+    <span class="calepin-syntax-scope-25">-</span> <span class="calepin-syntax-scope-19">pattern</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">sample_n($DATA, $N)</span>
+<span class="calepin-syntax-scope-19">fix</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">slice_sample(~~DATA~~, n = ~~N~~)</span>
+<span class="calepin-syntax-scope-19">message</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">Use `slice_sample()` instead of `sample_n()`.</span>
 
 ---
 
-id<span class="calepin-syntax-scope-3">:</span> superseded-sample-n-2
-language<span class="calepin-syntax-scope-3">:</span> r
-severity<span class="calepin-syntax-scope-3">:</span> warning
-rule<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span>
-fix<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span>
-message<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">..</span></code></pre></div><p>Similarly, <code>script/foo2.R</code> is now:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r">if (<span class="calepin-syntax-scope-1">nrow</span>(<span class="calepin-syntax-scope-1">slice_sample</span>(df<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">n</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-2">3</span>)) <span class="calepin-syntax-scope-3">></span> <span class="calepin-syntax-scope-2">0</span>) { <span class="calepin-syntax-scope-3">#</span> fixed
-  <span class="calepin-syntax-scope-1">print</span>(<span class="calepin-syntax-scope-3">"</span>hi<span class="calepin-syntax-scope-3">"</span>)
+<span class="calepin-syntax-scope-19">id</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">superseded-sample-n-2</span>
+<span class="calepin-syntax-scope-19">language</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">r</span>
+<span class="calepin-syntax-scope-19">severity</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-3">warning</span>
+<span class="calepin-syntax-scope-19">rule</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+<span class="calepin-syntax-scope-19">fix</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+<span class="calepin-syntax-scope-19">message</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">..</span>
+</code></pre></div><p>Similarly, <code>script/foo2.R</code> is now:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">nrow</span>(<span class="calepin-syntax-scope-22">slice_sample</span>(df<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">n</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-23">3</span>)) <span class="calepin-syntax-scope-24">></span> <span class="calepin-syntax-scope-23">0</span>) { <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> fixed</span>
+  <span class="calepin-syntax-scope-21">print</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">hi</span><span class="calepin-syntax-scope-4">"</span>)
 }
 </code></pre></div><h3 id="going-further">Going further</h3><p>In this example, I have shown very simple patterns to detect, but it is possible to use much more advanced rules, using nested patterns and regular expressions for instance.</p><p>Take a look at those rules in <code>flir</code> to see what it can do: <a href="https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/redundant_ifelse.yml"><code>redundant_ifelse</code></a>, <a href="https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/stopifnot_all.yml"><code>stopifnot_all</code></a>, <a href="https://github.com/etiennebacher/flir/blob/main/inst/rules/builtin/literal_coercion.yml"><code>literal_coercion</code></a>.</p><h2 id="conclusion">Conclusion</h2><p><code>flir</code> is useful to detect bad practices in R code, but its usage doesn’t stop here. It can be used to rewrite any R code you want using flexible patterns, which can be very valuable in projects involving many R files.</p><p>In the future, I would like to add a feature enabling package developers to provide a set of rules, for instance to replace deprecated and superseded functions in their package, that users would be able to use directly.</p><p>If you find bugs, would like more features, or simply have further questions, head to the <a href="https://github.com/etiennebacher/flir/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen">Issues page</a>!</p>
         </main>
@@ -2196,7 +2428,11 @@ message<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {
