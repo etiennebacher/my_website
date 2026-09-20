@@ -228,7 +228,7 @@ If you've reached this section, then maybe I have convinced you to use snapshots
 
 Lucky for you, there's a package for that \u{2122}.
 
-`flir` is a package I created a few years ago that uses the Rust crate `ast-grep` to perform search and replace of any pattern of R code #calepin.elements.sidenote[This package was originally created to be an R linter and an alternative to `lintr`. However, its purpose evolved and it is now better to view it as a tool to refactor any type of code by detecting and rewriting custom patterns.]. It is perfectly suitable for the task we want to perform now, namely find an existing code pattern (`expect_error()`) and replace it with another one (`expect_snapshot(error = TRUE)`) without doing any other manual tweaks.
+#link("https://flir.etiennebacher.com/")[`flir`] is a package I created a few years ago that uses the Rust crate #link("https://ast-grep.github.io/")[`ast-grep`] to perform search and replace of any pattern of R code #calepin.elements.sidenote[This package was originally created to be an R linter and an alternative to `lintr`. However, its purpose evolved and it is now better to view it as a tool to refactor any type of code by detecting and rewriting custom patterns.]. It is perfectly suitable for the task we want to perform now, namely find an existing code pattern (`expect_error()`) and replace it with another one (`expect_snapshot(error = TRUE)`) without doing any other manual tweaks.
 
 Here are the steps to follow once you have installed `flir`:
 
@@ -255,4 +255,4 @@ As an illustration of this workflow, here's a PR in a real package where I made 
 
 == What's next?
 
-This post was purely about improving the checking infrastructure of error messages, but now the hard part is actually fixing or improving error messages displayed in the snapshots! Parts of this could be made easier, e.g. by using one of the many packages for input checking (`rlang`, `checkmate`, `dreamerr`, `arg`, etc.), but some parts are very package-specific and require you to explore them.
+This post was purely about improving the checking infrastructure of error messages, but now the hard part is actually fixing or improving error messages displayed in the snapshots! Parts of this could be made easier, e.g. by using one of the many packages for input checking (#link("https://rlang.r-lib.org/index.html")[`rlang`], #link("https://mllg.github.io/checkmate/")[`checkmate`], #link("https://lrberge.github.io/dreamerr/")[`dreamerr`], #link("https://ngreifer.github.io/arg/")[`arg`], etc.), but some parts are very package-specific and require you to explore them.
