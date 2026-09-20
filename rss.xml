@@ -12,7 +12,7 @@
       <guid>https://etiennebacher.com/posts/2026-08-24-jarl-0.6.0/index.html</guid>
       <pubDate>Mon, 24 Aug 2026 00:00:00 GMT</pubDate>
       
-      
+      <description>I&#39;m glad to announce the release of Jarl 0.6.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl via the command line…</description>
     </item>
     
     <item>
@@ -21,7 +21,7 @@
       <guid>https://etiennebacher.com/posts/2026-03-23-jarl-0.5.0/index.html</guid>
       <pubDate>Mon, 23 Mar 2026 00:00:00 GMT</pubDate>
       
-      
+      <description>I&#39;m glad to announce the release of Jarl 0.5.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl via the command line…</description>
     </item>
     
     <item>
@@ -57,7 +57,7 @@
       <guid>https://etiennebacher.com/posts/2024-10-01-using-property-testing-in-r/index.html</guid>
       <pubDate>Tue, 01 Oct 2024 00:00:00 GMT</pubDate>
       
-      <description>When you don&apos;t want to write dozens of versions of unit tests.</description>
+      <description>When you don&#39;t want to write dozens of versions of unit tests.</description>
     </item>
     
     <item>
@@ -102,7 +102,7 @@
       <guid>https://etiennebacher.com/posts/2021-12-27-mapping-french-rivers-network/index.html</guid>
       <pubDate>Mon, 27 Dec 2021 00:00:00 GMT</pubDate>
       
-      
+      <description>Once again inspired by Dominic Royé&#39;s maps, I decided to map rivers in France. The dataset I use comes from HydroSHEDS. The code below is quite similar to the code in my previous post so I don&#39;t spend a lot of time on it.</description>
     </item>
     
     <item>
@@ -142,7 +142,7 @@
     </item>
     
     <item>
-      <title>What to do when your code doesn&apos;t work?</title>
+      <title>What to do when your code doesn&#39;t work?</title>
       <link>https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/index.html</link>
       <guid>https://etiennebacher.com/posts/2020-05-22-code-doesnt-work/index.html</guid>
       <pubDate>Fri, 22 May 2020 00:00:00 GMT</pubDate>

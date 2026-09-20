@@ -1,4 +1,4 @@
-#import "/.calepin/calepin.typ": _html-themed-raw-block, _is-query, chunk_from_raw_plain
+#import "/.calepin/calepin.typ": _html-themed-raw-block, _is-query, _fenced-chunk, _fenced-chunks-runs, _resolve-options, _call-defaults
 #import "/.calepin/calepin.typ" as calepin
 #import "@preview/marginalia:0.3.1" as marginalia
 
@@ -87,7 +87,7 @@
     it.lang,
     _resolve-options(it.lang, _call-defaults).at("fenced-chunks"),
   ) {
-    chunk_from_raw_plain(it.lang, it)
+    _fenced-chunk(it.lang, it)
   } else {
     _html-themed-raw-block(it)
   }

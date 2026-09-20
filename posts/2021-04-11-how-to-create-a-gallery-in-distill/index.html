@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>How to create a gallery in Distill</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="Use lightgallery.js to create a gallery for your plots or images.">
+    <meta property="og:description" content="Use lightgallery.js to create a gallery for your plots or images.">
+    <meta name="twitter:description" content="Use lightgallery.js to create a gallery for your plots or images.">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="How to create a gallery in Distill | Etienne Bacher">
+    <meta name="twitter:title" content="How to create a gallery in Distill | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2021-04-11-how-to-create-a-gallery-in-distill/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [How to create a gallery in Distill])\r\n#metadata((\r\n  title: \"How to create a gallery in Distill\",\r\n  kind: \"post\",\r\n  date: \"2021-04-11\",\r\n  summary: \"Use lightgallery.js to create a gallery for your plots or images.\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nThis post shows how to create a gallery on a Distill website. Keep in mind that Distill is (purposely) less flexible than other tools, such as `{blogdown}`, so the gallery might look quite different from what you expect.\r\n\r\n= Create a gallery with lightgallery.js\r\n<create-a-gallery-with-lightgallery.js>\r\n#link(\"https://github.com/sachinchoolur/lightgallery\")[Lightgallery.js] is a Javascript library that allows you to build a gallery very simply. You will need images in full size and thumbnails, i.e a smaller version of the images (we will see how to automatically make them later in this post).\r\n\r\nFirst of all, let's construct the gallery with HTML, CSS, and Javascript. We will see how to adapt this in R then. We need to load the Javascript and CSS files for lightgallery.js in the head:\r\n\r\n```html\r\n<head>\r\n\r\n<link type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css\" />\r\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"><\/script>\r\n\r\n<!-- lightgallery plugins -->\r\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"><\/script>\r\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"><\/script>\r\n\r\n</head>\r\n```\r\n\r\nThen, we construct the layout of the gallery. Here, I make the minimum layout, just to make sure this works:\r\n\r\n```html\r\n<div id=\"lightgallery\">\r\n  <a href=\"img1.png\">\r\n    <img src=\"thumb-img1.png\" />\r\n  </a>\r\n  <a href=\"img2.png\">\r\n    <img src=\"thumb-img2.png\" />\r\n  </a>\r\n</div>\r\n```\r\n\r\nAs you can see, the whole gallery is in a `<div>` element. To add an image to the gallery, we just have to add an `<a>` element as the two already there.\r\n\r\nThen, we add the Javascript code to run lightgallery.js:\r\n\r\n```html\r\n<script type=\"text/javascript\">\r\n  lightGallery(document.getElementById('lightgallery'));\r\n<\/script>\r\n```\r\n\r\nThis should work, but I just add a CSS animation to zoom a bit when hovering a thumbnail:\r\n\r\n```html\r\n<style>\r\n  #lightgallery > a > img:hover {\r\n    transform: scale(1.2, 1.2);\r\n    transition: 0.2s ease-in-out;\r\n    cursor: pointer;\r\n  }\r\n</style>\r\n```\r\n\r\nThat's it for the proof of concept. Now let's adapt it in R.\r\n\r\n#html.elem(\"details\")[\r\n  #html.elem(\"summary\")[\r\n    Click to see the full HTML.\r\n  ]\r\n\r\n  ```html\r\n  <!doctype html>\r\n  <html>\r\n    <head>\r\n      <link type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/css/lightgallery.css\" />\r\n      <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"><\/script>\r\n\r\n     <!-- lightgallery plugins -->\r\n     <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"><\/script>\r\n     <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"><\/script>\r\n    </head>\r\n    <body>\r\n      <div id=\"lightgallery\">\r\n        <a href=\"img1.png\" data-sub-html=\"<h4>Sunset Serenity</h4><p>A gorgeous Sunset tonight captured at Coniston Water....</p>\">\r\n            <img src=\"thumb-img1.png\" />\r\n        </a>\r\n        <a href=\"img2.png\">\r\n            <img src=\"thumb-img2.png\" />\r\n        </a>\r\n      </div>\r\n\r\n      <script type=\"text/javascript\">\r\n        lightGallery(document.getElementById('lightgallery'));\r\n      <\/script>\r\n\r\n      <style>\r\n        #lightgallery > a > img:hover {\r\n          transform: scale(1.2, 1.2);\r\n          transition: 0.2s ease-in-out;\r\n          cursor: pointer;\r\n        }\r\n      </style>\r\n\r\n    </body>\r\n  </html>\r\n  ```\r\n]\r\n= Make the gallery with R\r\n<make-the-gallery-with-r>\r\n== Create thumbnails\r\n<create-thumbnails>\r\nFirst, store your (full-size) images in a folder, let's say `_gallery/img`. As we saw above, `lightgallery.js` also requires thumbnails in addition to full-size images. To automatically create these thumbnails, we can use the function `image_resize()` in the package `magick`. First, I create a function to resize a single image, and I will apply it to all the images I have:\r\n\r\n```r\r\nlibrary(magick)\r\nlibrary(here)\r\n\r\nresize_image <- function(image) {\r\n\r\n  imFile <- image_read(here::here(paste0(\"_gallery/img/\", image)))\r\n  imFile_resized <- magick::image_resize(imFile, \"6%\")\r\n  magick::image_write(imFile_resized, here::here(paste0(\"_gallery/img/thumb-\", image)))\r\n\r\n}\r\n\r\nlist_png <- list.files(\"_gallery/img\")\r\nlapply(list_png, resize_image)\r\n```\r\n\r\n== Build the HTML structure\r\n<build-the-html-structure>\r\nWe can now start building the HTML structure with the package `htmltools`. First, we can see that the HTML code for each image is very similar:\r\n\r\n```html\r\n<a href=\"img.png\">\r\n    <img src=\"thumb-img.png\" />\r\n</a>\r\n```\r\n\r\nThis can be reproduced in R with:\r\n\r\n```r\r\nlibrary(htmltools)\r\n\r\ntags$a(\r\n  href = \"img.png\",\r\n  tags$img(src = \"thumb-img.png\")\r\n)\r\n```\r\n\r\nWe can now create a function to apply this structure to all the images we have:\r\n\r\n```r\r\nmake_gallery_layout <- function() {\r\n\r\n  # Get the names of all images\r\n  images <- list.files(\"_gallery/img\")\r\n\r\n  # Get the names of all full-size images\r\n  images_full_size <- grep(\"thumb\", images, value = TRUE, invert = TRUE)\r\n\r\n  # Get the names of all thumbnails\r\n  images_thumb <- grep(\"thumb\", images, value = TRUE)\r\n\r\n  # Create a dataframe where each row is one image (useful for\r\n  # the apply() function)\r\n  images <- data.frame(images_thumb = images_thumb,\r\n                       images_full_size = images_full_size)\r\n\r\n  # Create the HTML structure for each image\r\n  tagList(apply(images, 1, function(x) {\r\n      tags$a(\r\n        href = paste0(\"_gallery/img/\", x[[\"images_full_size\"]]),\r\n        tags$img(src = paste0(\"_gallery/img/\", x[[\"images_thumb\"]]))\r\n      )\r\n  }))\r\n\r\n}\r\n```\r\n\r\nLastly, we need to embed this HTML code in `<div id=\"lightgallery\">`, as shown in the first section. We can do that with the following code:\r\n\r\n```r\r\nwithTags(\r\n  div(\r\n    class = \"row\",\r\n    id = \"lightgallery\",\r\n    tagList(\r\n      make_gallery_layout()\r\n    )\r\n  )\r\n)\r\n```\r\n\r\nWe now have all the HTML code we need. We now have to add the CSS and the JavaScript code. We can just copy-paste it in an R Markdown file.\r\n\r\n#html.elem(\"details\")[\r\n  #html.elem(\"summary\")[\r\n    Click to see the full R Markdown file.\r\n  ]\r\n\r\n  ````\r\n  ---\r\n  title: \"Gallery\"\r\n  output:\r\n    distill::distill_article\r\n  ---\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  :::\r\n\r\n\r\n  <head>\r\n\r\n  <link type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css\" />\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"><\/script>\r\n\r\n  <!-- lightgallery plugins -->\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"><\/script>\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"><\/script>\r\n\r\n  </head>\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.css .cell-code}\r\n  #lightgallery > a > img:hover {\r\n     transform: scale(1.15, 1.15);\r\n     transition: 0.4s ease-in-out;\r\n     cursor: pointer;\r\n  }\r\n  ```\r\n  :::\r\n\r\n\r\n\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.r .cell-code}\r\n  # Create layout\r\n  withTags(\r\n    div(\r\n      class = \"row\",\r\n      id = \"lightgallery\",\r\n      tagList(\r\n        make_gallery_layout()\r\n      )\r\n    )\r\n  )\r\n  ```\r\n  :::\r\n\r\n\r\n  <script type=\"text/javascript\">\r\n      lightGallery(document.getElementById('lightgallery'));\r\n  <\/script>\r\n  ````\r\n]\r\n= Update GitHub Actions\r\n<update-github-actions>\r\nWe need to add `fs::dir_copy(\"_gallery/img\", \"_site/_gallery/img\")` in GitHub Actions so that the images are found when the gallery is built. We also have to add `magick` and `httr` in the list of packages to install.\r\n\r\nIf you haven't set up GitHub Actions yet, you can check #link(\"https://www.etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/\")[my previous post], or check my #link(\"https://github.com/etiennebacher/my_website/blob/master/.github/workflows/main.yml\")[current GitHub Actions] for this site.\r\n\r\n= Bonus: make a gallery for \\#tidytuesday\r\n<bonus-make-a-gallery-for-tidytuesday>\r\nI have started participating to #link(\"https://github.com/rfordatascience/tidytuesday\")[\\#tidytuesday] this year, and the main reason I wanted to create a gallery was to display my favorite plots. Therefore, I created a function to make it as easy as possible for me to update the plots I want to display in the gallery.\r\n\r\nThe purpose of the function below is to download a plot for a specific week in a specific year in the #link(\"https://github.com/etiennebacher/tidytuesday\")[repo containing my plots].\r\n\r\n```r\r\nlibrary(httr)\r\n\r\nget_tt_image <- function(year, week) {\r\n\r\n  if (is.numeric(year)) year <- as.character(year)\r\n  if (is.numeric(week)) week <- as.character(week)\r\n  if (nchar(week) == 1) week <- paste0(\"0\", week)\r\n\r\n  ### Get the link to download the image I want\r\n  req <- GET(\"https://api.github.com/repos/etiennebacher/tidytuesday/git/trees/master?recursive=1\")\r\n  stop_for_status(req)\r\n  file_list <- unlist(lapply(content(req)$tree, \"[\", \"path\"), use.names = F)\r\n  png_list <- grep(\".png\", file_list, value = TRUE, fixed = TRUE)\r\n  png_wanted <- grep(year, png_list, value = TRUE)\r\n  png_wanted <- grep(paste0(\"W\", week), png_wanted, value = TRUE)\r\n  # If a png file is called accidental_art, don't take it\r\n  if (any(grepl(\"accidental_art\", png_wanted))) {\r\n    png_wanted <- png_wanted[-which(grepl(\"accidental_art\", png_wanted))]\r\n  }\r\n\r\n  ### Link of the image I want to download\r\n  origin <- paste0(\r\n    \"https://raw.githubusercontent.com/etiennebacher/tidytuesday/master/\",\r\n    png_wanted\r\n  )\r\n\r\n  ### Destination of this image\r\n  destination <- paste0(\"_gallery/img/\", year, \"-\", week, \"-\", trimws(basename(origin)))\r\n\r\n  ### Download only if not already there\r\n  if (!file.exists(destination)) {\r\n    if (!file.exists(\"_gallery/img\")) {\r\n      dir.create(\"_gallery/img\")\r\n    }\r\n    download.file(origin, destination)\r\n  }\r\n\r\n  ### Create the thumbnail if not already there\r\n  thumb_destination <- paste0(\"_gallery/img/thumb-\", year, \"-\", week, \"-\",\r\n                        trimws(basename(origin)))\r\n  if (!file.exists(thumb_destination)) {\r\n    resize_image(paste0(year, \"-\", week, \"-\", trimws(basename(origin))))\r\n  }\r\n\r\n}\r\n```\r\n\r\nAs you can see, this function downloads the plot I want, puts it in `_gallery/img` and creates the thumbnail. All I have to do now is to choose the plots I want to display and to apply the function to these year-week pairs in the R Markdown file.\r\n\r\nNote that for some reason, this function sometimes fails on GitHub Actions because of HTTP error 403. I think this is related to the number of requests to GitHub API but what is strange is that this function isn't supposed to make a lot of requests, so it is still a mystery.\r\n\r\n#html.elem(\"details\")[\r\n  #html.elem(\"summary\")[\r\n    Click to see the full R Markdown file.\r\n  ]\r\n\r\n  ````\r\n  ---\r\n  title: \"Gallery\"\r\n  output:\r\n    distill::distill_article\r\n  ---\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  :::\r\n\r\n\r\n  <head>\r\n\r\n  <link type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css\" />\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"><\/script>\r\n\r\n  <!-- lightgallery plugins -->\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"><\/script>\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"><\/script>\r\n\r\n  </head>\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.css .cell-code}\r\n  #lightgallery > a > img:hover {\r\n     transform: scale(1.15, 1.15);\r\n     transition: 0.4s ease-in-out;\r\n     cursor: pointer;\r\n  }\r\n  ```\r\n  :::\r\n\r\n\r\n\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.r .cell-code}\r\n  # Create layout\r\n  withTags(\r\n    div(\r\n      class = \"row\",\r\n      id = \"lightgallery\",\r\n      tagList(\r\n        make_gallery_layout()\r\n      )\r\n    )\r\n  )\r\n  ```\r\n  :::\r\n\r\n\r\n  <script type=\"text/javascript\">\r\n      lightGallery(document.getElementById('lightgallery'));\r\n  <\/script>\r\n  ````\r\n]\r\n= Conclusion\r\n<conclusion>\r\nIn this post, I tried to explain how to build a gallery with a simple example. However, you can also check the #link(\"https://github.com/etiennebacher/my_website\")[repo of my website] to have a clearer view of how to do so. I also added some CSS styling that is not described here, to limit the code to what is really necessary.\r\n\r\nCheck the #link(\"https://www.etiennebacher.com/gallery.html\")[gallery] to see the result.\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [How to create a gallery in Distill])\r\n#metadata((\r\n  title: \"How to create a gallery in Distill\",\r\n  kind: \"post\",\r\n  date: \"2021-04-11\",\r\n  summary: \"Use lightgallery.js to create a gallery for your plots or images.\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\nThis post shows how to create a gallery on a Distill website. Keep in mind that Distill is (purposely) less flexible than other tools, such as `{blogdown}`, so the gallery might look quite different from what you expect.\r\n\r\n= Create a gallery with lightgallery.js\r\n\u003ccreate-a-gallery-with-lightgallery.js\u003e\r\n#link(\"https://github.com/sachinchoolur/lightgallery\")[Lightgallery.js] is a Javascript library that allows you to build a gallery very simply. You will need images in full size and thumbnails, i.e a smaller version of the images (we will see how to automatically make them later in this post).\r\n\r\nFirst of all, let's construct the gallery with HTML, CSS, and Javascript. We will see how to adapt this in R then. We need to load the Javascript and CSS files for lightgallery.js in the head:\r\n\r\n```html\r\n\u003chead\u003e\r\n\r\n\u003clink type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css\" /\u003e\r\n\u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"\u003e\u003c/script\u003e\r\n\r\n\u003c!-- lightgallery plugins --\u003e\r\n\u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"\u003e\u003c/script\u003e\r\n\u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"\u003e\u003c/script\u003e\r\n\r\n\u003c/head\u003e\r\n```\r\n\r\nThen, we construct the layout of the gallery. Here, I make the minimum layout, just to make sure this works:\r\n\r\n```html\r\n\u003cdiv id=\"lightgallery\"\u003e\r\n  \u003ca href=\"img1.png\"\u003e\r\n    \u003cimg src=\"thumb-img1.png\" /\u003e\r\n  \u003c/a\u003e\r\n  \u003ca href=\"img2.png\"\u003e\r\n    \u003cimg src=\"thumb-img2.png\" /\u003e\r\n  \u003c/a\u003e\r\n\u003c/div\u003e\r\n```\r\n\r\nAs you can see, the whole gallery is in a `\u003cdiv\u003e` element. To add an image to the gallery, we just have to add an `\u003ca\u003e` element as the two already there.\r\n\r\nThen, we add the Javascript code to run lightgallery.js:\r\n\r\n```html\r\n\u003cscript type=\"text/javascript\"\u003e\r\n  lightGallery(document.getElementById('lightgallery'));\r\n\u003c/script\u003e\r\n```\r\n\r\nThis should work, but I just add a CSS animation to zoom a bit when hovering a thumbnail:\r\n\r\n```html\r\n\u003cstyle\u003e\r\n  #lightgallery \u003e a \u003e img:hover {\r\n    transform: scale(1.2, 1.2);\r\n    transition: 0.2s ease-in-out;\r\n    cursor: pointer;\r\n  }\r\n\u003c/style\u003e\r\n```\r\n\r\nThat's it for the proof of concept. Now let's adapt it in R.\r\n\r\n#html.elem(\"details\")[\r\n  #html.elem(\"summary\")[\r\n    Click to see the full HTML.\r\n  ]\r\n\r\n  ```html\r\n  \u003c!doctype html\u003e\r\n  \u003chtml\u003e\r\n    \u003chead\u003e\r\n      \u003clink type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/css/lightgallery.css\" /\u003e\r\n      \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"\u003e\u003c/script\u003e\r\n\r\n     \u003c!-- lightgallery plugins --\u003e\r\n     \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"\u003e\u003c/script\u003e\r\n     \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"\u003e\u003c/script\u003e\r\n    \u003c/head\u003e\r\n    \u003cbody\u003e\r\n      \u003cdiv id=\"lightgallery\"\u003e\r\n        \u003ca href=\"img1.png\" data-sub-html=\"\u003ch4\u003eSunset Serenity\u003c/h4\u003e\u003cp\u003eA gorgeous Sunset tonight captured at Coniston Water....\u003c/p\u003e\"\u003e\r\n            \u003cimg src=\"thumb-img1.png\" /\u003e\r\n        \u003c/a\u003e\r\n        \u003ca href=\"img2.png\"\u003e\r\n            \u003cimg src=\"thumb-img2.png\" /\u003e\r\n        \u003c/a\u003e\r\n      \u003c/div\u003e\r\n\r\n      \u003cscript type=\"text/javascript\"\u003e\r\n        lightGallery(document.getElementById('lightgallery'));\r\n      \u003c/script\u003e\r\n\r\n      \u003cstyle\u003e\r\n        #lightgallery \u003e a \u003e img:hover {\r\n          transform: scale(1.2, 1.2);\r\n          transition: 0.2s ease-in-out;\r\n          cursor: pointer;\r\n        }\r\n      \u003c/style\u003e\r\n\r\n    \u003c/body\u003e\r\n  \u003c/html\u003e\r\n  ```\r\n]\r\n= Make the gallery with R\r\n\u003cmake-the-gallery-with-r\u003e\r\n== Create thumbnails\r\n\u003ccreate-thumbnails\u003e\r\nFirst, store your (full-size) images in a folder, let's say `_gallery/img`. As we saw above, `lightgallery.js` also requires thumbnails in addition to full-size images. To automatically create these thumbnails, we can use the function `image_resize()` in the package `magick`. First, I create a function to resize a single image, and I will apply it to all the images I have:\r\n\r\n```r\r\nlibrary(magick)\r\nlibrary(here)\r\n\r\nresize_image \u003c- function(image) {\r\n\r\n  imFile \u003c- image_read(here::here(paste0(\"_gallery/img/\", image)))\r\n  imFile_resized \u003c- magick::image_resize(imFile, \"6%\")\r\n  magick::image_write(imFile_resized, here::here(paste0(\"_gallery/img/thumb-\", image)))\r\n\r\n}\r\n\r\nlist_png \u003c- list.files(\"_gallery/img\")\r\nlapply(list_png, resize_image)\r\n```\r\n\r\n== Build the HTML structure\r\n\u003cbuild-the-html-structure\u003e\r\nWe can now start building the HTML structure with the package `htmltools`. First, we can see that the HTML code for each image is very similar:\r\n\r\n```html\r\n\u003ca href=\"img.png\"\u003e\r\n    \u003cimg src=\"thumb-img.png\" /\u003e\r\n\u003c/a\u003e\r\n```\r\n\r\nThis can be reproduced in R with:\r\n\r\n```r\r\nlibrary(htmltools)\r\n\r\ntags$a(\r\n  href = \"img.png\",\r\n  tags$img(src = \"thumb-img.png\")\r\n)\r\n```\r\n\r\nWe can now create a function to apply this structure to all the images we have:\r\n\r\n```r\r\nmake_gallery_layout \u003c- function() {\r\n\r\n  # Get the names of all images\r\n  images \u003c- list.files(\"_gallery/img\")\r\n\r\n  # Get the names of all full-size images\r\n  images_full_size \u003c- grep(\"thumb\", images, value = TRUE, invert = TRUE)\r\n\r\n  # Get the names of all thumbnails\r\n  images_thumb \u003c- grep(\"thumb\", images, value = TRUE)\r\n\r\n  # Create a dataframe where each row is one image (useful for\r\n  # the apply() function)\r\n  images \u003c- data.frame(images_thumb = images_thumb,\r\n                       images_full_size = images_full_size)\r\n\r\n  # Create the HTML structure for each image\r\n  tagList(apply(images, 1, function(x) {\r\n      tags$a(\r\n        href = paste0(\"_gallery/img/\", x[[\"images_full_size\"]]),\r\n        tags$img(src = paste0(\"_gallery/img/\", x[[\"images_thumb\"]]))\r\n      )\r\n  }))\r\n\r\n}\r\n```\r\n\r\nLastly, we need to embed this HTML code in `\u003cdiv id=\"lightgallery\"\u003e`, as shown in the first section. We can do that with the following code:\r\n\r\n```r\r\nwithTags(\r\n  div(\r\n    class = \"row\",\r\n    id = \"lightgallery\",\r\n    tagList(\r\n      make_gallery_layout()\r\n    )\r\n  )\r\n)\r\n```\r\n\r\nWe now have all the HTML code we need. We now have to add the CSS and the JavaScript code. We can just copy-paste it in an R Markdown file.\r\n\r\n#html.elem(\"details\")[\r\n  #html.elem(\"summary\")[\r\n    Click to see the full R Markdown file.\r\n  ]\r\n\r\n  ````\r\n  ---\r\n  title: \"Gallery\"\r\n  output:\r\n    distill::distill_article\r\n  ---\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  :::\r\n\r\n\r\n  \u003chead\u003e\r\n\r\n  \u003clink type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css\" /\u003e\r\n  \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"\u003e\u003c/script\u003e\r\n\r\n  \u003c!-- lightgallery plugins --\u003e\r\n  \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"\u003e\u003c/script\u003e\r\n  \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"\u003e\u003c/script\u003e\r\n\r\n  \u003c/head\u003e\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.css .cell-code}\r\n  #lightgallery \u003e a \u003e img:hover {\r\n     transform: scale(1.15, 1.15);\r\n     transition: 0.4s ease-in-out;\r\n     cursor: pointer;\r\n  }\r\n  ```\r\n  :::\r\n\r\n\r\n\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.r .cell-code}\r\n  # Create layout\r\n  withTags(\r\n    div(\r\n      class = \"row\",\r\n      id = \"lightgallery\",\r\n      tagList(\r\n        make_gallery_layout()\r\n      )\r\n    )\r\n  )\r\n  ```\r\n  :::\r\n\r\n\r\n  \u003cscript type=\"text/javascript\"\u003e\r\n      lightGallery(document.getElementById('lightgallery'));\r\n  \u003c/script\u003e\r\n  ````\r\n]\r\n= Update GitHub Actions\r\n\u003cupdate-github-actions\u003e\r\nWe need to add `fs::dir_copy(\"_gallery/img\", \"_site/_gallery/img\")` in GitHub Actions so that the images are found when the gallery is built. We also have to add `magick` and `httr` in the list of packages to install.\r\n\r\nIf you haven't set up GitHub Actions yet, you can check #link(\"https://www.etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/\")[my previous post], or check my #link(\"https://github.com/etiennebacher/my_website/blob/master/.github/workflows/main.yml\")[current GitHub Actions] for this site.\r\n\r\n= Bonus: make a gallery for \\#tidytuesday\r\n\u003cbonus-make-a-gallery-for-tidytuesday\u003e\r\nI have started participating to #link(\"https://github.com/rfordatascience/tidytuesday\")[\\#tidytuesday] this year, and the main reason I wanted to create a gallery was to display my favorite plots. Therefore, I created a function to make it as easy as possible for me to update the plots I want to display in the gallery.\r\n\r\nThe purpose of the function below is to download a plot for a specific week in a specific year in the #link(\"https://github.com/etiennebacher/tidytuesday\")[repo containing my plots].\r\n\r\n```r\r\nlibrary(httr)\r\n\r\nget_tt_image \u003c- function(year, week) {\r\n\r\n  if (is.numeric(year)) year \u003c- as.character(year)\r\n  if (is.numeric(week)) week \u003c- as.character(week)\r\n  if (nchar(week) == 1) week \u003c- paste0(\"0\", week)\r\n\r\n  ### Get the link to download the image I want\r\n  req \u003c- GET(\"https://api.github.com/repos/etiennebacher/tidytuesday/git/trees/master?recursive=1\")\r\n  stop_for_status(req)\r\n  file_list \u003c- unlist(lapply(content(req)$tree, \"[\", \"path\"), use.names = F)\r\n  png_list \u003c- grep(\".png\", file_list, value = TRUE, fixed = TRUE)\r\n  png_wanted \u003c- grep(year, png_list, value = TRUE)\r\n  png_wanted \u003c- grep(paste0(\"W\", week), png_wanted, value = TRUE)\r\n  # If a png file is called accidental_art, don't take it\r\n  if (any(grepl(\"accidental_art\", png_wanted))) {\r\n    png_wanted \u003c- png_wanted[-which(grepl(\"accidental_art\", png_wanted))]\r\n  }\r\n\r\n  ### Link of the image I want to download\r\n  origin \u003c- paste0(\r\n    \"https://raw.githubusercontent.com/etiennebacher/tidytuesday/master/\",\r\n    png_wanted\r\n  )\r\n\r\n  ### Destination of this image\r\n  destination \u003c- paste0(\"_gallery/img/\", year, \"-\", week, \"-\", trimws(basename(origin)))\r\n\r\n  ### Download only if not already there\r\n  if (!file.exists(destination)) {\r\n    if (!file.exists(\"_gallery/img\")) {\r\n      dir.create(\"_gallery/img\")\r\n    }\r\n    download.file(origin, destination)\r\n  }\r\n\r\n  ### Create the thumbnail if not already there\r\n  thumb_destination \u003c- paste0(\"_gallery/img/thumb-\", year, \"-\", week, \"-\",\r\n                        trimws(basename(origin)))\r\n  if (!file.exists(thumb_destination)) {\r\n    resize_image(paste0(year, \"-\", week, \"-\", trimws(basename(origin))))\r\n  }\r\n\r\n}\r\n```\r\n\r\nAs you can see, this function downloads the plot I want, puts it in `_gallery/img` and creates the thumbnail. All I have to do now is to choose the plots I want to display and to apply the function to these year-week pairs in the R Markdown file.\r\n\r\nNote that for some reason, this function sometimes fails on GitHub Actions because of HTTP error 403. I think this is related to the number of requests to GitHub API but what is strange is that this function isn't supposed to make a lot of requests, so it is still a mystery.\r\n\r\n#html.elem(\"details\")[\r\n  #html.elem(\"summary\")[\r\n    Click to see the full R Markdown file.\r\n  ]\r\n\r\n  ````\r\n  ---\r\n  title: \"Gallery\"\r\n  output:\r\n    distill::distill_article\r\n  ---\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  :::\r\n\r\n\r\n  \u003chead\u003e\r\n\r\n  \u003clink type=\"text/css\" rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css\" /\u003e\r\n  \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js\"\u003e\u003c/script\u003e\r\n\r\n  \u003c!-- lightgallery plugins --\u003e\r\n  \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js\"\u003e\u003c/script\u003e\r\n  \u003cscript src=\"https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js\"\u003e\u003c/script\u003e\r\n\r\n  \u003c/head\u003e\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.css .cell-code}\r\n  #lightgallery \u003e a \u003e img:hover {\r\n     transform: scale(1.15, 1.15);\r\n     transition: 0.4s ease-in-out;\r\n     cursor: pointer;\r\n  }\r\n  ```\r\n  :::\r\n\r\n\r\n\r\n\r\n\r\n  ::: {.cell}\r\n\r\n  ```{.r .cell-code}\r\n  # Create layout\r\n  withTags(\r\n    div(\r\n      class = \"row\",\r\n      id = \"lightgallery\",\r\n      tagList(\r\n        make_gallery_layout()\r\n      )\r\n    )\r\n  )\r\n  ```\r\n  :::\r\n\r\n\r\n  \u003cscript type=\"text/javascript\"\u003e\r\n      lightGallery(document.getElementById('lightgallery'));\r\n  \u003c/script\u003e\r\n  ````\r\n]\r\n= Conclusion\r\n\u003cconclusion\u003e\r\nIn this post, I tried to explain how to build a gallery with a simple example. However, you can also check the #link(\"https://github.com/etiennebacher/my_website\")[repo of my website] to have a clearer view of how to do so. I also added some CSS styling that is not described here, to limit the code to what is really necessary.\r\n\r\nCheck the #link(\"https://www.etiennebacher.com/gallery.html\")[gallery] to see the result.\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2059,115 +2286,121 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="how-to-create-a-gallery-in-distill">How to create a gallery in Distill</h1></span></p><p>This post shows how to create a gallery on a Distill website. Keep in mind that Distill is (purposely) less flexible than other tools, such as <code>{blogdown}</code>, so the gallery might look quite different from what you expect.</p><h2 id="create-a-gallery-with-lightgallery.js">Create a gallery with lightgallery.js</h2><p><a href="https://github.com/sachinchoolur/lightgallery">Lightgallery.js</a> is a Javascript library that allows you to build a gallery very simply. You will need images in full size and thumbnails, i.e a smaller version of the images (we will see how to automatically make them later in this post).</p><p>First of all, let’s construct the gallery with HTML, CSS, and Javascript. We will see how to adapt this in R then. We need to load the Javascript and CSS files for lightgallery.js in the head:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-3">&lt;</span>head<span class="calepin-syntax-scope-3">></span>
+            <p><span style="font-variant-caps: small-caps"><h1 id="how-to-create-a-gallery-in-distill">How to create a gallery in Distill</h1></span></p><p>This post shows how to create a gallery on a Distill website. Keep in mind that Distill is (purposely) less flexible than other tools, such as <code>{blogdown}</code>, so the gallery might look quite different from what you expect.</p><h2 id="create-a-gallery-with-lightgallery.js">Create a gallery with lightgallery.js</h2><p><a href="https://github.com/sachinchoolur/lightgallery">Lightgallery.js</a> is a Javascript library that allows you to build a gallery very simply. You will need images in full size and thumbnails, i.e a smaller version of the images (we will see how to automatically make them later in this post).</p><p>First of all, let’s construct the gallery with HTML, CSS, and Javascript. We will see how to adapt this in R then. We need to load the Javascript and CSS files for lightgallery.js in the head:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">head</span><span class="calepin-syntax-scope-25">></span>
 
-<span class="calepin-syntax-scope-3">&lt;</span>link <span class="calepin-syntax-scope-5">type</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>text/css<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-5">rel</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>stylesheet<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-<span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span><span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
+<span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">link</span> <span class="calepin-syntax-scope-29">type</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">text/css</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-29">rel</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">stylesheet</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+<span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span><span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
 
-<span class="calepin-syntax-scope-3">&lt;!--</span> lightgallery plugins <span class="calepin-syntax-scope-3">--></span>
-<span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span><span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
-<span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span><span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
+<span class="calepin-syntax-scope-2">&lt;!--</span><span class="calepin-syntax-scope-1"> lightgallery plugins </span><span class="calepin-syntax-scope-2">--></span>
+<span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span><span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
+<span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span><span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
 
-<span class="calepin-syntax-scope-3">&lt;/</span>head<span class="calepin-syntax-scope-3">></span></code></pre></div><p>Then, we construct the layout of the gallery. Here, I make the minimum layout, just to make sure this works:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-3">&lt;</span>div <span class="calepin-syntax-scope-5">id</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>lightgallery<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-3">&lt;</span>a <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>img1.png<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-    <span class="calepin-syntax-scope-3">&lt;</span>img <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>thumb-img1.png<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-  <span class="calepin-syntax-scope-3">&lt;/</span>a<span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-3">&lt;</span>a <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>img2.png<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-    <span class="calepin-syntax-scope-3">&lt;</span>img <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>thumb-img2.png<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-  <span class="calepin-syntax-scope-3">&lt;/</span>a<span class="calepin-syntax-scope-3">></span>
-<span class="calepin-syntax-scope-3">&lt;/</span>div<span class="calepin-syntax-scope-3">></span></code></pre></div><p>As you can see, the whole gallery is in a <code>&lt;div></code> element. To add an image to the gallery, we just have to add an <code>&lt;a></code> element as the two already there.</p><p>Then, we add the Javascript code to run lightgallery.js:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">type</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>text/javascript<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-1">lightGallery</span>(document.<span class="calepin-syntax-scope-1">getElementById</span>(<span class="calepin-syntax-scope-3">'</span>lightgallery<span class="calepin-syntax-scope-3">'</span>));
-<span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span></code></pre></div><p>This should work, but I just add a CSS animation to zoom a bit when hovering a thumbnail:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-3">&lt;</span>style<span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-3">#</span><span class="calepin-syntax-scope-5">lightgallery</span> <span class="calepin-syntax-scope-3">></span> a <span class="calepin-syntax-scope-3">></span> img<span class="calepin-syntax-scope-3">:</span>hover {
-    transform<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-1">scale</span><span class="calepin-syntax-scope-3">(</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">)</span>;
-    transition<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-2">s</span> ease-in-out;
-    cursor<span class="calepin-syntax-scope-3">:</span> pointer;
+<span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">head</span><span class="calepin-syntax-scope-25">></span>
+</code></pre></div><p>Then, we construct the layout of the gallery. Here, I make the minimum layout, just to make sure this works:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">div</span> <span class="calepin-syntax-scope-29">id</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">lightgallery</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+  <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">img1.png</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+    <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">img</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb-img1.png</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+  <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">a</span><span class="calepin-syntax-scope-25">></span>
+  <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">img2.png</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+    <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">img</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb-img2.png</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+  <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">a</span><span class="calepin-syntax-scope-25">></span>
+<span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">div</span><span class="calepin-syntax-scope-25">></span>
+</code></pre></div><p>As you can see, the whole gallery is in a <code>&lt;div></code> element. To add an image to the gallery, we just have to add an <code>&lt;a></code> element as the two already there.</p><p>Then, we add the Javascript code to run lightgallery.js:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">type</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">text/javascript</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+  <span class="calepin-syntax-scope-22">lightGallery</span>(<span class="calepin-syntax-scope-17">document</span>.<span class="calepin-syntax-scope-22">getElementById</span>(<span class="calepin-syntax-scope-4">'</span><span class="calepin-syntax-scope-3">lightgallery</span><span class="calepin-syntax-scope-4">'</span>));
+<span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
+</code></pre></div><p>This should work, but I just add a CSS animation to zoom a bit when hovering a thumbnail:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">style</span><span class="calepin-syntax-scope-25">></span>
+  <span class="calepin-syntax-scope-25">#</span><span class="calepin-syntax-scope-29">lightgallery</span> <span class="calepin-syntax-scope-26">></span> <span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-26">></span> <span class="calepin-syntax-scope-19">img</span><span class="calepin-syntax-scope-25">:</span>hover {
+    <span class="calepin-syntax-scope-17">transform</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-21">scale</span><span class="calepin-syntax-scope-25">(</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-25">)</span>;
+    <span class="calepin-syntax-scope-17">transition</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-6">s</span> <span class="calepin-syntax-scope-13">ease-in-out</span>;
+    <span class="calepin-syntax-scope-17">cursor</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-13">pointer</span>;
   }
-<span class="calepin-syntax-scope-3">&lt;/</span>style<span class="calepin-syntax-scope-3">></span></code></pre></div><p>That’s it for the proof of concept. Now let’s adapt it in R.</p><details><summary>Click to see the full HTML.</summary><div class="sourceCode" data-lang="html"><pre><code data-lang="html">&lt;!doctype html>
-<span class="calepin-syntax-scope-3">&lt;</span>html<span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-3">&lt;</span>head<span class="calepin-syntax-scope-3">></span>
-    <span class="calepin-syntax-scope-3">&lt;</span>link <span class="calepin-syntax-scope-5">type</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>text/css<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-5">rel</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>stylesheet<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/css/lightgallery.css<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-    <span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span><span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
+<span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">style</span><span class="calepin-syntax-scope-25">></span>
+</code></pre></div><p>That’s it for the proof of concept. Now let’s adapt it in R.</p><details><summary>Click to see the full HTML.</summary><div class="sourceCode" data-lang="html"><pre><code data-lang="html">  &lt;!doctype html>
+  <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">html</span><span class="calepin-syntax-scope-25">></span>
+    <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">head</span><span class="calepin-syntax-scope-25">></span>
+      <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">link</span> <span class="calepin-syntax-scope-29">type</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">text/css</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-29">rel</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">stylesheet</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/css/lightgallery.css</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+      <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.1-beta.0/js/lightgallery.min.js</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span><span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
 
-   <span class="calepin-syntax-scope-3">&lt;!--</span> lightgallery plugins <span class="calepin-syntax-scope-3">--></span>
-   <span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span><span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
-   <span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span><span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-3">&lt;/</span>head<span class="calepin-syntax-scope-3">></span>
-  <span class="calepin-syntax-scope-3">&lt;</span>body<span class="calepin-syntax-scope-3">></span>
-    <span class="calepin-syntax-scope-3">&lt;</span>div <span class="calepin-syntax-scope-5">id</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>lightgallery<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-      <span class="calepin-syntax-scope-3">&lt;</span>a <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>img1.png<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-5">data-sub-html</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>&lt;h4>Sunset Serenity&lt;/h4>&lt;p>A gorgeous Sunset tonight captured at Coniston Water....&lt;/p><span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-          <span class="calepin-syntax-scope-3">&lt;</span>img <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>thumb-img1.png<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-      <span class="calepin-syntax-scope-3">&lt;/</span>a<span class="calepin-syntax-scope-3">></span>
-      <span class="calepin-syntax-scope-3">&lt;</span>a <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>img2.png<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-          <span class="calepin-syntax-scope-3">&lt;</span>img <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>thumb-img2.png<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-      <span class="calepin-syntax-scope-3">&lt;/</span>a<span class="calepin-syntax-scope-3">></span>
-    <span class="calepin-syntax-scope-3">&lt;/</span>div<span class="calepin-syntax-scope-3">></span>
+     <span class="calepin-syntax-scope-2">&lt;!--</span><span class="calepin-syntax-scope-1"> lightgallery plugins </span><span class="calepin-syntax-scope-2">--></span>
+     <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lg-fullscreen/1.2.1/lg-fullscreen.min.js</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span><span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
+     <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://cdnjs.cloudflare.com/ajax/libs/lg-thumbnail/1.2.1/lg-thumbnail.min.js</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span><span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
+    <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">head</span><span class="calepin-syntax-scope-25">></span>
+    <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">body</span><span class="calepin-syntax-scope-25">></span>
+      <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">div</span> <span class="calepin-syntax-scope-29">id</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">lightgallery</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+        <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">img1.png</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-29">data-sub-html</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">&lt;h4>Sunset Serenity&lt;/h4>&lt;p>A gorgeous Sunset tonight captured at Coniston Water....&lt;/p></span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+            <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">img</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb-img1.png</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+        <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">a</span><span class="calepin-syntax-scope-25">></span>
+        <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">img2.png</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+            <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">img</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb-img2.png</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+        <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">a</span><span class="calepin-syntax-scope-25">></span>
+      <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">div</span><span class="calepin-syntax-scope-25">></span>
 
-    <span class="calepin-syntax-scope-3">&lt;</span>script <span class="calepin-syntax-scope-5">type</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>text/javascript<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-      <span class="calepin-syntax-scope-1">lightGallery</span>(document.<span class="calepin-syntax-scope-1">getElementById</span>(<span class="calepin-syntax-scope-3">'</span>lightgallery<span class="calepin-syntax-scope-3">'</span>));
-    <span class="calepin-syntax-scope-3">&lt;/</span>script<span class="calepin-syntax-scope-3">></span>
+      <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">script</span> <span class="calepin-syntax-scope-29">type</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">text/javascript</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+        <span class="calepin-syntax-scope-22">lightGallery</span>(<span class="calepin-syntax-scope-17">document</span>.<span class="calepin-syntax-scope-22">getElementById</span>(<span class="calepin-syntax-scope-4">'</span><span class="calepin-syntax-scope-3">lightgallery</span><span class="calepin-syntax-scope-4">'</span>));
+      <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">script</span><span class="calepin-syntax-scope-25">></span>
 
-    <span class="calepin-syntax-scope-3">&lt;</span>style<span class="calepin-syntax-scope-3">></span>
-      <span class="calepin-syntax-scope-3">#</span><span class="calepin-syntax-scope-5">lightgallery</span> <span class="calepin-syntax-scope-3">></span> a <span class="calepin-syntax-scope-3">></span> img<span class="calepin-syntax-scope-3">:</span>hover {
-        transform<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-1">scale</span><span class="calepin-syntax-scope-3">(</span><span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-3">)</span>;
-        transition<span class="calepin-syntax-scope-3">:</span> <span class="calepin-syntax-scope-2">0</span><span class="calepin-syntax-scope-3">.</span><span class="calepin-syntax-scope-2">2</span><span class="calepin-syntax-scope-2">s</span> ease-in-out;
-        cursor<span class="calepin-syntax-scope-3">:</span> pointer;
-      }
-    <span class="calepin-syntax-scope-3">&lt;/</span>style<span class="calepin-syntax-scope-3">></span>
+      <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">style</span><span class="calepin-syntax-scope-25">></span>
+        <span class="calepin-syntax-scope-25">#</span><span class="calepin-syntax-scope-29">lightgallery</span> <span class="calepin-syntax-scope-26">></span> <span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-26">></span> <span class="calepin-syntax-scope-19">img</span><span class="calepin-syntax-scope-25">:</span>hover {
+          <span class="calepin-syntax-scope-17">transform</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-21">scale</span><span class="calepin-syntax-scope-25">(</span><span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-25">)</span>;
+          <span class="calepin-syntax-scope-17">transition</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-23">0</span><span class="calepin-syntax-scope-26">.</span><span class="calepin-syntax-scope-23">2</span><span class="calepin-syntax-scope-6">s</span> <span class="calepin-syntax-scope-13">ease-in-out</span>;
+          <span class="calepin-syntax-scope-17">cursor</span><span class="calepin-syntax-scope-26">:</span> <span class="calepin-syntax-scope-13">pointer</span>;
+        }
+      <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">style</span><span class="calepin-syntax-scope-25">></span>
 
-  <span class="calepin-syntax-scope-3">&lt;/</span>body<span class="calepin-syntax-scope-3">></span>
-<span class="calepin-syntax-scope-3">&lt;/</span>html<span class="calepin-syntax-scope-3">></span></code></pre></div></details><h2 id="make-the-gallery-with-r">Make the gallery with R</h2><h3 id="create-thumbnails">Create thumbnails</h3><p>First, store your (full-size) images in a folder, let’s say <code>_gallery/img</code>. As we saw above, <code>lightgallery.js</code> also requires thumbnails in addition to full-size images. To automatically create these thumbnails, we can use the function <code>image_resize()</code> in the package <code>magick</code>. First, I create a function to resize a single image, and I will apply it to all the images I have:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">library</span>(magick)
-<span class="calepin-syntax-scope-1">library</span>(here)
+    <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">body</span><span class="calepin-syntax-scope-25">></span>
+  <span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">html</span><span class="calepin-syntax-scope-25">></span>
+</code></pre></div></details><h2 id="make-the-gallery-with-r">Make the gallery with R</h2><h3 id="create-thumbnails">Create thumbnails</h3><p>First, store your (full-size) images in a folder, let’s say <code>_gallery/img</code>. As we saw above, <code>lightgallery.js</code> also requires thumbnails in addition to full-size images. To automatically create these thumbnails, we can use the function <code>image_resize()</code> in the package <code>magick</code>. First, I create a function to resize a single image, and I will apply it to all the images I have:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">library</span>(magick)
+<span class="calepin-syntax-scope-21">library</span>(here)
 
-<span class="calepin-syntax-scope-1">resize_image</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">image</span>) {
+<span class="calepin-syntax-scope-20">resize_image</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">image</span>) {
 
-  imFile <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">image_read</span>(here::<span class="calepin-syntax-scope-1">here</span>(<span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img/<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> image)))
-  imFile_resized <span class="calepin-syntax-scope-4">&lt;-</span> magick::<span class="calepin-syntax-scope-1">image_resize</span>(imFile<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>6%<span class="calepin-syntax-scope-3">"</span>)
-  magick::<span class="calepin-syntax-scope-1">image_write</span>(imFile_resized<span class="calepin-syntax-scope-3">,</span> here::<span class="calepin-syntax-scope-1">here</span>(<span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img/thumb-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> image)))
+  imFile <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">image_read</span>(here::<span class="calepin-syntax-scope-22">here</span>(<span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img/</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> image)))
+  imFile_resized <span class="calepin-syntax-scope-27">&lt;-</span> magick::<span class="calepin-syntax-scope-22">image_resize</span>(imFile<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">6%</span><span class="calepin-syntax-scope-4">"</span>)
+  magick::<span class="calepin-syntax-scope-22">image_write</span>(imFile_resized<span class="calepin-syntax-scope-26">,</span> here::<span class="calepin-syntax-scope-22">here</span>(<span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img/thumb-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> image)))
 
 }
 
-list_png <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">list.files</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img<span class="calepin-syntax-scope-3">"</span>)
-<span class="calepin-syntax-scope-1">lapply</span>(list_png<span class="calepin-syntax-scope-3">,</span> resize_image)
-</code></pre></div><h3 id="build-the-html-structure">Build the HTML structure</h3><p>We can now start building the HTML structure with the package <code>htmltools</code>. First, we can see that the HTML code for each image is very similar:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-3">&lt;</span>a <span class="calepin-syntax-scope-5">href</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>img.png<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">></span>
-    <span class="calepin-syntax-scope-3">&lt;</span>img <span class="calepin-syntax-scope-5">src</span><span class="calepin-syntax-scope-3">=</span><span class="calepin-syntax-scope-3">"</span>thumb-img.png<span class="calepin-syntax-scope-3">"</span> <span class="calepin-syntax-scope-3">/></span>
-<span class="calepin-syntax-scope-3">&lt;/</span>a<span class="calepin-syntax-scope-3">></span></code></pre></div><p>This can be reproduced in R with:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">library</span>(htmltools)
+list_png <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">list.files</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img</span><span class="calepin-syntax-scope-4">"</span>)
+<span class="calepin-syntax-scope-21">lapply</span>(list_png<span class="calepin-syntax-scope-26">,</span> resize_image)
+</code></pre></div><h3 id="build-the-html-structure">Build the HTML structure</h3><p>We can now start building the HTML structure with the package <code>htmltools</code>. First, we can see that the HTML code for each image is very similar:</p><div class="sourceCode" data-lang="html"><pre><code data-lang="html"><span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">a</span> <span class="calepin-syntax-scope-29">href</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">img.png</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-25">></span>
+    <span class="calepin-syntax-scope-25">&lt;</span><span class="calepin-syntax-scope-19">img</span> <span class="calepin-syntax-scope-29">src</span><span class="calepin-syntax-scope-26">=</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb-img.png</span><span class="calepin-syntax-scope-4">"</span> <span class="calepin-syntax-scope-25">/></span>
+<span class="calepin-syntax-scope-25">&lt;/</span><span class="calepin-syntax-scope-19">a</span><span class="calepin-syntax-scope-25">></span>
+</code></pre></div><p>This can be reproduced in R with:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">library</span>(htmltools)
 
-tags$<span class="calepin-syntax-scope-1">a</span>(
-  <span class="calepin-syntax-scope-5">href</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>img.png<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span>
-  tags$<span class="calepin-syntax-scope-1">img</span>(<span class="calepin-syntax-scope-5">src</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>thumb-img.png<span class="calepin-syntax-scope-3">"</span>)
+tags<span class="calepin-syntax-scope-6">$</span><span class="calepin-syntax-scope-22">a</span>(
+  <span class="calepin-syntax-scope-28">href</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">img.png</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span>
+  tags<span class="calepin-syntax-scope-6">$</span><span class="calepin-syntax-scope-22">img</span>(<span class="calepin-syntax-scope-28">src</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb-img.png</span><span class="calepin-syntax-scope-4">"</span>)
 )
-</code></pre></div><p>We can now create a function to apply this structure to all the images we have:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">make_gallery_layout</span> <span class="calepin-syntax-scope-4">&lt;-</span> function() {
+</code></pre></div><p>We can now create a function to apply this structure to all the images we have:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-20">make_gallery_layout</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>() {
 
-  <span class="calepin-syntax-scope-3">#</span> Get the names of all images
-  images <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">list.files</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img<span class="calepin-syntax-scope-3">"</span>)
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Get the names of all images</span>
+  images <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">list.files</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img</span><span class="calepin-syntax-scope-4">"</span>)
 
-  <span class="calepin-syntax-scope-3">#</span> Get the names of all full-size images
-  images_full_size <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">grep</span>(<span class="calepin-syntax-scope-3">"</span>thumb<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> images<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">value</span> <span class="calepin-syntax-scope-4">=</span> TRUE<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">invert</span> <span class="calepin-syntax-scope-4">=</span> TRUE)
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Get the names of all full-size images</span>
+  images_full_size <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">grep</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> images<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">value</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">invert</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)
 
-  <span class="calepin-syntax-scope-3">#</span> Get the names of all thumbnails
-  images_thumb <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">grep</span>(<span class="calepin-syntax-scope-3">"</span>thumb<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> images<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">value</span> <span class="calepin-syntax-scope-4">=</span> TRUE)
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Get the names of all thumbnails</span>
+  images_thumb <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">grep</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">thumb</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> images<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">value</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)
 
-  <span class="calepin-syntax-scope-3">#</span> Create a dataframe where each row is one image (useful for
-  <span class="calepin-syntax-scope-3">#</span> the apply() function)
-  images <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">data.frame</span>(<span class="calepin-syntax-scope-5">images_thumb</span> <span class="calepin-syntax-scope-4">=</span> images_thumb<span class="calepin-syntax-scope-3">,</span>
-                       <span class="calepin-syntax-scope-5">images_full_size</span> <span class="calepin-syntax-scope-4">=</span> images_full_size)
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Create a dataframe where each row is one image (useful for</span>
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> the apply() function)</span>
+  images <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">data.frame</span>(<span class="calepin-syntax-scope-28">images_thumb</span> <span class="calepin-syntax-scope-27">=</span> images_thumb<span class="calepin-syntax-scope-26">,</span>
+                       <span class="calepin-syntax-scope-28">images_full_size</span> <span class="calepin-syntax-scope-27">=</span> images_full_size)
 
-  <span class="calepin-syntax-scope-3">#</span> Create the HTML structure for each image
-  <span class="calepin-syntax-scope-1">tagList</span>(<span class="calepin-syntax-scope-1">apply</span>(images<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-2">1</span><span class="calepin-syntax-scope-3">,</span> function(<span class="calepin-syntax-scope-5">x</span>) {
-      tags$<span class="calepin-syntax-scope-1">a</span>(
-        <span class="calepin-syntax-scope-5">href</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img/<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> x[[<span class="calepin-syntax-scope-3">"</span>images_full_size<span class="calepin-syntax-scope-3">"</span>]])<span class="calepin-syntax-scope-3">,</span>
-        tags$<span class="calepin-syntax-scope-1">img</span>(<span class="calepin-syntax-scope-5">src</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img/<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> x[[<span class="calepin-syntax-scope-3">"</span>images_thumb<span class="calepin-syntax-scope-3">"</span>]]))
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> Create the HTML structure for each image</span>
+  <span class="calepin-syntax-scope-22">tagList</span>(<span class="calepin-syntax-scope-21">apply</span>(images<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-23">1</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">x</span>) {
+      tags<span class="calepin-syntax-scope-6">$</span><span class="calepin-syntax-scope-22">a</span>(
+        <span class="calepin-syntax-scope-28">href</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img/</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> x[[<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">images_full_size</span><span class="calepin-syntax-scope-4">"</span>]])<span class="calepin-syntax-scope-26">,</span>
+        tags<span class="calepin-syntax-scope-6">$</span><span class="calepin-syntax-scope-22">img</span>(<span class="calepin-syntax-scope-28">src</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img/</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> x[[<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">images_thumb</span><span class="calepin-syntax-scope-4">"</span>]]))
       )
   }))
 
 }
-</code></pre></div><p>Lastly, we need to embed this HTML code in <code>&lt;div id="lightgallery"></code>, as shown in the first section. We can do that with the following code:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">withTags</span>(
-  <span class="calepin-syntax-scope-1">div</span>(
-    <span class="calepin-syntax-scope-5">class</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>row<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-5">id</span> <span class="calepin-syntax-scope-4">=</span> <span class="calepin-syntax-scope-3">"</span>lightgallery<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span>
-    <span class="calepin-syntax-scope-1">tagList</span>(
-      <span class="calepin-syntax-scope-1">make_gallery_layout</span>()
+</code></pre></div><p>Lastly, we need to embed this HTML code in <code>&lt;div id="lightgallery"></code>, as shown in the first section. We can do that with the following code:</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-22">withTags</span>(
+  <span class="calepin-syntax-scope-22">div</span>(
+    <span class="calepin-syntax-scope-28">class</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">row</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-28">id</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">lightgallery</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span>
+    <span class="calepin-syntax-scope-22">tagList</span>(
+      <span class="calepin-syntax-scope-22">make_gallery_layout</span>()
     )
   )
 )
@@ -2229,48 +2462,48 @@ withTags(
 
 &lt;script type="text/javascript">
     lightGallery(document.getElementById('lightgallery'));
-&lt;/script></code></pre></div></details><h2 id="update-github-actions">Update GitHub Actions</h2><p>We need to add <code>fs::dir_copy("_gallery/img", "_site/_gallery/img")</code> in GitHub Actions so that the images are found when the gallery is built. We also have to add <code>magick</code> and <code>httr</code> in the list of packages to install.</p><p>If you haven’t set up GitHub Actions yet, you can check <a href="https://www.etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/">my previous post</a>, or check my <a href="https://github.com/etiennebacher/my_website/blob/master/.github/workflows/main.yml">current GitHub Actions</a> for this site.</p><h2 id="bonus-make-a-gallery-for-tidytuesday">Bonus: make a gallery for #tidytuesday</h2><p>I have started participating to <a href="https://github.com/rfordatascience/tidytuesday">#tidytuesday</a> this year, and the main reason I wanted to create a gallery was to display my favorite plots. Therefore, I created a function to make it as easy as possible for me to update the plots I want to display in the gallery.</p><p>The purpose of the function below is to download a plot for a specific week in a specific year in the <a href="https://github.com/etiennebacher/tidytuesday">repo containing my plots</a>.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-1">library</span>(httr)
+&lt;/script></code></pre></div></details><h2 id="update-github-actions">Update GitHub Actions</h2><p>We need to add <code>fs::dir_copy("_gallery/img", "_site/_gallery/img")</code> in GitHub Actions so that the images are found when the gallery is built. We also have to add <code>magick</code> and <code>httr</code> in the list of packages to install.</p><p>If you haven’t set up GitHub Actions yet, you can check <a href="https://www.etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/">my previous post</a>, or check my <a href="https://github.com/etiennebacher/my_website/blob/master/.github/workflows/main.yml">current GitHub Actions</a> for this site.</p><h2 id="bonus-make-a-gallery-for-tidytuesday">Bonus: make a gallery for #tidytuesday</h2><p>I have started participating to <a href="https://github.com/rfordatascience/tidytuesday">#tidytuesday</a> this year, and the main reason I wanted to create a gallery was to display my favorite plots. Therefore, I created a function to make it as easy as possible for me to update the plots I want to display in the gallery.</p><p>The purpose of the function below is to download a plot for a specific week in a specific year in the <a href="https://github.com/etiennebacher/tidytuesday">repo containing my plots</a>.</p><div class="sourceCode" data-lang="R"><pre><code data-lang="r"><span class="calepin-syntax-scope-21">library</span>(httr)
 
-<span class="calepin-syntax-scope-1">get_tt_image</span> <span class="calepin-syntax-scope-4">&lt;-</span> function(<span class="calepin-syntax-scope-5">year</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">week</span>) {
+<span class="calepin-syntax-scope-20">get_tt_image</span> <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-8">function</span>(<span class="calepin-syntax-scope-28">year</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">week</span>) {
 
-  if (<span class="calepin-syntax-scope-1">is.numeric</span>(year)) year <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">as.character</span>(year)
-  if (<span class="calepin-syntax-scope-1">is.numeric</span>(week)) week <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">as.character</span>(week)
-  if (<span class="calepin-syntax-scope-1">nchar</span>(week) <span class="calepin-syntax-scope-3">==</span> <span class="calepin-syntax-scope-2">1</span>) week <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>0<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> week)
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">is.numeric</span>(year)) year <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">as.character</span>(year)
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">is.numeric</span>(week)) week <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">as.character</span>(week)
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">nchar</span>(week) <span class="calepin-syntax-scope-24">==</span> <span class="calepin-syntax-scope-23">1</span>) week <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">0</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> week)
 
-  <span class="calepin-syntax-scope-3">###</span> Get the link to download the image I want
-  req <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">GET</span>(<span class="calepin-syntax-scope-3">"</span>https://api.github.com/repos/etiennebacher/tidytuesday/git/trees/master?recursive=1<span class="calepin-syntax-scope-3">"</span>)
-  <span class="calepin-syntax-scope-1">stop_for_status</span>(req)
-  file_list <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">unlist</span>(<span class="calepin-syntax-scope-1">lapply</span>(<span class="calepin-syntax-scope-1">content</span>(req)$tree<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>[<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>path<span class="calepin-syntax-scope-3">"</span>)<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">use.names</span> <span class="calepin-syntax-scope-4">=</span> F)
-  png_list <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">grep</span>(<span class="calepin-syntax-scope-3">"</span>.png<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> file_list<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">value</span> <span class="calepin-syntax-scope-4">=</span> TRUE<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">fixed</span> <span class="calepin-syntax-scope-4">=</span> TRUE)
-  png_wanted <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">grep</span>(year<span class="calepin-syntax-scope-3">,</span> png_list<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">value</span> <span class="calepin-syntax-scope-4">=</span> TRUE)
-  png_wanted <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">grep</span>(<span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>W<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> week)<span class="calepin-syntax-scope-3">,</span> png_wanted<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-5">value</span> <span class="calepin-syntax-scope-4">=</span> TRUE)
-  <span class="calepin-syntax-scope-3">#</span> If a png file is called accidental_art, don't take it
-  if (<span class="calepin-syntax-scope-1">any</span>(<span class="calepin-syntax-scope-1">grepl</span>(<span class="calepin-syntax-scope-3">"</span>accidental_art<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> png_wanted))) {
-    png_wanted <span class="calepin-syntax-scope-4">&lt;-</span> png_wanted[<span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-1">which</span>(<span class="calepin-syntax-scope-1">grepl</span>(<span class="calepin-syntax-scope-3">"</span>accidental_art<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> png_wanted))]
+  <span class="calepin-syntax-scope-2">###</span><span class="calepin-syntax-scope-1"> Get the link to download the image I want</span>
+  req <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-22">GET</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://api.github.com/repos/etiennebacher/tidytuesday/git/trees/master?recursive=1</span><span class="calepin-syntax-scope-4">"</span>)
+  <span class="calepin-syntax-scope-22">stop_for_status</span>(req)
+  file_list <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">unlist</span>(<span class="calepin-syntax-scope-21">lapply</span>(<span class="calepin-syntax-scope-22">content</span>(req)<span class="calepin-syntax-scope-6">$</span>tree<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">[</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">path</span><span class="calepin-syntax-scope-4">"</span>)<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">use.names</span> <span class="calepin-syntax-scope-27">=</span> F)
+  png_list <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">grep</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">.png</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> file_list<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">value</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">fixed</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)
+  png_wanted <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">grep</span>(year<span class="calepin-syntax-scope-26">,</span> png_list<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">value</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)
+  png_wanted <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">grep</span>(<span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">W</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> week)<span class="calepin-syntax-scope-26">,</span> png_wanted<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-28">value</span> <span class="calepin-syntax-scope-27">=</span> <span class="calepin-syntax-scope-11">TRUE</span>)
+  <span class="calepin-syntax-scope-2">#</span><span class="calepin-syntax-scope-1"> If a png file is called accidental_art, don't take it</span>
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-21">any</span>(<span class="calepin-syntax-scope-21">grepl</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">accidental_art</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> png_wanted))) {
+    png_wanted <span class="calepin-syntax-scope-27">&lt;-</span> png_wanted[<span class="calepin-syntax-scope-24">-</span><span class="calepin-syntax-scope-21">which</span>(<span class="calepin-syntax-scope-21">grepl</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">accidental_art</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> png_wanted))]
   }
 
-  <span class="calepin-syntax-scope-3">###</span> Link of the image I want to download
-  origin <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">paste0</span>(
-    <span class="calepin-syntax-scope-3">"</span>https://raw.githubusercontent.com/etiennebacher/tidytuesday/master/<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span>
+  <span class="calepin-syntax-scope-2">###</span><span class="calepin-syntax-scope-1"> Link of the image I want to download</span>
+  origin <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">paste0</span>(
+    <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">https://raw.githubusercontent.com/etiennebacher/tidytuesday/master/</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span>
     png_wanted
   )
 
-  <span class="calepin-syntax-scope-3">###</span> Destination of this image
-  destination <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img/<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> year<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> week<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">trimws</span>(<span class="calepin-syntax-scope-1">basename</span>(origin)))
+  <span class="calepin-syntax-scope-2">###</span><span class="calepin-syntax-scope-1"> Destination of this image</span>
+  destination <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img/</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> year<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> week<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">trimws</span>(<span class="calepin-syntax-scope-21">basename</span>(origin)))
 
-  <span class="calepin-syntax-scope-3">###</span> Download only if not already there
-  if (<span class="calepin-syntax-scope-3">!</span><span class="calepin-syntax-scope-1">file.exists</span>(destination)) {
-    if (<span class="calepin-syntax-scope-3">!</span><span class="calepin-syntax-scope-1">file.exists</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img<span class="calepin-syntax-scope-3">"</span>)) {
-      <span class="calepin-syntax-scope-1">dir.create</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img<span class="calepin-syntax-scope-3">"</span>)
+  <span class="calepin-syntax-scope-2">###</span><span class="calepin-syntax-scope-1"> Download only if not already there</span>
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-24">!</span><span class="calepin-syntax-scope-21">file.exists</span>(destination)) {
+    <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-24">!</span><span class="calepin-syntax-scope-21">file.exists</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img</span><span class="calepin-syntax-scope-4">"</span>)) {
+      <span class="calepin-syntax-scope-21">dir.create</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img</span><span class="calepin-syntax-scope-4">"</span>)
     }
-    <span class="calepin-syntax-scope-1">download.file</span>(origin<span class="calepin-syntax-scope-3">,</span> destination)
+    <span class="calepin-syntax-scope-21">download.file</span>(origin<span class="calepin-syntax-scope-26">,</span> destination)
   }
 
-  <span class="calepin-syntax-scope-3">###</span> Create the thumbnail if not already there
-  thumb_destination <span class="calepin-syntax-scope-4">&lt;-</span> <span class="calepin-syntax-scope-1">paste0</span>(<span class="calepin-syntax-scope-3">"</span>_gallery/img/thumb-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> year<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> week<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span>
-                        <span class="calepin-syntax-scope-1">trimws</span>(<span class="calepin-syntax-scope-1">basename</span>(origin)))
-  if (<span class="calepin-syntax-scope-3">!</span><span class="calepin-syntax-scope-1">file.exists</span>(thumb_destination)) {
-    <span class="calepin-syntax-scope-1">resize_image</span>(<span class="calepin-syntax-scope-1">paste0</span>(year<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> week<span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-3">"</span>-<span class="calepin-syntax-scope-3">"</span><span class="calepin-syntax-scope-3">,</span> <span class="calepin-syntax-scope-1">trimws</span>(<span class="calepin-syntax-scope-1">basename</span>(origin))))
+  <span class="calepin-syntax-scope-2">###</span><span class="calepin-syntax-scope-1"> Create the thumbnail if not already there</span>
+  thumb_destination <span class="calepin-syntax-scope-27">&lt;-</span> <span class="calepin-syntax-scope-21">paste0</span>(<span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">_gallery/img/thumb-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> year<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> week<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span>
+                        <span class="calepin-syntax-scope-21">trimws</span>(<span class="calepin-syntax-scope-21">basename</span>(origin)))
+  <span class="calepin-syntax-scope-10">if</span> (<span class="calepin-syntax-scope-24">!</span><span class="calepin-syntax-scope-21">file.exists</span>(thumb_destination)) {
+    <span class="calepin-syntax-scope-22">resize_image</span>(<span class="calepin-syntax-scope-21">paste0</span>(year<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> week<span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-3">-</span><span class="calepin-syntax-scope-4">"</span><span class="calepin-syntax-scope-26">,</span> <span class="calepin-syntax-scope-21">trimws</span>(<span class="calepin-syntax-scope-21">basename</span>(origin))))
   }
 
 }
@@ -2402,7 +2635,11 @@ withTags(
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {

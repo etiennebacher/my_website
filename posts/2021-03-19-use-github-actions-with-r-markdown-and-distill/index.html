@@ -3,8 +3,11 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Use GitHub actions with R Markdown and Distill</title>
     
     
-    <meta name="description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
-    <meta property="og:description" content="Personal website of Etienne Bacher: blog posts about R, research, and software.">
+    
+    <meta name="description" content="How can you automatically render README, Distill website...">
+    <meta property="og:description" content="How can you automatically render README, Distill website...">
+    <meta name="twitter:description" content="How can you automatically render README, Distill website...">
+    
     
     
     <meta property="og:site_name" content="Etienne Bacher">
@@ -15,7 +18,12 @@
     
     
     <meta property="og:title" content="Use GitHub actions with R Markdown and Distill | Etienne Bacher">
+    <meta name="twitter:title" content="Use GitHub actions with R Markdown and Distill | Etienne Bacher">
     
+    
+    <meta property="og:type" content="article">
+    
+    <meta name="twitter:card" content="summary">
     
     
     <link rel="canonical" href="https://etiennebacher.com/posts/2021-03-19-use-github-actions-with-r-markdown-and-distill/">
@@ -106,6 +114,14 @@
   --calepin-color-border: #d8dee6;
   --calepin-color-accent: #1c9bad;
   --calepin-color-accent-hover: #16808f;
+  /* Accent as a filled background behind `--calepin-color-accent-contrast`
+     text. Darker than the accent used for links and borders, so white label
+     text clears the WCAG AA 4.5:1 ratio. Derived from the accent so a theme
+     that sets only `--calepin-color-accent` keeps its buttons in family. */
+  --calepin-color-accent-strong: #167987;
+  --calepin-color-accent-strong: color-mix(in srgb, var(--calepin-color-accent) 78%, #000000);
+  --calepin-color-accent-strong-hover: #11606b;
+  --calepin-color-accent-strong-hover: color-mix(in srgb, var(--calepin-color-accent) 62%, #000000);
   --calepin-color-accent-soft: rgba(28, 155, 173, 0.12);
   --calepin-color-accent-soft: color-mix(in srgb, var(--calepin-color-accent) 12%, transparent);
   --calepin-color-accent-contrast: #ffffff;
@@ -183,6 +199,9 @@
   --calepin-border: var(--calepin-border-width) solid var(--calepin-color-border);
   --calepin-topbar-height: 3.5rem;
   --calepin-sidebar-width: 12rem;
+  /* Right-hand table-of-contents column. Defaults to the sidebar width, so
+   * overriding --calepin-sidebar-width alone still resizes both columns. */
+  --calepin-toc-width: var(--calepin-sidebar-width);
   --calepin-shell-gap: 1.5rem;
   --calepin-shadow-card: 0 10px 30px color-mix(in srgb, var(--calepin-color-text) 8%, transparent);
   --calepin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--calepin-color-focus) 28%, transparent);
@@ -204,6 +223,8 @@ html[data-theme="dark"] {
   --calepin-color-border: #344252;
   --calepin-color-accent: #67d4df;
   --calepin-color-accent-hover: #8be4ec;
+  --calepin-color-accent-strong: var(--calepin-color-accent);
+  --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
   --calepin-color-accent-contrast: #071316;
   --calepin-color-link: var(--calepin-color-accent);
   --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -237,6 +258,8 @@ html[data-theme="dark"] {
     --calepin-color-border: #344252;
     --calepin-color-accent: #67d4df;
     --calepin-color-accent-hover: #8be4ec;
+    --calepin-color-accent-strong: var(--calepin-color-accent);
+    --calepin-color-accent-strong-hover: var(--calepin-color-accent-hover);
     --calepin-color-accent-contrast: #071316;
     --calepin-color-link: var(--calepin-color-accent);
     --calepin-color-link-hover: var(--calepin-color-accent-hover);
@@ -256,7 +279,11 @@ html[data-theme="dark"] {
   }
 }
 
-:root,
+/* `:root:root` matches the specificity Pico uses for its own light palette
+   (`:root:not([data-theme=dark])`), which otherwise wins over a plain `:root`
+   and leaves a visitor who has not picked a theme with stock Pico colors
+   instead of the theme's. */
+:root:root,
 html[data-theme="light"],
 html[data-theme="dark"] {
   --pico-background-color: var(--calepin-color-background);
@@ -268,12 +295,12 @@ html[data-theme="dark"] {
   --pico-code-background-color: var(--calepin-surface-code);
   --pico-code-color: var(--calepin-color-text);
   --pico-primary: var(--calepin-color-accent);
-  --pico-primary-background: var(--calepin-color-accent);
-  --pico-primary-border: var(--calepin-color-accent);
+  --pico-primary-background: var(--calepin-color-accent-strong);
+  --pico-primary-border: var(--calepin-color-accent-strong);
   --pico-primary-underline: transparent;
   --pico-primary-hover: var(--calepin-color-accent-hover);
-  --pico-primary-hover-background: var(--calepin-color-accent-hover);
-  --pico-primary-hover-border: var(--calepin-color-accent-hover);
+  --pico-primary-hover-background: var(--calepin-color-accent-strong-hover);
+  --pico-primary-hover-border: var(--calepin-color-accent-strong-hover);
   --pico-primary-hover-underline: transparent;
   --pico-primary-focus: color-mix(in srgb, var(--calepin-color-focus) 40%, transparent);
   --pico-primary-inverse: var(--calepin-color-accent-contrast);
@@ -469,15 +496,15 @@ figure > img {
 
 .landing-button-primary,
 .landing-button-primary:visited {
-  border-color: var(--calepin-color-accent);
-  background: var(--calepin-color-accent);
+  border-color: var(--calepin-color-accent-strong);
+  background: var(--calepin-color-accent-strong);
   color: var(--calepin-color-accent-contrast);
 }
 
 .landing-button-primary:hover,
 .landing-button-primary:focus-visible {
-  border-color: var(--calepin-color-accent-hover);
-  background: var(--calepin-color-accent-hover);
+  border-color: var(--calepin-color-accent-strong-hover);
+  background: var(--calepin-color-accent-strong-hover);
   color: var(--calepin-color-accent-contrast);
 }
 
@@ -557,19 +584,44 @@ figure > img {
   --calepin-syntax-foreground: #003b4f;
   --calepin-syntax-background: #f7f7f5;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #4759ab;
-  --scope-2-foreground: #ad0000;
-  --scope-3-foreground: #5e5e5e;
-  --scope-4-foreground: #5e5e5e;
-  --scope-5-foreground: #667321;
-  --scope-6-foreground: #003b4f;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #003b4f;
-  --fallback-8-foreground: #003b4f;
-  --fallback-9-foreground: #ad0000;
-  --fallback-10-foreground: #003b4f;
-  --fallback-11-foreground: #5e5e5e;
-  --fallback-12-foreground: #667321;
+  --scope-1-foreground: #5e5e5e;
+  --scope-2-foreground: #5e5e5e;
+  --scope-3-foreground: #20794d;
+  --scope-4-foreground: #20794d;
+  --scope-5-foreground: #8f5902;
+  --scope-6-foreground: #8b41b1;
+  --scope-7-foreground: #8b41b1;
+  --scope-8-foreground: #8b41b1;
+  --scope-9-foreground: #8b41b1;
+  --scope-10-foreground: #8b41b1;
+  --scope-11-foreground: #8f5902;
+  --scope-12-foreground: #8f5902;
+  --scope-13-foreground: #8f5902;
+  --scope-14-foreground: #0b6e79;
+  --scope-15-foreground: #0b6e79;
+  --scope-16-foreground: #0b6e79;
+  --scope-17-foreground: #0b6e79;
+  --scope-18-foreground: #0b6e79;
+  --scope-19-foreground: #8b41b1;
+  --scope-20-foreground: #4759ab;
+  --scope-21-foreground: #4759ab;
+  --scope-22-foreground: #4759ab;
+  --scope-23-foreground: #ad0000;
+  --scope-24-foreground: #5e5e5e;
+  --scope-25-foreground: #5e5e5e;
+  --scope-26-foreground: #5e5e5e;
+  --scope-27-foreground: #003b4f;
+  --scope-28-foreground: #667321;
+  --scope-29-foreground: #667321;
+  --scope-30-foreground: #667321;
+  --scope-31-foreground: #003b4f;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #5e5e5e;
+  --fallback-33-foreground: #20794d;
+  --fallback-34-foreground: #ad0000;
+  --fallback-35-foreground: #0b6e79;
+  --fallback-36-foreground: #8b41b1;
+  --fallback-37-foreground: #667321;
 
 }
 
@@ -624,37 +676,162 @@ pre code .calepin-syntax-scope-5 {
 .sourceCode .calepin-syntax-scope-6,
 pre code .calepin-syntax-scope-6 {
   color: var(--scope-6-foreground);
-  font-weight: var(--scope-6-font-weight);
 }
 
-.sourceCode .calepin-syntax-fallback-7,
-pre code .calepin-syntax-fallback-7 {
-  color: var(--fallback-7-foreground);
+.sourceCode .calepin-syntax-scope-7,
+pre code .calepin-syntax-scope-7 {
+  color: var(--scope-7-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-8,
-pre code .calepin-syntax-fallback-8 {
-  color: var(--fallback-8-foreground);
+.sourceCode .calepin-syntax-scope-8,
+pre code .calepin-syntax-scope-8 {
+  color: var(--scope-8-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-9,
-pre code .calepin-syntax-fallback-9 {
-  color: var(--fallback-9-foreground);
+.sourceCode .calepin-syntax-scope-9,
+pre code .calepin-syntax-scope-9 {
+  color: var(--scope-9-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-10,
-pre code .calepin-syntax-fallback-10 {
-  color: var(--fallback-10-foreground);
+.sourceCode .calepin-syntax-scope-10,
+pre code .calepin-syntax-scope-10 {
+  color: var(--scope-10-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-11,
-pre code .calepin-syntax-fallback-11 {
-  color: var(--fallback-11-foreground);
+.sourceCode .calepin-syntax-scope-11,
+pre code .calepin-syntax-scope-11 {
+  color: var(--scope-11-foreground);
 }
 
-.sourceCode .calepin-syntax-fallback-12,
-pre code .calepin-syntax-fallback-12 {
-  color: var(--fallback-12-foreground);
+.sourceCode .calepin-syntax-scope-12,
+pre code .calepin-syntax-scope-12 {
+  color: var(--scope-12-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-13,
+pre code .calepin-syntax-scope-13 {
+  color: var(--scope-13-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-14,
+pre code .calepin-syntax-scope-14 {
+  color: var(--scope-14-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-15,
+pre code .calepin-syntax-scope-15 {
+  color: var(--scope-15-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-16,
+pre code .calepin-syntax-scope-16 {
+  color: var(--scope-16-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-17,
+pre code .calepin-syntax-scope-17 {
+  color: var(--scope-17-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-18,
+pre code .calepin-syntax-scope-18 {
+  color: var(--scope-18-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-19,
+pre code .calepin-syntax-scope-19 {
+  color: var(--scope-19-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-20,
+pre code .calepin-syntax-scope-20 {
+  color: var(--scope-20-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-21,
+pre code .calepin-syntax-scope-21 {
+  color: var(--scope-21-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-22,
+pre code .calepin-syntax-scope-22 {
+  color: var(--scope-22-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-23,
+pre code .calepin-syntax-scope-23 {
+  color: var(--scope-23-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-24,
+pre code .calepin-syntax-scope-24 {
+  color: var(--scope-24-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-25,
+pre code .calepin-syntax-scope-25 {
+  color: var(--scope-25-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-26,
+pre code .calepin-syntax-scope-26 {
+  color: var(--scope-26-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-27,
+pre code .calepin-syntax-scope-27 {
+  color: var(--scope-27-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-28,
+pre code .calepin-syntax-scope-28 {
+  color: var(--scope-28-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-29,
+pre code .calepin-syntax-scope-29 {
+  color: var(--scope-29-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-30,
+pre code .calepin-syntax-scope-30 {
+  color: var(--scope-30-foreground);
+}
+
+.sourceCode .calepin-syntax-scope-31,
+pre code .calepin-syntax-scope-31 {
+  color: var(--scope-31-foreground);
+  font-weight: var(--scope-31-font-weight);
+}
+
+.sourceCode .calepin-syntax-fallback-32,
+pre code .calepin-syntax-fallback-32 {
+  color: var(--fallback-32-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-33,
+pre code .calepin-syntax-fallback-33 {
+  color: var(--fallback-33-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-34,
+pre code .calepin-syntax-fallback-34 {
+  color: var(--fallback-34-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-35,
+pre code .calepin-syntax-fallback-35 {
+  color: var(--fallback-35-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-36,
+pre code .calepin-syntax-fallback-36 {
+  color: var(--fallback-36-foreground);
+}
+
+.sourceCode .calepin-syntax-fallback-37,
+pre code .calepin-syntax-fallback-37 {
+  color: var(--fallback-37-foreground);
 }
 
 
@@ -715,19 +892,44 @@ html[data-theme="dark"] {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
 }
 
@@ -750,19 +952,44 @@ html[data-theme="dark"] .calepin-copy-code:focus-visible {
   --calepin-syntax-foreground: #d8e7ef;
   --calepin-syntax-background: #161b22;
   --calepin-syntax-border: color-mix(in srgb, var(--calepin-syntax-foreground) 18%, var(--calepin-syntax-background));
-  --scope-1-foreground: #9db8ff;
-  --scope-2-foreground: #ffb3a7;
-  --scope-3-foreground: #b5bdc9;
-  --scope-4-foreground: #b5bdc9;
-  --scope-5-foreground: #c3d86c;
-  --scope-6-foreground: #d8e7ef;
-  --scope-6-font-weight: 700;
-  --fallback-7-foreground: #d8e7ef;
-  --fallback-8-foreground: #d8e7ef;
-  --fallback-9-foreground: #ffb3a7;
-  --fallback-10-foreground: #d8e7ef;
-  --fallback-11-foreground: #b5bdc9;
-  --fallback-12-foreground: #c3d86c;
+  --scope-1-foreground: #8b949e;
+  --scope-2-foreground: #8b949e;
+  --scope-3-foreground: #8fd694;
+  --scope-4-foreground: #8fd694;
+  --scope-5-foreground: #ffcc9c;
+  --scope-6-foreground: #c8a2f0;
+  --scope-7-foreground: #c8a2f0;
+  --scope-8-foreground: #c8a2f0;
+  --scope-9-foreground: #c8a2f0;
+  --scope-10-foreground: #c8a2f0;
+  --scope-11-foreground: #ffcc9c;
+  --scope-12-foreground: #ffcc9c;
+  --scope-13-foreground: #ffcc9c;
+  --scope-14-foreground: #7fd1de;
+  --scope-15-foreground: #7fd1de;
+  --scope-16-foreground: #7fd1de;
+  --scope-17-foreground: #7fd1de;
+  --scope-18-foreground: #7fd1de;
+  --scope-19-foreground: #c8a2f0;
+  --scope-20-foreground: #9db8ff;
+  --scope-21-foreground: #9db8ff;
+  --scope-22-foreground: #9db8ff;
+  --scope-23-foreground: #ffb3a7;
+  --scope-24-foreground: #b5bdc9;
+  --scope-25-foreground: #b5bdc9;
+  --scope-26-foreground: #b5bdc9;
+  --scope-27-foreground: #d8e7ef;
+  --scope-28-foreground: #c3d86c;
+  --scope-29-foreground: #c3d86c;
+  --scope-30-foreground: #c3d86c;
+  --scope-31-foreground: #d8e7ef;
+  --scope-31-font-weight: 700;
+  --fallback-32-foreground: #8b949e;
+  --fallback-33-foreground: #8fd694;
+  --fallback-34-foreground: #ffb3a7;
+  --fallback-35-foreground: #7fd1de;
+  --fallback-36-foreground: #c8a2f0;
+  --fallback-37-foreground: #c3d86c;
 
   }
 
@@ -1993,7 +2220,7 @@ tbody > tr > td {
 
 
 
-<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Use GitHub actions with R Markdown and Distill])\r\n#metadata((\r\n  title: \"Use GitHub actions with R Markdown and Distill\",\r\n  kind: \"post\",\r\n  date: \"2021-03-19\",\r\n  summary: \"How can you automatically render README, Distill website...\",\r\n)) <website-metadata>\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\n#emph[ The preview image comes from: https:\\/\\/github.com/marketplace/actions/cancel-workflow-action ]\r\n\r\nSometimes, it is useful to automatically render an R Markdown document or a website, made with #link(\"https://rstudio.github.io/distill/\")[`distill`] for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.\r\n\r\n= Render a README\r\n<render-a-readme>\r\nOne of my GitHub repos is a list of JavaScript libraries that have been adapted in R. You can find the repo #link(\"https://github.com/etiennebacher/r-js-adaptation\")[here]. I wanted this list to be easy to update, so that it can be done on GitHub directly. The idea is that when I (or someone else) find a JavaScript library that has been adapted into an R package, I add it to a CSV file on GitHub. The problem is that this CSV file is then used into an R Markdown file, that creates a clean README with all the information.\r\n\r\nWithout GitHub Actions, in addition to modify the CSV file, I would have to clone the repo, open it in RStudio, render the README, and push it back on GitHub.\r\n\r\nBut this task is repetitive: apart from the details I add to the CSV file, it can be automated. This is where GitHub Actions comes into play. The idea is that you create a `.yml` file that contains the R code you want to run to render the README. This is what mine looks like:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n\r\nname: Render README\r\n\r\njobs:\r\n  render:\r\n    name: Render README\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n      - uses: r-lib/actions/setup-r@v1\r\n      - uses: r-lib/actions/setup-pandoc@v1\r\n      - name: Install rmarkdown\r\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\r\n      - name: Render README\r\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\r\n      - name: Commit results\r\n        run: |\r\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n\r\nThe first two parts are quite self-explanatory:\r\n\r\n- the jobs run every time there's a push on the master branch;\r\n\r\n- the name of this process is \"Render README\".\r\n\r\nThe third part needs a bit more details. There are some parts that I just copied and pasted from the #link(\"https://github.com/r-lib/actions\")[R actions repository], but basically you can see that first it initiates R and pandoc (`setup-r@v1`, `setup-pandoc@v1`). Then, I run an R script to install the `rmarkdown` package and I use it to render the Rmd file to create `README.md`.\r\n\r\nLast but not least, GitHub Actions rendered the README, but the changes are not on the repo yet. Hence, the last step is to commit the changes with a message and to push them on the master branch. Now, every time I change the CSV file on the master branch, the README will be automatically rendered (after a few minutes, since all the actions have to run first).\r\n\r\nI said this was the `.yaml` file I use on my repo, but I lied a bit. Actually, for my list of JavaScript libraries to be up-to-date, I also need to scrape the #link(\"https://gallery.htmlwidgets.org/\")[htmlwidgets gallery] once in a while. Hence, I use `cron` to run GitHub Actions every Monday at 00:00. See #link(\"https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule\")[the documentation] to know how to format your schedule. Finally, here's the `.yaml` file I use:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n  schedule:\r\n    - cron: '0 0 * * MON'\r\n\r\nname: Render README\r\n\r\njobs:\r\n  render:\r\n    name: Render README\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n      - uses: r-lib/actions/setup-r@v1\r\n      - uses: r-lib/actions/setup-pandoc@v1\r\n      - name: Install rmarkdown\r\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\r\n      - name: Render README\r\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\r\n      - name: Commit results\r\n        run: |\r\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n\r\n= Render a Distill website\r\n<render-a-distill-website>\r\nTo automatically render your `distill` website on every push on master branch, the logic is very similar. In my `.yml` file, there are two main differences.\r\n\r\nThe first one is that I need to install more packages to render my `distill` website. Some will be essential for everyone (e.g `distill`) but other packages won't be (e.g `postcards`).\r\n\r\nThe second one is more tricky, but could be useful for several people. Before using `distill`, I used `blogdown`. For some reasons (and mostly because `distill` is much easier in my opinion), I switched to `distill`. However, this switch changed a few URLs addresses, for my posts for instance. Therefore, I needed a #link(\"https://yihui.org/en/2017/11/301-redirect/\")[`_redirects`] file to, well, redirect the old URLs to the new ones and prevent 404 errors. The `_redirects` file needs to be in the `_site` folder, because it is the folder that is used by Netlify to build the site. The problem here is that this folder is deleted and re-generated every time `rmarkdown::render_site()` is called, i.e every time the website is locally built. Therefore, the `_redirects` file couldn't just stay there. I had to add it manually after every build.\r\n\r\nThe solution to that is to automate this in GitHub Actions. After having rendered the website, I just copy `_redirects` from its location on the repo to the `_site` folder. Now, every time I change something on the master branch, the `distill` website is rebuilt, and then the `_redirects` file is added.\r\n\r\nOne drawback though: since these files are changed on GitHub only, the first thing you have to do when opening your site project in RStudio is to pull the changes (or, like me, you will struggle with merge conflicts).\r\n\r\nTo finish this post, here's the `.yml` file for my `distill` website:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n\r\nname: Render & Deploy Site\r\n\r\njobs:\r\n  build:\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n\r\n      - uses: r-lib/actions/setup-r@master\r\n\r\n      - uses: r-lib/actions/setup-pandoc@master\r\n\r\n      - name: Install dependencies\r\n        run: |\r\n          install.packages(\"rmarkdown\")\r\n          install.packages(\"distill\")\r\n          install.packages(\"postcards\")\r\n          install.packages(\"devtools\")\r\n          install.packages(\"fs\")\r\n          devtools::install_github(\"etiennebacher/ebmisc\")\r\n        shell: Rscript {0}\r\n\r\n      - name: Render Site\r\n        run: Rscript -e 'rmarkdown::render_site(encoding = \"UTF-8\")'\r\n      - name: Copy redirects\r\n        run: Rscript -e 'fs::file_copy(\"_redirects\", \"_site/_redirects\")'\r\n      - name: Commit results\r\n        run: |\r\n          git add -A\r\n          git commit -m 'Rebuild site' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n"</script>
+<script id="calepin-website-source-data" type="application/json">"#import \"/.calepin/calepin.typ\" as calepin\r\n\r\n#set document(title: [Use GitHub actions with R Markdown and Distill])\r\n#metadata((\r\n  title: \"Use GitHub actions with R Markdown and Distill\",\r\n  kind: \"post\",\r\n  date: \"2021-03-19\",\r\n  summary: \"How can you automatically render README, Distill website...\",\r\n)) \u003cwebsite-metadata\u003e\r\n\r\n// Code blocks in these posts are already-rendered output from the original\r\n// Quarto build, not live chunks. Keep Calepin from executing them.\r\n#calepin.setup(eval: false, fenced-chunks: false)\r\n\r\n#title()\r\n\r\n#emph[ The preview image comes from: https:\\/\\/github.com/marketplace/actions/cancel-workflow-action ]\r\n\r\nSometimes, it is useful to automatically render an R Markdown document or a website, made with #link(\"https://rstudio.github.io/distill/\")[`distill`] for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.\r\n\r\n= Render a README\r\n\u003crender-a-readme\u003e\r\nOne of my GitHub repos is a list of JavaScript libraries that have been adapted in R. You can find the repo #link(\"https://github.com/etiennebacher/r-js-adaptation\")[here]. I wanted this list to be easy to update, so that it can be done on GitHub directly. The idea is that when I (or someone else) find a JavaScript library that has been adapted into an R package, I add it to a CSV file on GitHub. The problem is that this CSV file is then used into an R Markdown file, that creates a clean README with all the information.\r\n\r\nWithout GitHub Actions, in addition to modify the CSV file, I would have to clone the repo, open it in RStudio, render the README, and push it back on GitHub.\r\n\r\nBut this task is repetitive: apart from the details I add to the CSV file, it can be automated. This is where GitHub Actions comes into play. The idea is that you create a `.yml` file that contains the R code you want to run to render the README. This is what mine looks like:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n\r\nname: Render README\r\n\r\njobs:\r\n  render:\r\n    name: Render README\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n      - uses: r-lib/actions/setup-r@v1\r\n      - uses: r-lib/actions/setup-pandoc@v1\r\n      - name: Install rmarkdown\r\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\r\n      - name: Render README\r\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\r\n      - name: Commit results\r\n        run: |\r\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n\r\nThe first two parts are quite self-explanatory:\r\n\r\n- the jobs run every time there's a push on the master branch;\r\n\r\n- the name of this process is \"Render README\".\r\n\r\nThe third part needs a bit more details. There are some parts that I just copied and pasted from the #link(\"https://github.com/r-lib/actions\")[R actions repository], but basically you can see that first it initiates R and pandoc (`setup-r@v1`, `setup-pandoc@v1`). Then, I run an R script to install the `rmarkdown` package and I use it to render the Rmd file to create `README.md`.\r\n\r\nLast but not least, GitHub Actions rendered the README, but the changes are not on the repo yet. Hence, the last step is to commit the changes with a message and to push them on the master branch. Now, every time I change the CSV file on the master branch, the README will be automatically rendered (after a few minutes, since all the actions have to run first).\r\n\r\nI said this was the `.yaml` file I use on my repo, but I lied a bit. Actually, for my list of JavaScript libraries to be up-to-date, I also need to scrape the #link(\"https://gallery.htmlwidgets.org/\")[htmlwidgets gallery] once in a while. Hence, I use `cron` to run GitHub Actions every Monday at 00:00. See #link(\"https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule\")[the documentation] to know how to format your schedule. Finally, here's the `.yaml` file I use:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n  schedule:\r\n    - cron: '0 0 * * MON'\r\n\r\nname: Render README\r\n\r\njobs:\r\n  render:\r\n    name: Render README\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n      - uses: r-lib/actions/setup-r@v1\r\n      - uses: r-lib/actions/setup-pandoc@v1\r\n      - name: Install rmarkdown\r\n        run: Rscript -e 'install.packages(\"rmarkdown\")'\r\n      - name: Render README\r\n        run: Rscript -e 'rmarkdown::render(\"README.Rmd\", output_format = \"md_document\")'\r\n      - name: Commit results\r\n        run: |\r\n          git commit README.md -m 'Re-build README.Rmd' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n\r\n= Render a Distill website\r\n\u003crender-a-distill-website\u003e\r\nTo automatically render your `distill` website on every push on master branch, the logic is very similar. In my `.yml` file, there are two main differences.\r\n\r\nThe first one is that I need to install more packages to render my `distill` website. Some will be essential for everyone (e.g `distill`) but other packages won't be (e.g `postcards`).\r\n\r\nThe second one is more tricky, but could be useful for several people. Before using `distill`, I used `blogdown`. For some reasons (and mostly because `distill` is much easier in my opinion), I switched to `distill`. However, this switch changed a few URLs addresses, for my posts for instance. Therefore, I needed a #link(\"https://yihui.org/en/2017/11/301-redirect/\")[`_redirects`] file to, well, redirect the old URLs to the new ones and prevent 404 errors. The `_redirects` file needs to be in the `_site` folder, because it is the folder that is used by Netlify to build the site. The problem here is that this folder is deleted and re-generated every time `rmarkdown::render_site()` is called, i.e every time the website is locally built. Therefore, the `_redirects` file couldn't just stay there. I had to add it manually after every build.\r\n\r\nThe solution to that is to automate this in GitHub Actions. After having rendered the website, I just copy `_redirects` from its location on the repo to the `_site` folder. Now, every time I change something on the master branch, the `distill` website is rebuilt, and then the `_redirects` file is added.\r\n\r\nOne drawback though: since these files are changed on GitHub only, the first thing you have to do when opening your site project in RStudio is to pull the changes (or, like me, you will struggle with merge conflicts).\r\n\r\nTo finish this post, here's the `.yml` file for my `distill` website:\r\n\r\n```{yaml}\r\non:\r\n  push:\r\n    branches: master\r\n\r\nname: Render \u0026 Deploy Site\r\n\r\njobs:\r\n  build:\r\n    runs-on: macOS-latest\r\n    steps:\r\n      - uses: actions/checkout@v2\r\n\r\n      - uses: r-lib/actions/setup-r@master\r\n\r\n      - uses: r-lib/actions/setup-pandoc@master\r\n\r\n      - name: Install dependencies\r\n        run: |\r\n          install.packages(\"rmarkdown\")\r\n          install.packages(\"distill\")\r\n          install.packages(\"postcards\")\r\n          install.packages(\"devtools\")\r\n          install.packages(\"fs\")\r\n          devtools::install_github(\"etiennebacher/ebmisc\")\r\n        shell: Rscript {0}\r\n\r\n      - name: Render Site\r\n        run: Rscript -e 'rmarkdown::render_site(encoding = \"UTF-8\")'\r\n      - name: Copy redirects\r\n        run: Rscript -e 'fs::file_copy(\"_redirects\", \"_site/_redirects\")'\r\n      - name: Commit results\r\n        run: |\r\n          git add -A\r\n          git commit -m 'Rebuild site' || echo \"No changes to commit\"\r\n          git push origin || echo \"No changes to commit\"\r\n```\r\n"</script>
 </head><body>
     <header class="academic-topbar calepin-site-topbar">
         <nav class="academic-nav calepin-site-nav" aria-label="Site">
@@ -2049,8 +2276,7 @@ tbody > tr > td {
         </aside>
         
         <main class="academic-main calepin-content" data-pagefind-body>
-            <p><span style="font-variant-caps: small-caps"><h1 id="use-github-actions-with-r-markdown-and-distill">Use GitHub actions with R Markdown and Distill</h1></span></p><p><em>The preview image comes from: https://github.com/marketplace/actions/cancel-workflow-action</em></p><p>Sometimes, it is useful to automatically render an R Markdown document or a website, made with <a href="https://rstudio.github.io/distill/"><code>distill</code></a> for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.</p><h2 id="render-a-readme">Render a README</h2><p>One of my GitHub repos is a list of JavaScript libraries that have been adapted in R. You can find the repo <a href="https://github.com/etiennebacher/r-js-adaptation">here</a>. I wanted this list to be easy to update, so that it can be done on GitHub directly. The idea is that when I (or someone else) find a JavaScript library that has been adapted into an R package, I add it to a CSV file on GitHub. The problem is that this CSV file is then used into an R Markdown file, that creates a clean README with all the information.</p><p>Without GitHub Actions, in addition to modify the CSV file, I would have to clone the repo, open it in RStudio, render the README, and push it back on GitHub.</p><p>But this task is repetitive: apart from the details I add to the CSV file, it can be automated. This is where GitHub Actions comes into play. The idea is that you create a <code>.yml</code> file that contains the R code you want to run to render the README. This is what mine looks like:</p><div class="sourceCode" data-lang><pre><code>{yaml}
-on:
+            <p><span style="font-variant-caps: small-caps"><h1 id="use-github-actions-with-r-markdown-and-distill">Use GitHub actions with R Markdown and Distill</h1></span></p><p><em>The preview image comes from: https://github.com/marketplace/actions/cancel-workflow-action</em></p><p>Sometimes, it is useful to automatically render an R Markdown document or a website, made with <a href="https://rstudio.github.io/distill/"><code>distill</code></a> for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.</p><h2 id="render-a-readme">Render a README</h2><p>One of my GitHub repos is a list of JavaScript libraries that have been adapted in R. You can find the repo <a href="https://github.com/etiennebacher/r-js-adaptation">here</a>. I wanted this list to be easy to update, so that it can be done on GitHub directly. The idea is that when I (or someone else) find a JavaScript library that has been adapted into an R package, I add it to a CSV file on GitHub. The problem is that this CSV file is then used into an R Markdown file, that creates a clean README with all the information.</p><p>Without GitHub Actions, in addition to modify the CSV file, I would have to clone the repo, open it in RStudio, render the README, and push it back on GitHub.</p><p>But this task is repetitive: apart from the details I add to the CSV file, it can be automated. This is where GitHub Actions comes into play. The idea is that you create a <code>.yml</code> file that contains the R code you want to run to render the README. This is what mine looks like:</p><div class="sourceCode" data-lang="{yaml}"><pre><code data-lang="{yaml}">on:
   push:
     branches: master
 
@@ -2071,8 +2297,8 @@ jobs:
       - name: Commit results
         run: |
           git commit README.md -m 'Re-build README.Rmd' || echo "No changes to commit"
-          git push origin || echo "No changes to commit"</code></pre></div><p>The first two parts are quite self-explanatory:</p><ul><li><p>the jobs run every time there’s a push on the master branch;</p></li><li><p>the name of this process is “Render README”.</p></li></ul><p>The third part needs a bit more details. There are some parts that I just copied and pasted from the <a href="https://github.com/r-lib/actions">R actions repository</a>, but basically you can see that first it initiates R and pandoc (<code>setup-r@v1</code>, <code>setup-pandoc@v1</code>). Then, I run an R script to install the <code>rmarkdown</code> package and I use it to render the Rmd file to create <code>README.md</code>.</p><p>Last but not least, GitHub Actions rendered the README, but the changes are not on the repo yet. Hence, the last step is to commit the changes with a message and to push them on the master branch. Now, every time I change the CSV file on the master branch, the README will be automatically rendered (after a few minutes, since all the actions have to run first).</p><p>I said this was the <code>.yaml</code> file I use on my repo, but I lied a bit. Actually, for my list of JavaScript libraries to be up-to-date, I also need to scrape the <a href="https://gallery.htmlwidgets.org/">htmlwidgets gallery</a> once in a while. Hence, I use <code>cron</code> to run GitHub Actions every Monday at 00:00. See <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule">the documentation</a> to know how to format your schedule. Finally, here’s the <code>.yaml</code> file I use:</p><div class="sourceCode" data-lang><pre><code>{yaml}
-on:
+          git push origin || echo "No changes to commit"
+</code></pre></div><p>The first two parts are quite self-explanatory:</p><ul><li><p>the jobs run every time there’s a push on the master branch;</p></li><li><p>the name of this process is “Render README”.</p></li></ul><p>The third part needs a bit more details. There are some parts that I just copied and pasted from the <a href="https://github.com/r-lib/actions">R actions repository</a>, but basically you can see that first it initiates R and pandoc (<code>setup-r@v1</code>, <code>setup-pandoc@v1</code>). Then, I run an R script to install the <code>rmarkdown</code> package and I use it to render the Rmd file to create <code>README.md</code>.</p><p>Last but not least, GitHub Actions rendered the README, but the changes are not on the repo yet. Hence, the last step is to commit the changes with a message and to push them on the master branch. Now, every time I change the CSV file on the master branch, the README will be automatically rendered (after a few minutes, since all the actions have to run first).</p><p>I said this was the <code>.yaml</code> file I use on my repo, but I lied a bit. Actually, for my list of JavaScript libraries to be up-to-date, I also need to scrape the <a href="https://gallery.htmlwidgets.org/">htmlwidgets gallery</a> once in a while. Hence, I use <code>cron</code> to run GitHub Actions every Monday at 00:00. See <a href="https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule">the documentation</a> to know how to format your schedule. Finally, here’s the <code>.yaml</code> file I use:</p><div class="sourceCode" data-lang="{yaml}"><pre><code data-lang="{yaml}">on:
   push:
     branches: master
   schedule:
@@ -2095,8 +2321,8 @@ jobs:
       - name: Commit results
         run: |
           git commit README.md -m 'Re-build README.Rmd' || echo "No changes to commit"
-          git push origin || echo "No changes to commit"</code></pre></div><h2 id="render-a-distill-website">Render a Distill website</h2><p>To automatically render your <code>distill</code> website on every push on master branch, the logic is very similar. In my <code>.yml</code> file, there are two main differences.</p><p>The first one is that I need to install more packages to render my <code>distill</code> website. Some will be essential for everyone (e.g <code>distill</code>) but other packages won’t be (e.g <code>postcards</code>).</p><p>The second one is more tricky, but could be useful for several people. Before using <code>distill</code>, I used <code>blogdown</code>. For some reasons (and mostly because <code>distill</code> is much easier in my opinion), I switched to <code>distill</code>. However, this switch changed a few URLs addresses, for my posts for instance. Therefore, I needed a <a href="https://yihui.org/en/2017/11/301-redirect/"><code>_redirects</code></a> file to, well, redirect the old URLs to the new ones and prevent 404 errors. The <code>_redirects</code> file needs to be in the <code>_site</code> folder, because it is the folder that is used by Netlify to build the site. The problem here is that this folder is deleted and re-generated every time <code>rmarkdown::render_site()</code> is called, i.e every time the website is locally built. Therefore, the <code>_redirects</code> file couldn’t just stay there. I had to add it manually after every build.</p><p>The solution to that is to automate this in GitHub Actions. After having rendered the website, I just copy <code>_redirects</code> from its location on the repo to the <code>_site</code> folder. Now, every time I change something on the master branch, the <code>distill</code> website is rebuilt, and then the <code>_redirects</code> file is added.</p><p>One drawback though: since these files are changed on GitHub only, the first thing you have to do when opening your site project in RStudio is to pull the changes (or, like me, you will struggle with merge conflicts).</p><p>To finish this post, here’s the <code>.yml</code> file for my <code>distill</code> website:</p><div class="sourceCode" data-lang><pre><code>{yaml}
-on:
+          git push origin || echo "No changes to commit"
+</code></pre></div><h2 id="render-a-distill-website">Render a Distill website</h2><p>To automatically render your <code>distill</code> website on every push on master branch, the logic is very similar. In my <code>.yml</code> file, there are two main differences.</p><p>The first one is that I need to install more packages to render my <code>distill</code> website. Some will be essential for everyone (e.g <code>distill</code>) but other packages won’t be (e.g <code>postcards</code>).</p><p>The second one is more tricky, but could be useful for several people. Before using <code>distill</code>, I used <code>blogdown</code>. For some reasons (and mostly because <code>distill</code> is much easier in my opinion), I switched to <code>distill</code>. However, this switch changed a few URLs addresses, for my posts for instance. Therefore, I needed a <a href="https://yihui.org/en/2017/11/301-redirect/"><code>_redirects</code></a> file to, well, redirect the old URLs to the new ones and prevent 404 errors. The <code>_redirects</code> file needs to be in the <code>_site</code> folder, because it is the folder that is used by Netlify to build the site. The problem here is that this folder is deleted and re-generated every time <code>rmarkdown::render_site()</code> is called, i.e every time the website is locally built. Therefore, the <code>_redirects</code> file couldn’t just stay there. I had to add it manually after every build.</p><p>The solution to that is to automate this in GitHub Actions. After having rendered the website, I just copy <code>_redirects</code> from its location on the repo to the <code>_site</code> folder. Now, every time I change something on the master branch, the <code>distill</code> website is rebuilt, and then the <code>_redirects</code> file is added.</p><p>One drawback though: since these files are changed on GitHub only, the first thing you have to do when opening your site project in RStudio is to pull the changes (or, like me, you will struggle with merge conflicts).</p><p>To finish this post, here’s the <code>.yml</code> file for my <code>distill</code> website:</p><div class="sourceCode" data-lang="{yaml}"><pre><code data-lang="{yaml}">on:
   push:
     branches: master
 
@@ -2130,7 +2356,8 @@ jobs:
         run: |
           git add -A
           git commit -m 'Rebuild site' || echo "No changes to commit"
-          git push origin || echo "No changes to commit"</code></pre></div>
+          git push origin || echo "No changes to commit"
+</code></pre></div>
         </main>
     </div>
 
@@ -2200,7 +2427,11 @@ jobs:
   const root = document.documentElement;
   const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   const storageKey = (button) => button.dataset.calepinThemeStorageKey || "calepin-theme";
-  const urlParam = (button) => button.dataset.calepinThemeParam || "";
+  // Matches theme-init.js's default so the two scripts agree on which URL
+  // param to honor when a theme omits `data-calepin-theme-param`: otherwise
+  // the init script paints the theme from `?theme=`, and the toggle button's
+  // own read (used to sync its label/icon) silently ignores it, flashing.
+  const urlParam = (button) => button.dataset.calepinThemeParam || "theme";
   const systemTheme = () => media && media.matches ? "dark" : "light";
 
   function readUrl(button) {
