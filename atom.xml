@@ -13,7 +13,7 @@
     <link href="https://etiennebacher.com/posts/2026-09-15-snapshot-errors/index.html"/>
     <updated>2026-09-15T00:00:00Z</updated>
     
-    <summary>A snapshot is a file that contains the output of a function as it would appear to the user. For instance, you could snapshots to capture the output of plot() so that you can check that it looks correct and, most importantly, so that you know if this output changes even by just a…</summary>
+    <summary>A snapshot is a file that contains the output of a function as it would appear to the user. For instance, you could save snapshots to capture the output of plot() so that you can check that it looks correct, and so that you know if this output changes even by just a few pixels in…</summary>
   </entry>
   
   <entry>
