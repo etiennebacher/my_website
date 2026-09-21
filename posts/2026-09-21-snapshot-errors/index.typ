@@ -93,7 +93,7 @@ f("Species")
 
 Ah... well that could use some improvements. This tells me that `log()` isn't meaningful for factors. Alright, but I didn't call `log()`, I called `f()`. And although sometimes I know how a function is supposed to work, I'm not supposed to know everything about the internals of `f()`. And what is this `Math.factor()` that created this error?
 
-As we can see, the developer view and the user view conflict here: the developer is happy because  code coverage is 100%, but users has a terrible experience when they do something _slightly_ wrong with the function. They don't know what they did wrong and they have no idea how to fix it.
+As we can see, the developer view and the user view conflict here: the developer is happy because  code coverage is 100%, but users have a terrible experience when they do something _slightly_ wrong with the function. They don't know what they did wrong and they have no idea how to fix it.
 
 Let's stay on the developer point of view here. How can we ensure our error check leads to better code? One way would be to be stricter in `expect_error()`. We can provide a regex that the message should match, so at least we know that the error should contain some key message:
 
