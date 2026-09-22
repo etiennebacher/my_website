@@ -58,7 +58,7 @@ And on top of that, in many cases (but not here), it will give you an actual cod
 So, bottom line: *error messages are important*.
 
 Throughout this post, we will use a custom function that fails in some cases to explore how to test our error messages.
-Let's make a function that does some computation #calepin.elements.sidenote[I know this function doesn't make sense, this is for illustration only.]:
+Let's make a function that does some computation:
 
 ```r
 f <- function(column) {
