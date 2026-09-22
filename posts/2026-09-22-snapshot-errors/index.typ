@@ -252,6 +252,8 @@ Here are the steps to follow once you have installed `flir`:
 - `flir::fix_dir("tests", linters = "expect_snapshot_error")`
 - remove the `flir` folder
 
+You will then need to run the test suite once with `devtools::test()` to save all the new snapshots.
+
 Note that `flir` is not a formatter, so you will either need to check that the replaced code is properly formatted, or run a code formatter such as #link("https://posit-dev.github.io/air/")[Air].
 
 As an illustration of this workflow, here's a PR in a real package where I made this transition to snapshots: https://github.com/palaeoverse/palaeoverse/pull/173.
