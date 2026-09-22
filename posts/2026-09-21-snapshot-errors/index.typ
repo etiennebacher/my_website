@@ -64,22 +64,26 @@ Let's make a function that does some computation:
 
 ```r
 f <- function(column) {
-  internal_computation(iris[, column])
+  internal_computation(palmerpenguins::penguins[, column])
 }
 
 internal_computation <- function(x) {
   x * log(x) / exp(x)
 }
 
-head(f("Sepal.Length"), 1)
+head(f("bill_length_mm"), 1)
 ```
 
 `testthat` provides a function called `expect_error()` that you can use, well, when you expect a piece of code to produce an error.
 
-In our dummy function above, we know that the column must be numeric so that `log()` and `exp()` work. We could check that this properly errors if we pass a column name that is not numeric:
+In our dummy function above, we know that the column must be numeric so that `log()` and `exp()` work. We could check that this properly errors if we pass a column name that is not numeric but factor instead:
 
 ```r
-testthat::expect_error(f("Species"))
+head(palmerpenguins::penguins[, "species"])
+```
+
+```r
+testthat::expect_error(f("species"))
 ```
 
 Yay, that passed! Let's go home.
@@ -88,7 +92,7 @@ Nope, the developer is happy because the test passes. And the user? Well that's 
 
 ```r
 #| error: true
-f("Species")
+f("species")
 ```
 
 Ah... well that could use some improvements. This tells me that `log()` isn't meaningful for factors. Alright, but I didn't call `log()`, I called `f()`. And although sometimes I know how a function is supposed to work, I'm not supposed to know everything about the internals of `f()`. And what is this `Math.factor()` that created this error?
@@ -100,7 +104,7 @@ Let's stay on the developer point of view here. How can we ensure our error chec
 ```r
 #| error: true
 testthat::expect_error(
-  f("Species"),
+  f("species"),
   regex = "cannot pass a column of type 'factor'"
 )
 ```
@@ -121,7 +125,7 @@ Instead of checking some parts of the error message, we can use snapshot tests t
 #| eval: false
 testthat::local_edition(3)
 testthat::expect_snapshot(
-  f("Species"),
+  f("species"),
   error = TRUE
 )
 ```
@@ -129,7 +133,7 @@ testthat::expect_snapshot(
 ── Snapshot ──────────────────────────────────────────────────────────────────────
 ℹ Can't save or compare to reference when testing interactively.
 Code
-  f("Species")
+  f("species")
 Condition
   Error in `Math.factor()`:
   ! ‘log’ not meaningful for factors
@@ -210,7 +214,7 @@ If you have very large test suites where you check many error messages, you migh
   ```
 ]
 
-Nevertheless, I think the gain in confidence about the user experience is worth this little performance loss in the test suite.
+Nevertheless, I think the gain in confidence about the user experience is worth this little performance loss in the test suite #calepin.elements.sidenote[You might also be interested in #link("https://lazytest.cynkra.com/")[`lazytest`], but I've personally never used it.].
 
 
 = How to transition to snapshots
