@@ -4,7 +4,16 @@
     <title>Etienne Bacher</title>
     <link>https://etiennebacher.com</link>
     <description>Personal website of Etienne Bacher: blog posts about R, research, and software.</description>
-    <lastBuildDate>Mon, 24 Aug 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 21 Sep 2026 00:00:00 GMT</lastBuildDate>
+    
+    <item>
+      <title>Snapshotting error messages</title>
+      <link>https://etiennebacher.com/posts/2026-09-21-snapshot-errors/index.html</link>
+      <guid>https://etiennebacher.com/posts/2026-09-21-snapshot-errors/index.html</guid>
+      <pubDate>Mon, 21 Sep 2026 00:00:00 GMT</pubDate>
+      
+      <description>Usually, when we develop software, we know very well how to use it and how it works. This is not true for external users, people who will make mistakes and won&#39;t use your software correctly on the first try. At some point, you should care about the user experience when your…</description>
+    </item>
     
     <item>
       <title>Jarl 0.6.0</title>

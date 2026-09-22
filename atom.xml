@@ -4,8 +4,17 @@
   <id>https://etiennebacher.com</id>
   <link href="https://etiennebacher.com"/>
   <link href="https://etiennebacher.com/atom.xml" rel="self"/>
-  <updated>2026-08-24T00:00:00Z</updated>
+  <updated>2026-09-21T00:00:00Z</updated>
   <subtitle>Personal website of Etienne Bacher: blog posts about R, research, and software.</subtitle>
+  
+  <entry>
+    <title>Snapshotting error messages</title>
+    <id>https://etiennebacher.com/posts/2026-09-21-snapshot-errors/index.html</id>
+    <link href="https://etiennebacher.com/posts/2026-09-21-snapshot-errors/index.html"/>
+    <updated>2026-09-21T00:00:00Z</updated>
+    
+    <summary>Usually, when we develop software, we know very well how to use it and how it works. This is not true for external users, people who will make mistakes and won&#39;t use your software correctly on the first try. At some point, you should care about the user experience when your…</summary>
+  </entry>
   
   <entry>
     <title>Jarl 0.6.0</title>
