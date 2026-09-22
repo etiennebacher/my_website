@@ -258,6 +258,6 @@ As an illustration of this workflow, here's a PR in a real package where I made 
 
 = What's next?
 
-This post was purely about improving the checking infrastructure of error messages, but now the hard part is actually fixing or improving error messages displayed in the snapshots! Parts of this could be made easier, e.g. by using one of the many packages for input checking (#link("https://rlang.r-lib.org/index.html")[`rlang`], #link("https://mllg.github.io/checkmate/")[`checkmate`], #link("https://lrberge.github.io/dreamerr/")[`dreamerr`], #link("https://ngreifer.github.io/arg/")[`arg`], etc.), but some parts are very package-specific and require you to explore them (which could lead to some refactors).
+This post was purely about improving the infrastructure to check error messages, but now the hard part is actually fixing or improving error messages displayed in the snapshots! Parts of this could be made easier, e.g. by using one of the many packages for input checking (#link("https://rlang.r-lib.org/index.html")[`rlang`], #link("https://mllg.github.io/checkmate/")[`checkmate`], #link("https://lrberge.github.io/dreamerr/")[`dreamerr`], #link("https://ngreifer.github.io/arg/")[`arg`], etc.), but some parts are very package-specific and require you to explore them (which could lead to some refactors).
 
 _Thank you Maëlle for your comments! _
