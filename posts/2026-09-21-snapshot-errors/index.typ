@@ -235,9 +235,7 @@ Here are the steps to follow once you have installed `flir`:
   language: r
   severity: warning
   rule:
-    # Note, this doesn't capture cases where `regex` is specified, but this pattern
-    # could be tweaked to handle that.
-    pattern: expect_error($A)
+    pattern: expect_error($A $$$)
   # This could also be `expect_snapshot(error = TRUE, ~~A~~)` to clarify that
   # this code should error.
   fix: expect_snapshot(~~A~~, error = TRUE)
