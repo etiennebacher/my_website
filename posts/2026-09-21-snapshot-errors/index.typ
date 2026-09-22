@@ -57,6 +57,8 @@ And on top of that, in many cases (but not here), it will give you an actual cod
 
 So, bottom line: *error messages are important*.
 
+= Testing error messages with `expect_error()`
+
 Throughout this post, we will use a custom function that fails in some cases to explore how to test our error messages.
 Let's make a function that does some computation:
 
@@ -71,8 +73,6 @@ internal_computation <- function(x) {
 
 head(f("Sepal.Length"), 1)
 ```
-
-= Testing error messages with `expect_error()`
 
 `testthat` provides a function called `expect_error()` that you can use, well, when you expect a piece of code to produce an error.
 
