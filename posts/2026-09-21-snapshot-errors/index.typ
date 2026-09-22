@@ -11,6 +11,12 @@
 
 #title()
 
+Usually, when we develop software, we know perfectly how to use it and how it works.
+This is not true for external users, people who will make mistakes and won't use your software correctly on the first try.
+At some point, you should care about the user experience when your software fails.
+
+The objective of this post is to explore how R package developers can be more confident in the user experience their software provides when things go wrong.
+
 *Note:* this blog post focuses on test suites that use `testthat`, so it assumes some familiarity with writing `testthat` expectations, but the code itself is less important than the message I try to convey. If you use `tinytest`, you might be able to get equivalent results with #link("https://cran.r-project.org/web/packages/tinysnapshot/")[`tinysnapshot`] but I haven't tried it personally.
 
 = What's a snapshot?
