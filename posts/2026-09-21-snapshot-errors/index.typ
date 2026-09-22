@@ -11,13 +11,13 @@
 
 #title()
 
-Usually, when we develop software, we know perfectly how to use it and how it works.
+Usually, when we develop software, we know very well how to use it and how it works.
 This is not true for external users, people who will make mistakes and won't use your software correctly on the first try.
 At some point, you should care about the user experience when your software fails.
 
-The objective of this post is to explore how R package developers can be more confident in the user experience their software provides when things go wrong.
+The objective of this post is to show how R package developers can be more confident in the user experience their software provides when things go wrong.
 
-*Note:* this blog post focuses on test suites that use `testthat`, so it assumes some familiarity with writing `testthat` expectations, but the code itself is less important than the message I try to convey. If you use `tinytest`, you might be able to get equivalent results with #link("https://cran.r-project.org/web/packages/tinysnapshot/")[`tinysnapshot`] but I haven't tried it personally.
+#underline[*Note:*] this blog post focuses on test suites that use `testthat`, so it assumes some familiarity with writing `testthat` expectations, but the code itself is less important than the message I try to convey. If you use `tinytest`, you might be able to get equivalent results with #link("https://cran.r-project.org/web/packages/tinysnapshot/")[`tinysnapshot`] but I haven't tried it personally.
 
 = What's a snapshot?
 
@@ -30,7 +30,7 @@ If you have a custom `print()` or `format()` method for your function, you can a
 
 In this post, I don't want to talk about plots or custom print methods, but rather I want to focus on error messages. Why? Because this is the first thing that users will see when something goes wrong and because it can be *particularly frustrating* when the error doesn't give you details about the what, where, and why of the error.
 
-My view on this also changed when I started using Rust a few years ago. Before, I was more or less thinking "you just have to learn to recognize the error messages over time". After, it just felt so nice to have a language that just helps you work with it. I mean look at what happens if I try to compile this piece of code:
+My view on this also changed when I started using Rust a few years ago. Before, I was more or less thinking "you just have to learn to recognize the error messages over time". After, it just felt so nice to have a language that helps you work with it. I mean look at what happens if I try to compile this piece of code:
 
 ```rust
 #| eval: false
@@ -63,14 +63,14 @@ And on top of that, in many cases (but not here), it will give you an actual cod
 
 So, bottom line: *error messages are important*.
 
-= Testing error messages with `expect_error()`
+= Setup
 
 Throughout this post, we will use a custom function that fails in some cases to explore how to test our error messages.
 Let's make a function that does some computation:
 
 ```r
 f <- function(column) {
-  internal_computation(palmerpenguins::penguins[, column])
+  internal_computation(palmerpenguins::penguins[[column]])
 }
 
 internal_computation <- function(x) {
@@ -79,6 +79,8 @@ internal_computation <- function(x) {
 
 head(f("bill_length_mm"), 1)
 ```
+
+= Testing error messages with `expect_error()`
 
 `testthat` provides a function called `expect_error()` that you can use, well, when you expect a piece of code to produce an error.
 
@@ -118,7 +120,7 @@ testthat::expect_error(
 This doesn't pass with the current implementation of `f()`, meaning that I would now need to refactor `f()` for this to pass.
 
 This forces us to think more about the error message, so it is an improvement.
-Still, the core of the message might be present but the surrounding information, such as the origin of the error (in the example above, that would be `Math.factor()`), is not captured.
+Still, the core of the message (the `regex` part) might be present but the surrounding information, such as the origin of the error (in the example above, that would be `Math.factor()`), is not captured.
 This means that even if the entire error message is of good quality today, we won't know if those unchecked parts of the message degrade in the future.
 
 
@@ -242,8 +244,8 @@ Here are the steps to follow once you have installed `flir`:
   severity: warning
   rule:
     pattern: expect_error($A $$$)
-  # This could also be `expect_snapshot(error = TRUE, ~~A~~)` to clarify that
-  # this code should error.
+  # This could also be `expect_snapshot(error = TRUE, ~~A~~)` to
+  # clarify that this code should error.
   fix: expect_snapshot(~~A~~, error = TRUE)
   message: foo
   ```
