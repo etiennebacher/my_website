@@ -4,7 +4,7 @@
 #metadata((
   title: "Snapshotting error messages",
   kind: "post",
-  date: "2026-09-21",
+  date: "2026-09-22",
 )) <website-metadata>
 
 #calepin.setup(eval: true)
