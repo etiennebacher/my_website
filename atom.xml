@@ -4,8 +4,17 @@
   <id>https://etiennebacher.com</id>
   <link href="https://etiennebacher.com"/>
   <link href="https://etiennebacher.com/atom.xml" rel="self"/>
-  <updated>2026-09-22T00:00:00Z</updated>
+  <updated>2026-09-25T00:00:00Z</updated>
   <subtitle>Personal website of Etienne Bacher: blog posts about R, research, and software.</subtitle>
+  
+  <entry>
+    <title>Using Just to run a subset of test files</title>
+    <id>https://etiennebacher.com/posts/2026-09-25-using-just-with-test-files/index.html</id>
+    <link href="https://etiennebacher.com/posts/2026-09-25-using-just-with-test-files/index.html"/>
+    <updated>2026-09-25T00:00:00Z</updated>
+    
+    <summary>I now spend a lot of time in the terminal, whether to run git commands, air format, or jarl check.</summary>
+  </entry>
   
   <entry>
     <title>Snapshotting error messages</title>
