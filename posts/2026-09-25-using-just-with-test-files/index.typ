@@ -11,7 +11,7 @@
 
 #title()
 
-I now spend a lot of time in the terminal, whether to run `git` commands, `air format`, or `jarl check`.
+I now spend a lot of time in the terminal, whether to run Git, #link(https://posit-dev.github.io/air/)[Air] or #link(https://jarl.etiennebacher.com/)[Jarl].
 
 #link("https://github.com/casey/just")[Just] is "just a command runner" (as per its description).
 It allows one to define commands in a `justfile` and run them with `just <command name>`.
