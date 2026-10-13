@@ -13,7 +13,7 @@
     <link href="https://etiennebacher.com/posts/2026-09-25-using-just-with-test-files/index.html"/>
     <updated>2026-09-25T00:00:00Z</updated>
     
-    <summary>I now spend a lot of time in the terminal, whether to run git commands, air format, or jarl check.</summary>
+    <summary>I now spend a lot of time in the terminal, whether to run Git, Air or Jarl. Lately I&#39;ve been using Just to run custom commands to lint, format, and test code.</summary>
   </entry>
   
   <entry>
