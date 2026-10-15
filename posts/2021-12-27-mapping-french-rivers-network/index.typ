@@ -5,6 +5,7 @@
   title: "Mapping French rivers network",
   kind: "post",
   date: "2021-12-27",
+  summary: "Once again inspired by Dominic Royé's maps, I decided to map rivers in France. The dataset I use comes from HydroSHEDS. The code below is quite similar to the code in my previous post so I don't spend a lot of time on it.",
 )) <website-metadata>
 
 // Code blocks in these posts are already-rendered output from the original
@@ -13,15 +14,17 @@
 
 #title()
 
+_2021-12-27_
+
 #figure([
 #box(image("original_map.png", alt: "Spanish rivers network, by Dominic Royé"))
 ], caption: figure.caption(
-position: bottom, 
+position: bottom,
 [
 Spanish rivers network, by Dominic Royé
-]), 
-kind: "quarto-float-fig", 
-supplement: "Figure", 
+]),
+kind: "quarto-float-fig",
+supplement: "Figure",
 )
 
 Once again inspired by #link("https://dominicroye.github.io/en/graphs/geography/")[Dominic Royé]'s maps, I decided to map rivers in France. The dataset I use comes from #link("https://hydrosheds.org/")[HydroSHEDS]. The code below is quite similar to the code in my #link("https://www.etiennebacher.com/posts/2021-12-23-reproduce-some-maps-about-3g-and-4g-access/")[previous post] so I don't spend a lot of time on it.

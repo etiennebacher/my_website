@@ -14,6 +14,8 @@
 
 #title()
 
+_2020-04-06_
+
 Currently working on my master's thesis, I spend almost half on my day on R (the other half being spent reading articles). I have learnt a few very useful shortcuts by reading blog posts or free R books here and there and I have decided to make a small list of those I use most.
 
 = "Ctrl+Shift+Enter": run the whole script

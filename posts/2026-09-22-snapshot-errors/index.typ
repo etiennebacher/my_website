@@ -5,11 +5,14 @@
   title: "Snapshotting error messages",
   kind: "post",
   date: "2026-09-22",
+  summary: "Usually, when we develop software, we know very well how to use it and how it works. This is not true for external users, people who will make mistakes and won't use your software correctly on the first try. At some point, you should care about the user experience when your…",
 )) <website-metadata>
 
 #calepin.setup(eval: true)
 
 #title()
+
+_2026-09-22_
 
 Usually, when we develop software, we know very well how to use it and how it works.
 This is not true for external users, people who will make mistakes and won't use your software correctly on the first try.

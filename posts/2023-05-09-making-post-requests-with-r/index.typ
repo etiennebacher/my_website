@@ -14,6 +14,8 @@
 
 #title()
 
+_2023-05-09_
+
 Preview picture from Kristina Tripkovic on Unsplash
 
 A few months ago, I gave a training on `RSelenium`, a package that allows us to reproduce all the actions we do in a browser (open a website, scroll, click on a button, etc.) with some R code. This is very useful to perform some webscraping on pages that are #emph[dynamically updated], meaning that we can't simply use the URL to get the HTML we want. I won't explain the basics of webscraping here, there are plenty of articles on this already and the #link("https://rvest.tidyverse.org/articles/rvest.html")[vignettes on the `rvest` website] are very good.
@@ -133,7 +135,7 @@ The next step is to actually perform the query:
 ```r
 # use politely() to tell the website who is performing the requests and to add
 # a delay between requests (here we only do one)
-polite_POST <- politely(POST, verbose=TRUE) 
+polite_POST <- politely(POST, verbose=TRUE)
 
 POST_response <- polite_POST(
   "http://historico.oepm.es/logica/search_lib.php",
@@ -184,7 +186,7 @@ Your rate will be set to 1 request every 5 second(s).
 ```
 
 ```
-Pausing... 
+Pausing...
 ```
 
 ```
@@ -214,7 +216,7 @@ content(POST_response, "parsed")
 This is the HTML code from the "Mostrando xxx de xxx resultados encontrados" to the bottom of the page. We only want the table, so we extract it with `rvest::html_table()`:
 
 ```r
-content(POST_response, "parsed") |> 
+content(POST_response, "parsed") |>
   html_table()
 ```
 
@@ -222,7 +224,7 @@ content(POST_response, "parsed") |>
 [[1]]
 # A tibble: 12 × 7
    ``    TIPO       SUBTIPO     EXPEDIENTE FECHA DENOMINACION_TITULO SOLICITANTE
-   <lgl> <chr>      <chr>            <int> <chr> <chr>               <chr>      
+   <lgl> <chr>      <chr>            <int> <chr> <chr>               <chr>
  1 NA    Marca      ""                 103 1870… La Deliciosa        "Castellá,…
  2 NA    Marca      "Marca de …         54 1867… Fuente de los Cana… "Pérez, Te…
  3 NA    Marca      "Marca de …         50 1868… Campanadas para in… "Algar, Fé…
@@ -257,8 +259,8 @@ Since the have the HTML of the full table (thanks to the POST request), we can e
 
 ```r
 # get all the attributes for all "+" buttons
-list_attrs <- content(POST_response, "parsed") |> 
-  html_nodes("td > a") |> 
+list_attrs <- content(POST_response, "parsed") |>
+  html_nodes("td > a") |>
   html_attrs()
 
 # for each "+" button, extract only the id and db attributes
@@ -291,30 +293,30 @@ We now have a very clean table with the `id` and `db` values for each row of the
 
 ```r
 read_html(
-  paste0("http://historico.oepm.es/logica/ficha.php?id=", 
+  paste0("http://historico.oepm.es/logica/ficha.php?id=",
          6, "&db=", "maruam")
-) |> 
+) |>
   html_table()
 ```
 
 ```
 [[1]]
 # A tibble: 14 × 2
-   X1                             X2                                      
-   <chr>                          <chr>                                   
- 1 Número de Marca                "103"                                   
- 2 Denominación Breve             "La Deliciosa"                          
- 3 Fecha Solicitud                "27-10-1870"                            
- 4 Fecha Concesión                "24-03-1871"                            
- 5 Fecha de publicación Concesión ""                                      
- 6 Clasificación NIZA             "CLASE31"                               
- 7 Caducidad                      "Caducada"                              
- 8 Fecha Caducidad                "24-03-1891"                            
- 9 Cesiones                       "Sí"                                    
-10 Propietario                    "Castellá, Joaquín"                     
-11 Lugar de residencia            "Madrid"                                
-12 Provincia de residencia        "Madrid"                                
-13 País de residencia             "ESPAÑA"                                
+   X1                             X2
+   <chr>                          <chr>
+ 1 Número de Marca                "103"
+ 2 Denominación Breve             "La Deliciosa"
+ 3 Fecha Solicitud                "27-10-1870"
+ 4 Fecha Concesión                "24-03-1871"
+ 5 Fecha de publicación Concesión ""
+ 6 Clasificación NIZA             "CLASE31"
+ 7 Caducidad                      "Caducada"
+ 8 Fecha Caducidad                "24-03-1891"
+ 9 Cesiones                       "Sí"
+10 Propietario                    "Castellá, Joaquín"
+11 Lugar de residencia            "Madrid"
+12 Provincia de residencia        "Madrid"
+13 País de residencia             "ESPAÑA"
 14 Profesión                      "Fabricante, industriales y empresarios"
 ```
 

@@ -14,17 +14,19 @@
 
 #title()
 
+_2021-12-23_
+
 A few weeks ago, I found out about some maps made by #link("https://dominicroye.github.io/")[Dominic Royé] (see #link("https://dominicroye.github.io/en/graphs/")[his gallery] for more graphs). Among all those beautiful graphs, I decided to try reproducing those on 3G and 4G cell towers redistribution, like the one below for France.
 
 #figure([
 #box(image("original_map.png", alt: "This is the original plot, by Dominic Royé."))
 ], caption: figure.caption(
-position: bottom, 
+position: bottom,
 [
 This is the original plot, by Dominic Royé.
-]), 
-kind: "quarto-float-fig", 
-supplement: "Figure", 
+]),
+kind: "quarto-float-fig",
+supplement: "Figure",
 )
 
 Note that what I do here is just reproducing some maps to train with spatial data. All credits for the original maps go to Dominic Royé.
@@ -204,12 +206,12 @@ ggsave("my_plot_fr.png", plot = x, height = 7, width = 7)
 #figure([
 #box(image("my_plot_fr.png", alt: "My reproduction of the plot"))
 ], caption: figure.caption(
-position: bottom, 
+position: bottom,
 [
 My reproduction of the plot
-]), 
-kind: "quarto-float-fig", 
-supplement: "Figure", 
+]),
+kind: "quarto-float-fig",
+supplement: "Figure",
 )
 
 If you want to do it for another country than France, such as England, you can simply download the data for England on opencellid.org, use the map of England from `rnaturalearth`, apply the same code as above, and voilà!

@@ -14,6 +14,8 @@
 
 #title()
 
+_2020-01-22_
+
 Note:
 In this and future articles, you will see some arrows below R code. If you click on it, it will display the Stata code equivalent to the R code displayed. However, since those are two different softwares, they are not completely equivalent and some of the Stata code may not fully correspond to the R code. Consider it more like a reference point not to be lost rather than like an exact equivalent.
 
@@ -116,17 +118,17 @@ base_created
 ```
 # A tibble: 23 × 7
     hhid indidy1 surname   name     gender  wage location
-   <dbl>   <dbl> <chr>     <chr>     <dbl> <dbl> <chr>   
- 1     1       1 BROWN     Robert        1  2000 France  
- 2     1       2 JONES     Michael       1  2100 France  
- 3     1       3 MILLER    William       1  2300 France  
- 4     1       4 DAVIS     David         1  1800 France  
- 5     2       1 RODRIGUEZ Mary          2  3600 England 
- 6     2       2 MARTINEZ  Patricia      2  3500 England 
- 7     2       3 WILSON    Linda         2  1900 England 
- 8     2       4 ANDERSON  Richard       1  1900 England 
- 9     3       1 THOMAS    Charles       1  1800 Spain   
-10     3       2 TAYLOR    Barbara       2  1890 Spain   
+   <dbl>   <dbl> <chr>     <chr>     <dbl> <dbl> <chr>
+ 1     1       1 BROWN     Robert        1  2000 France
+ 2     1       2 JONES     Michael       1  2100 France
+ 3     1       3 MILLER    William       1  2300 France
+ 4     1       4 DAVIS     David         1  1800 France
+ 5     2       1 RODRIGUEZ Mary          2  3600 England
+ 6     2       2 MARTINEZ  Patricia      2  3500 England
+ 7     2       3 WILSON    Linda         2  1900 England
+ 8     2       4 ANDERSON  Richard       1  1900 England
+ 9     3       1 THOMAS    Charles       1  1800 Spain
+10     3       2 TAYLOR    Barbara       2  1890 Spain
 # ℹ 13 more rows
 ```
 
@@ -158,7 +160,7 @@ We now want to merge #strong[`base_created`] with #strong[`base4`]. The problem 
 colnames(base_created)[2] <- "indid"
 colnames(base4)[2] <- "indid"
 
-# create the column "year", that will take the value 2019 
+# create the column "year", that will take the value 2019
 # for base_created and 2020 for base4
 base_created$year <- 2019
 base4$year <- 2020
@@ -214,8 +216,8 @@ base_created2
 But we have many missing values for the new rows because #strong[`base4`] only contained three columns. We want to have a data frame arranged by household then by individual and finally by year. Using only #strong[`dplyr`] functions, we can do:
 
 ```r
-base_created2 <- base_created2 %>% 
-  group_by(hhid, indid) %>% 
+base_created2 <- base_created2 %>%
+  group_by(hhid, indid) %>%
   arrange(hhid, indid, year) %>%
   ungroup()
 base_created2
@@ -243,7 +245,7 @@ Notice that there are some #strong[`%>%`] between the lines: it is a pipe and it
 ```r
 library(tidyr)
 base_created2 <- base_created2 %>%
-  fill(select_if(., ~ any(is.na(.))) %>% 
+  fill(select_if(., ~ any(is.na(.))) %>%
          names(),
        .direction = 'down')
 ```
@@ -275,24 +277,24 @@ Finally, we want the first three columns to be #strong[`hhid`], #strong[`indid`]
 ```r
 base_created2 <- base_created2 %>%
   select(hhid, indid, year, everything()) %>%
-  unite(hhind, c(hhid, indid), sep = "", remove = FALSE) 
+  unite(hhind, c(hhid, indid), sep = "", remove = FALSE)
 base_created2
 ```
 
 ```
 # A tibble: 46 × 9
    hhind  hhid indid  year surname   name    gender  wage location
-   <chr> <dbl> <dbl> <dbl> <chr>     <chr>    <dbl> <dbl> <chr>   
- 1 11        1     1  2019 BROWN     Robert       1  2000 France  
- 2 11        1     1  2020 BROWN     Robert       1  2136 France  
- 3 12        1     2  2019 JONES     Michael      1  2100 France  
- 4 12        1     2  2020 JONES     Michael      1  2362 France  
- 5 13        1     3  2019 MILLER    William      1  2300 France  
- 6 13        1     3  2020 MILLER    William      1  2384 France  
- 7 14        1     4  2019 DAVIS     David        1  1800 France  
- 8 14        1     4  2020 DAVIS     David        1  2090 France  
- 9 21        2     1  2019 RODRIGUEZ Mary         2  3600 England 
-10 21        2     1  2020 RODRIGUEZ Mary         2  3784 England 
+   <chr> <dbl> <dbl> <dbl> <chr>     <chr>    <dbl> <dbl> <chr>
+ 1 11        1     1  2019 BROWN     Robert       1  2000 France
+ 2 11        1     1  2020 BROWN     Robert       1  2136 France
+ 3 12        1     2  2019 JONES     Michael      1  2100 France
+ 4 12        1     2  2020 JONES     Michael      1  2362 France
+ 5 13        1     3  2019 MILLER    William      1  2300 France
+ 6 13        1     3  2020 MILLER    William      1  2384 France
+ 7 14        1     4  2019 DAVIS     David        1  1800 France
+ 8 14        1     4  2020 DAVIS     David        1  2090 France
+ 9 21        2     1  2019 RODRIGUEZ Mary         2  3600 England
+10 21        2     1  2020 RODRIGUEZ Mary         2  3784 England
 # ℹ 36 more rows
 ```
 
@@ -319,8 +321,8 @@ unique(base_created2$location)
 ```
 
 ```
-[1] "France"        "England"       "Spain"         "Italy"        
-[5] "England_error" "Spain_error"  
+[1] "France"        "England"       "Spain"         "Italy"
+[5] "England_error" "Spain_error"
 ```
 
 ```r
@@ -331,7 +333,7 @@ unique(base_created2$location)
 ```
 
 ```
-[1] "France"  "England" "Spain"   "Italy"  
+[1] "France"  "England" "Spain"   "Italy"
 ```
 
 #html.elem("details")[
@@ -443,7 +445,7 @@ table(base_created2$gender, base_created2$year)
 ```
 
 ```
-   
+
     2019 2020
   0    9    9
   1   14   14
@@ -454,7 +456,7 @@ table(base_created2$location, base_created2$year)
 ```
 
 ```
-         
+
           2019 2020
   England    6    6
   France    12   12
@@ -479,71 +481,71 @@ describe(base_created2)
 ```
 
 ```
-base_created2 
+base_created2
 
  9  Variables      46  Observations
 --------------------------------------------------------------------------------
-hhind : individual's ID 
-       n  missing distinct 
-      46        0       23 
+hhind : individual's ID
+       n  missing distinct
+      46        0       23
 
 lowest : 11 12 13 14 21, highest: 71 72 81 82 83
 --------------------------------------------------------------------------------
-hhid : household's ID 
-       n  missing distinct     Info     Mean  pMedian      Gmd 
-      46        0        8    0.975    4.217        4    2.783 
-                                                          
+hhid : household's ID
+       n  missing distinct     Info     Mean  pMedian      Gmd
+      46        0        8    0.975    4.217        4    2.783
+
 Value          1     2     3     4     5     6     7     8
 Frequency      8     8     4     2    10     4     4     6
 Proportion 0.174 0.174 0.087 0.043 0.217 0.087 0.087 0.130
 --------------------------------------------------------------------------------
-indid : individual's ID in the household 
-       n  missing distinct     Info     Mean  pMedian      Gmd 
-      46        0        5    0.923    2.217        2    1.306 
-                                        
+indid : individual's ID in the household
+       n  missing distinct     Info     Mean  pMedian      Gmd
+      46        0        5    0.923    2.217        2    1.306
+
 Value          1     2     3     4     5
 Frequency     16    14     8     6     2
 Proportion 0.348 0.304 0.174 0.130 0.043
 --------------------------------------------------------------------------------
-year 
-       n  missing distinct     Info     Mean 
-      46        0        2     0.75     2020 
-                    
+year
+       n  missing distinct     Info     Mean
+      46        0        2     0.75     2020
+
 Value      2019 2020
 Frequency    23   23
 Proportion  0.5  0.5
 --------------------------------------------------------------------------------
-surname 
-       n  missing distinct 
-      46        0       23 
+surname
+       n  missing distinct
+      46        0       23
 
-lowest : ANDERSON BROWN    DAVIS    DOE      JACKSON 
-highest: THOMAS   THOMPSON WHITE    WILLIAMS WILSON  
+lowest : ANDERSON BROWN    DAVIS    DOE      JACKSON
+highest: THOMAS   THOMPSON WHITE    WILLIAMS WILSON
 --------------------------------------------------------------------------------
-name 
-       n  missing distinct 
-      46        0       23 
+name
+       n  missing distinct
+      46        0       23
 
-lowest : Barbara Charles Daniel  David   Donald 
+lowest : Barbara Charles Daniel  David   Donald
 highest: Richard Robert  Susan   Thomas  William
 --------------------------------------------------------------------------------
-gender : 1 if male, 0 if female 
-       n  missing distinct     Info      Sum     Mean 
-      46        0        2    0.715       28   0.6087 
+gender : 1 if male, 0 if female
+       n  missing distinct     Info      Sum     Mean
+      46        0        2    0.715       28   0.6087
 
 --------------------------------------------------------------------------------
-wage 
-       n  missing distinct     Info     Mean  pMedian      Gmd      .05 
-      46        0       37    0.998     2059     1934    477.4     1627 
-     .10      .25      .50      .75      .90      .95 
-    1692     1800     1901     2098     2373     3575 
+wage
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05
+      46        0       37    0.998     2059     1934    477.4     1627
+     .10      .25      .50      .75      .90      .95
+    1692     1800     1901     2098     2373     3575
 
 lowest : 1397 1600 1608 1683 1690, highest: 2384 3500 3600 3782 3784
 --------------------------------------------------------------------------------
-location : household's location 
-       n  missing distinct 
-      46        0        4 
-                                          
+location : household's location
+       n  missing distinct
+      46        0        4
+
 Value      England  France   Italy   Spain
 Frequency       12      24       2       8
 Proportion   0.261   0.522   0.043   0.174
@@ -574,7 +576,7 @@ base_created2 %>%
   <labelled> <dbl>
 1 England    2452.
 2 France     1935.
-3 Italy      1801 
+3 Italy      1801
 4 Spain      1905.
 ```
 
@@ -594,7 +596,7 @@ Finally, we want to plot some data to include in our report or article (or anyth
 
 ```r
 library(ggplot2)
-hist1 <- ggplot(data = base_created2, 
+hist1 <- ggplot(data = base_created2,
                 mapping = aes(wage, fill = factor(year))) +
   geom_histogram(bins = 10)
 hist1
@@ -615,7 +617,7 @@ hist1
 If you prefer one histogram per year, you can use the #strong[`facet_wrap()`] argument, as below.
 
 ```r
-hist2 <- ggplot(data = base_created2, 
+hist2 <- ggplot(data = base_created2,
                 mapping = aes(wage, fill = factor(year))) +
   geom_histogram(bins = 10) +
   facet_wrap(vars(year))
@@ -659,7 +661,7 @@ That's it! In this first post, you have seen how to import, clean and tidy datas
 
   ::: {.cell}
   ::: {.cell-output .cell-output-stdout}
-  
+
   ```
   ─ Session info ───────────────────────────────────────────────────────────────
    setting  value
@@ -674,7 +676,7 @@ That's it! In this first post, you have seen how to import, clean and tidy datas
    date     2026-03-03
    pandoc   3.6.3 @ /usr/share/positron/resources/app/quarto/bin/tools/x86_64/ (via rmarkdown)
    quarto   1.9.27 @ /opt/quarto/bin/quarto
-  
+
   ─ Packages ───────────────────────────────────────────────────────────────────
    package      * version    date (UTC) lib source
    backports      1.5.0      2024-05-23 [1] RSPM
@@ -733,14 +735,14 @@ That's it! In this first post, you have seen how to import, clean and tidy datas
    withr          3.0.2      2024-10-28 [1] RSPM
    xfun           0.56       2026-01-18 [1] RSPM
    yaml           2.3.12     2025-12-10 [1] RSPM
-  
+
    [1] /home/etienne/R/x86_64-pc-linux-gnu-library/4.5
    [2] /opt/R/4.5.0/lib/R/library
    * ── Packages attached to the search path.
-  
+
   ──────────────────────────────────────────────────────────────────────────────
   ```
-  
+
   :::
   :::
 

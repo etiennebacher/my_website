@@ -14,6 +14,8 @@
 
 #title()
 
+_2024-10-01_
+
 I had never heard of property-based testing until a few months ago when I started looking at some pull requests in #link("https://github.com/pola-rs/polars/")[polars] (the Python implementation, not the R one) where they use #link("https://hypothesis.readthedocs.io/en/latest/")[hypothesis], for example #link("https://github.com/pola-rs/polars/pull/17992/files#diff-728b25c64b205cf575fb186611d9e63eff7cd1ea2c32cf811a6e68d6e3d0f4bc")[polars\#17992].
 
 I have contributed to a fair amount of R packages but I have never seen this type of tests before: unit tests, plenty; snapshot tests, sometimes; but property-based tests? Never. And at first, I didn't really see the point, but I've had a couple of situations recently where I thought it could help, so the aim of this post is to explain (briefly) what property-based testing is and to provide some examples where it can be useful.
@@ -101,7 +103,7 @@ test_that("reversing twice returns the original input", {
 ```
 
 ```
-[1] "Sz4y$L.V" NA         NA         "-"        "B"       
+[1] "Sz4y$L.V" NA         NA         "-"        "B"
 07:01:15.942289
 09:19:36.781132
 09:25:10.975813
@@ -178,7 +180,7 @@ Let's fix the function and try again:
 ```r
 normalize <- function(x) {
   if (length(x) == 1) {
-    return(0.5) # WARNING: this is for the sake of example, I don't 
+    return(0.5) # WARNING: this is for the sake of example, I don't
                 # guarantee this is the correct behavior
   }
   (x - min(x)) / (max(x) - min(x))
@@ -243,9 +245,9 @@ test_that("cluster_fast_greedy doesn't crash", {
   g <- add_edges(g, c(1, 6, 1, 11, 6, 11))
 
   for_all(
-    merges = any_atomic(any_na = TRUE), 
-    modularity = any_atomic(any_na = TRUE), 
-    membership = any_atomic(any_na = TRUE), 
+    merges = any_atomic(any_na = TRUE),
+    modularity = any_atomic(any_na = TRUE),
+    membership = any_atomic(any_na = TRUE),
     weights = any_atomic(any_na = TRUE),
     property = function(merges, modularity, membership, weights) {
       suppressWarnings(

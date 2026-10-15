@@ -14,6 +14,8 @@
 
 #title()
 
+_2026-02-03_
+
 I'm very happy to announce the release of #link("https://jarl.etiennebacher.com/")[Jarl] 0.4.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Jarl is available as a command-line tool and as an extension for Positron, VS Code, Zed, and more.
 
 After a few rapid iterations following the #link("https://www.etiennebacher.com/posts/2025-11-20-introducing-jarl/")[initial 0.1.0 announcement], I took a bit more time to add more features and fix more bugs.

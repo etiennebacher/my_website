@@ -5,11 +5,14 @@
   title: "Jarl 0.6.0",
   kind: "post",
   date: "2026-08-24",
+  summary: "I'm glad to announce the release of Jarl 0.6.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl via the command line…",
 )) <website-metadata>
 
 #calepin.setup(eval: false, fenced-chunks: false)
 
 #title()
+
+_2026-08-24_
 
 I'm glad to announce the release of #link("https://jarl.etiennebacher.com/")[Jarl] 0.6.0. Jarl is a very fast R linter, written in Rust. It finds inefficient, hard-to-read, and suspicious patterns of R code across dozens of files and thousands of lines of code in milliseconds. Install or update Jarl #link("https://jarl.etiennebacher.com/#installation")[via the command line] or install the #link("https://jarl.etiennebacher.com/howto/editors")[Jarl extension] in Positron, VS Code, Zed, and more.
 

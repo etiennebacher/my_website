@@ -14,6 +14,8 @@
 
 #title()
 
+_2023-03-01_
+
 The 6 Nations is a rugby tournament that takes place every year in February-March between the six strongest national teams in Europe: England, France, Ireland, Italy, Scotland, and Wales. Each team plays against the other five. A victory gives 4 points, a draw gives 2 points, and a loss gives 0 point.
 
 In 2017, bonus points were introduced:
@@ -36,11 +38,11 @@ library(tidyverse)
 
 ```
 ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.2.0.9000     ✔ readr     2.1.6     
-✔ forcats   1.0.1          ✔ stringr   1.6.0     
-✔ ggplot2   4.0.2          ✔ tibble    3.3.1     
-✔ lubridate 1.9.5          ✔ tidyr     1.3.2     
-✔ purrr     1.2.1          
+✔ dplyr     1.2.0.9000     ✔ readr     2.1.6
+✔ forcats   1.0.1          ✔ stringr   1.6.0
+✔ ggplot2   4.0.2          ✔ tibble    3.3.1
+✔ lubridate 1.9.5          ✔ tidyr     1.3.2
+✔ purrr     1.2.1
 ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter()         masks stats::filter()
 ✖ readr::guess_encoding() masks rvest::guess_encoding()
@@ -63,16 +65,16 @@ for (i in 2008:2022) {
   html <- read_html(
     paste0("https://www.espn.co.uk/rugby/table/_/league/180659/season/", i)
   )
-  countries <- html |> 
+  countries <- html |>
     html_element(css = "div.ResponsiveTable.ResponsiveTable--fixed-left > div.flex > table") |>
-    html_table() 
+    html_table()
   names(countries) <- "country"
 
-  res <- html |> 
-    html_element(css = "div.Table__ScrollerWrapper") |> 
+  res <- html |>
+    html_element(css = "div.Table__ScrollerWrapper") |>
     html_table()
-  
-  results[[as.character(i)]] <- bind_cols(countries, res) |> 
+
+  results[[as.character(i)]] <- bind_cols(countries, res) |>
     mutate(year = i)
 }
 ```
@@ -134,8 +136,8 @@ labs <- list(
   y = "Tries per year"
 )
 
-all_results |> 
-  summarise(tries_per_year = sum(TF), .by = year) |> 
+all_results |>
+  summarise(tries_per_year = sum(TF), .by = year) |>
   ggplot(aes(year, tries_per_year)) +
   geom_point(color = "black", fill = "#99b3e6", shape = 21, size = 2.5) +
   geom_vline(xintercept = 2016.5, linetype = "dashed") +
@@ -160,7 +162,7 @@ We see an increase in the number of tries, but this upward trend started before 
 ```r
 plots <- list()
 for (i in unique(all_results$country)) {
-  
+
   main_color <- switch(i,
     "Ireland" = "#339966",
     "France" = "#0044cc",
@@ -169,7 +171,7 @@ for (i in unique(all_results$country)) {
     "Scotland" = "#00004d",
     "Italy" = "#1a1aff"
   )
-  
+
   text_color <- switch(i,
     "Ireland" = "white",
     "France" = "white",
@@ -178,7 +180,7 @@ for (i in unique(all_results$country)) {
     "Scotland" = "white",
     "Italy" = "white"
   )
-  
+
   plots[[i]] <-
     all_results |>
     filter(country == i) |>
@@ -193,22 +195,22 @@ for (i in unique(all_results$country)) {
     ) |>
     ggplot(aes(year, tries_per_year)) +
     geom_point(
-      color = "black", 
-      fill = ifelse(main_color == "white", text_color, main_color), 
-      alpha = 0.3, 
-      shape = 21, 
+      color = "black",
+      fill = ifelse(main_color == "white", text_color, main_color),
+      alpha = 0.3,
+      shape = 21,
       size = 2.5
     ) +
     geom_line(
-      aes(y = mean_before), 
-      linetype = "longdash", 
-      color = ifelse(main_color == "white", text_color, main_color), 
+      aes(y = mean_before),
+      linetype = "longdash",
+      color = ifelse(main_color == "white", text_color, main_color),
       linewidth = 0.8
     ) +
     geom_line(
-      aes(y = mean_after), 
-      linetype = "longdash", 
-      color = ifelse(main_color == "white", text_color, main_color), 
+      aes(y = mean_after),
+      linetype = "longdash",
+      color = ifelse(main_color == "white", text_color, main_color),
       linewidth = 0.8
     ) +
     geom_vline(xintercept = 2016.5, linetype = "dotted") +

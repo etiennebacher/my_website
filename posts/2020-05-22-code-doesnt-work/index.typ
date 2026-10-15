@@ -14,6 +14,8 @@
 
 #title()
 
+_2020-05-22_
+
 As #link("https://rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/")[Jenny Bryan said], one of the first things people do when there is a problem with the code is run it a second time. But in 95% of the cases (in my small programming experience), this does not solve the problem, and I realized I developed a small pattern of reactions when I am in this situation.
 
 = Read the error message

@@ -14,6 +14,8 @@
 
 #title()
 
+_2020-10-18_
+
 The Nobel laureates of 2020 were announced last week, and I thought it would be interesting to visualize the repartition of laureates per country, as there are several ways to do so. I'm going to use #link("https://www.kaggle.com/nobelfoundation/nobel-laureates")[this dataset] available on Kaggle, which contains information on the year, category, name of the laureate, country, city and date of birth and death, among other things. Notice that this dataset goes from 1901 to 2016 and therefore doesn't contain the most recent laureates.
 
 But first of all, we need to load all the packages we will use in this analysis:
@@ -43,13 +45,13 @@ The first thing that we have to correct before doing visualization concerns the 
 ```
 # A tibble: 6 × 2
   birth_country     death_country
-  <chr>             <chr>        
-1 Netherlands       Germany      
-2 France            France       
-3 Prussia (Poland)  Germany      
-4 Switzerland       Switzerland  
-5 France            France       
-6 Prussia (Germany) Germany      
+  <chr>             <chr>
+1 Netherlands       Germany
+2 France            France
+3 Prussia (Poland)  Germany
+4 Switzerland       Switzerland
+5 France            France
+6 Prussia (Germany) Germany
 ```
 
 Since we only want the current country names, we must modify these columns so that:
@@ -91,13 +93,13 @@ The country names are now cleaned:
 ```
 # A tibble: 6 × 2
   birth_country death_country
-  <chr>         <chr>        
-1 Netherlands   Germany      
-2 France        France       
-3 Poland        Germany      
-4 Switzerland   Switzerland  
-5 France        France       
-6 Germany       Germany      
+  <chr>         <chr>
+1 Netherlands   Germany
+2 France        France
+3 Poland        Germany
+4 Switzerland   Switzerland
+5 France        France
+6 Germany       Germany
 ```
 
 From now on, there are several ways to visualize the repartition of Nobel laureates per country. We could do a static bar plot, an animated bar plot to see the evolution in time, a static map, or an interactive map.
@@ -343,7 +345,7 @@ I hope you enjoyed it!
 
   ::: {.cell}
   ::: {.cell-output .cell-output-stdout}
-  
+
   ```
   ─ Session info ───────────────────────────────────────────────────────────────
    setting  value
@@ -358,7 +360,7 @@ I hope you enjoyed it!
    date     2026-03-03
    pandoc   3.6.3 @ /usr/share/positron/resources/app/quarto/bin/tools/x86_64/ (via rmarkdown)
    quarto   1.9.27 @ /opt/quarto/bin/quarto
-  
+
   ─ Packages ───────────────────────────────────────────────────────────────────
    package        * version    date (UTC) lib source
    abind            1.4-8      2024-09-12 [1] RSPM
@@ -470,14 +472,14 @@ I hope you enjoyed it!
    XML              3.99-0.22  2026-02-10 [1] RSPM
    xtable           1.8-4      2019-04-21 [1] RSPM
    yaml             2.3.12     2025-12-10 [1] RSPM
-  
+
    [1] /home/etienne/R/x86_64-pc-linux-gnu-library/4.5
    [2] /opt/R/4.5.0/lib/R/library
    * ── Packages attached to the search path.
-  
+
   ──────────────────────────────────────────────────────────────────────────────
   ```
-  
+
   :::
   :::
 

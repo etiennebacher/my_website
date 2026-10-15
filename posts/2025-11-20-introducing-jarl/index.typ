@@ -14,6 +14,8 @@
 
 #title()
 
+_2025-11-20_
+
 I'm very excited to introduce #link("https://jarl.etiennebacher.com/")[Jarl]#calepin.elements.sidenote[Jarl stands for "Just Another R Linter".], a new R linter. A linter is a tool that statically parses code (meaning that it doesn't run the code in question) and searches for patterns that are inefficient, hard to read, or likely bugs.
 
 Jarl can parse dozens of files and thousands of lines of code in milliseconds. Here is an example of Jarl running on #link("https://github.com/wch/r-source/")[r-source] (approximately 1000 files and 200k lines of R code) in about 700 milliseconds:

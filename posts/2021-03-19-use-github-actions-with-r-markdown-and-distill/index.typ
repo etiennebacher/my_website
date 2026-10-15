@@ -14,6 +14,8 @@
 
 #title()
 
+_2021-03-19_
+
 #emph[ The preview image comes from: https:\/\/github.com/marketplace/actions/cancel-workflow-action ]
 
 Sometimes, it is useful to automatically render an R Markdown document or a website, made with #link("https://rstudio.github.io/distill/")[`distill`] for example. In this post, I will present you two cases in which I use GitHub Actions to automatically do that.

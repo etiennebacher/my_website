@@ -14,6 +14,8 @@
 
 #title()
 
+_2021-04-11_
+
 This post shows how to create a gallery on a Distill website. Keep in mind that Distill is (purposely) less flexible than other tools, such as `{blogdown}`, so the gallery might look quite different from what you expect.
 
 = Create a gallery with lightgallery.js

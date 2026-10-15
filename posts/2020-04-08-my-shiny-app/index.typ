@@ -14,6 +14,8 @@
 
 #title()
 
+_2020-04-08_
+
 One of the greatest things about R is the possibility to build websites quite easily with R Shiny. I started to create apps with Shiny almost immediately after having discovered it. This was in May last year and two months later I thought it would be a great idea to build an app to treat more easily World Bank data. Indeed, in my field, World Development Indicators (WDI) are often used and I thought it would be useful to have a graphical interface where we can import and treat these indicators.
 
 So in July last year I started to work on this. Besides building something useful, I considered this as a good opportunity to practice with R Shiny. I worked on that irregularly during the rest of the year. Sometimes I considerably improved my app in a week and sometimes I spent two months not thinking about it.

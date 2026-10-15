@@ -5,11 +5,14 @@
   title: "Using Just to run a subset of test files",
   kind: "post",
   date: "2026-10-15",
+  summary: "I now spend a lot of time in the terminal, whether to run Git, Air, or Jarl. Lately I've been using Just to run custom commands to lint, format, and test code.",
 )) <website-metadata>
 
 #calepin.setup(eval: true)
 
 #title()
+
+_2026-10-15_
 
 I now spend a lot of time in the terminal, whether to run Git, #link("https://posit-dev.github.io/air/")[Air], or #link("https://jarl.etiennebacher.com/")[Jarl].
 Lately I've been using #link("https://github.com/casey/just")[`Just`] to run custom commands to lint, format, and test code.

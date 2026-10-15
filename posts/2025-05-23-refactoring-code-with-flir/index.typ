@@ -14,6 +14,8 @@
 
 #title()
 
+_2025-05-23_
+
 Slightly less than a year ago, I created #link("https://flir.etiennebacher.com/")[`flir`] (named `flint` at the time). The objective was to have a tool to detect and automatically correct a set of "bad practices" in R code. Those "bad practices" do not necessarily mean the code is wrong, simply that it is possible to improve its readability, robustness, and performance. If you are already familiar with #link("https://lintr.r-lib.org/")[`lintr`], you could think of `flir` as an extension that is faster and applies automatic fixes (at the expense of not covering the entire set of `lintr`'s rules).
 
 = Detecting and fixing bad practices

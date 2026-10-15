@@ -14,6 +14,8 @@
 
 #title()
 
+_2022-11-28_
+
 Preview image coming from: https:\/\/trainingindustry.com/magazine/nov-dec-2018/life-in-the-fast-lane-accelerated-continuous-development-for-fast-paced-organizations/
 
 Lately I've spent quite some time on packages that require (almost) only base R:
@@ -37,8 +39,8 @@ make_big <- function(data, nrep = 500000) {
   for (i in 1:nrep) {
     tmp[[i]] <- data
   }
-  
-  data.table::rbindlist(tmp) |> 
+
+  data.table::rbindlist(tmp) |>
     as.data.frame()
 }
 ```
@@ -156,7 +158,7 @@ disabled.
   expression      min   median `itr/sec` mem_alloc `gc/sec`
   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
 1 apply         4.04s    4.04s     0.248    80.1MB     9.41
-2 do.call    126.96ms 127.58ms     7.83     11.4MB     0   
+2 do.call    126.96ms 127.58ms     7.83     11.4MB     0
 ```
 
 = Giving attributes to large dataframes
@@ -222,7 +224,7 @@ bench::mark(
   expression      min   median `itr/sec` mem_alloc `gc/sec`
   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
 1 old          32.8ms   41.8ms      24.9    38.2MB     3.12
-2 new          43.5µs     47µs   19415.     23.5KB    14.7 
+2 new          43.5µs     47µs   19415.     23.5KB    14.7
 ```
 
 = Find empty rows
@@ -259,7 +261,7 @@ disabled.
   expression      min   median `itr/sec` mem_alloc `gc/sec`
   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
 1 apply         1.27s    1.27s     0.785   112.9MB     6.28
-2 rowSums    282.67ms 287.59ms     3.48     99.7MB     0   
+2 rowSums    282.67ms 287.59ms     3.48     99.7MB     0
 ```
 
 = Conclusion

@@ -14,6 +14,8 @@
 
 #title()
 
+_2019-12-01_
+
 Before going into the details about studying economics with R, it makes sense to explain why you should use R compared to Stata. Before I start, please note that I have been using Stata occasionally for about a year whereas I spend much more time on R so I may forget some features that Stata has and that I am not aware of. However, I believe that what I have made with Stata corresponds to most Master students' experiences, e.g.~data cleaning and treatment, data analysis, econometrics, etc.
 
 Now we can begin.

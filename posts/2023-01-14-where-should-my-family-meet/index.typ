@@ -14,6 +14,8 @@
 
 #title()
 
+_2023-01-14_
+
 Like many others, my family is quite split geographically: some are in Europe but in different countries, and some are in other continents. Given this distance between us, we don't gather in a single place that often.
 
 This got me thinking: in which place should we meet if we wanted to minimize the total distance, i.e the sum of the distances made by each one? I'm just thinking in terms of distance as the crow flies, because of course the distance also depends on where we must go to take the plane, on the potential flight connections we have to make, etc.
@@ -200,7 +202,7 @@ where $R$ is the radius of the sphere.
 Let's make an example. We define some random points on a sphere with their latitude and longitude in degrees:
 
 ```r
-# R = earth radius (km) 
+# R = earth radius (km)
 R <- 6200
 
 # Latitude, longitude for a few locations in degrees
@@ -271,7 +273,7 @@ We can now apply once again the `optim()` function:
 
 ```r
 # Initial point (latitude, longitude, in degrees)
-y <- optim(c(0,0), criterion_3D, my_p = my_points) 
+y <- optim(c(0,0), criterion_3D, my_p = my_points)
 y$par
 ```
 
@@ -303,17 +305,17 @@ coords <- data.frame(
   long_sol = y$par[2]
 )
 
-coords |> 
-  e_charts() |> 
-  
+coords |>
+  e_charts() |>
+
   # create the globe
   e_globe(
-    base_texture = ea_asset("world"), 
+    base_texture = ea_asset("world"),
     displacementScale = 0.05,
     shading = "color",
     viewControl = list(autoRotate = FALSE, targetCoord = c(10, 0))
-  ) |> 
-  
+  ) |>
+
   # add the starting points
   e_scatter_3d(
     long, lat,
@@ -321,16 +323,16 @@ coords |>
     symbolSize = 15,
     itemStyle = list(color = "red"),
     emphasis = list(label = list(show = FALSE))
-  ) |> 
-  
+  ) |>
+
   # add the solution
   e_scatter_3d(
     long_sol, lat_sol,
     coord_system = "globe",
     symbolSize = 15,
     itemStyle = list(color = "yellow")
-  ) |> 
-  
+  ) |>
+
   # add tooltip with latitude and longitude (only works for
   # starting points)
   e_tooltip(
@@ -340,7 +342,7 @@ coords |>
         return('Longitude: ' + params.value[0] + '<br />Latitude: ' + params.value[1])
       }
     ")
-  ) |> 
+  ) |>
   e_legend(FALSE)
 ```
 
