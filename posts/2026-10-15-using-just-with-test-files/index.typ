@@ -4,7 +4,7 @@
 #metadata((
   title: "Using Just to run a subset of test files",
   kind: "post",
-  date: "2026-09-25",
+  date: "2026-10-15",
 )) <website-metadata>
 
 #calepin.setup(eval: true)
